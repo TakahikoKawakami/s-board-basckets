@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "bootstrap": "^4.5.2"
+  },
+  "devDependencies": {
+    "webpack": "^4.44.2"
+  }
+}
