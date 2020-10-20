@@ -11,16 +11,25 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+env = environ.Env()
+
+# 環境変数でDJANGO_READ_ENV_FILEをTrueにしておくと.envを読んでくれる。
+# env_file = str(BASE_DIR.path('.env'))
+env.read_env('.env')
+SMAREGI_CLIENT_ID = env('SMAREGI_CLIENT_ID')
+SMAREGI_CLIENT_SECRET = env('SMAREGI_CLIENT_SECRET')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'fv&qlx4s4ga_kf529o5()hql#t(noq_!f$#7ydv%d)c!ug6j&)'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     's_board_relations.apps.SBoardRelationsConfig',
+    'users.apps.UsersConfig',
     'bootstrap4',
 ]
 
