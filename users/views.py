@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.conf import settings
+from django.views import View
 
 # from .models import Book
 # from .forms import *
@@ -8,6 +9,26 @@ import base64
 import requests
 from urllib.parse import urlencode
 import json
+from .models import Accounts
+from . forms import LoginForm
+
+
+#ログイン機能
+class Login(View):
+    def post(self, request, *arg, **kwargs):
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            user = Accounts.objects.get(name=username)
+            login(request, user)
+            # return redirect('/')
+        return render(request, 'login.html', {'form': form,})
+
+    def get(self, request, *args, **kwargs):
+        form = LoginForm(request.POST)
+        return render(request, 'login.html', {'form': form,})
+
+login = Login.as_view()
 
 # Create your views here.
 def getSmaregiAccessToken(request):

@@ -9,5 +9,5 @@ urlpatterns = [
     # path('logout/', views.book_edit, name='book_add'),  # 登録
     # path('register/', views.book_edit, name='book_mod'),  # 修正
     path('getSmaregiAccessToken/', views.getSmaregiAccessToken, name='get_smaregi_access_token'),   # 削除
-    # path('network/', views.network, name='network'),
+    path('login/', views.login, name='login'),
 ]
