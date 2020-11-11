@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('comment', models.TextField(blank=True, verbose_name='コメント')),
-                ('book', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='impressions', to='s_board_relations.Book', verbose_name='書籍')),
+                ('book', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='impressions', to='basckets.Book', verbose_name='書籍')),
             ],
         ),
     ]
