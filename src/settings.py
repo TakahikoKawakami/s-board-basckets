@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import environ
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,6 +22,7 @@ env = environ.Env()
 # 環境変数でDJANGO_READ_ENV_FILEをTrueにしておくと.envを読んでくれる。
 # env_file = str(BASE_DIR.path('.env'))
 env.read_env('.env')
+ENV_DIVISION = env('ENV_DIVISION')
 SMAREGI_CLIENT_ID = env('SMAREGI_CLIENT_ID')
 SMAREGI_CLIENT_SECRET = env('SMAREGI_CLIENT_SECRET')
 
@@ -34,7 +36,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -46,8 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    's_board_relations.apps.SBoardRelationsConfig',
-    'users.apps.UsersConfig',
+    'basckets.apps.BascketsConfig',
+    'accounts',
     'bootstrap4',
 ]
 
@@ -87,13 +89,13 @@ WSGI_APPLICATION = 'src.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if (ENV_DIVISION == 'LOCAL'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
 
 
 # Password validation
@@ -113,6 +115,27 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'accounts.User'
+
+#REST_FRAMEWORK = {
+#    'DEFAULT_PERMISSION_CLASSES': (
+#        'rest_framework.permissions.IsAuthenticated',
+#    ),
+#    'DEFAULT_AUTHENTICATION_CLASSES': (
+#        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+#        'rest_framework.authentication.SessionAuthentication',
+#        'rest_framework.authentication.BasicAuthentication',
+#    ),
+#}
+#
+#JWT_AUTH = {
+#    'JWT_SECRET_KEY': SECRET_KEY,
+#    'JWT_ALGORITHM': 'HS256',
+#    'JWT_ALLOW_REFRESH': True,
+#    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+#    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=28),
+#}
 
 
 # Internationalization

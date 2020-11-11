@@ -1,7 +1,7 @@
 from . import views
 from django.urls import path
 
-app_name = "s_board_relations"
+app_name = "basckets"
 
 urlpatterns = [
     # 書籍

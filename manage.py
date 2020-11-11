@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+""" bascket """
+
 import os
 import sys
-
+sys.path.append(os.getcwd()) # 現在のディレクトリを環境変数に一時的に取り込む
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.settings')
