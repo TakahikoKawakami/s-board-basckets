@@ -66,5 +66,5 @@ def network(request):
     encodedBody = urlencode(body)
     r_post = requests.post(url, headers=headers, data=urlencode(body))
     r_post = r_post.json()
-    return HttpResponse(r_post["access_token"])
+#    return HttpResponse(r_post["access_token"])
     return render(request, 's_board_relations/network.html')
