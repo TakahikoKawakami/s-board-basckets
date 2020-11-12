@@ -36,7 +36,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', '0.0.0.0', 's-board.from-garage.work']
 
 
 # Application definition
@@ -88,6 +88,9 @@ WSGI_APPLICATION = 'src.wsgi.application'
 
 
 # Database
+MYSQL_DB_NAME = env('MYSQL_DB_NAME')
+MYSQL_USER = env('MYSQL_USER')
+MYSQL_PASSWORD = env('MYSQL_PASSWORD')
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 if (ENV_DIVISION == 'LOCAL'):
     DATABASES = {
@@ -96,7 +99,15 @@ if (ENV_DIVISION == 'LOCAL'):
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
-
+if (ENV_DIVISION == 'STAGING'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': MYSQL_DB_NAME,
+			'USER': MYSQL_USER,
+			'PASSWORD': MYSQL_PASSWORD,
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
