@@ -10,5 +10,7 @@ urlpatterns = [
     # path('register/', views.book_edit, name='book_mod'),  # 修正
     path('getSmaregiAccessToken/', views.getSmaregiAccessToken, name='get_smaregi_access_token'),   # 削除
     path('loginBata/', views.LoginBata.as_view(), name='login_bata'),   # ログインβ
-    path('login/', views.login, name='login'),
+    path('login/', views.Login.as_view(), name='login'),
+#    path('sign_up/smaregi/', views.SignUp.as_view(), name='sign_up_smaregi'), # スマレジからの購入通知用
+    path('sign_up/smaregi/', views.sign_up, name='sign_up_smaregi'), # スマレジからの購入通知用
 ]

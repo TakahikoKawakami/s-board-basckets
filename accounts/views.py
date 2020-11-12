@@ -15,9 +15,13 @@ from . forms import LoginForm
 import time
 import jwt
 
+import logging
+
 #ログイン機能
 class Login(View):
     def post(self, request, *arg, **kwargs):
+        logger = logging.getLogger('file')
+        logger.info(request)
         form = LoginForm(data=request.POST)
         if form.is_valid():
 #            username = form.cleaned_data.get('username')
@@ -72,7 +76,6 @@ class Login(View):
             SECRET_KEY
         ).decode("utf-8")
 
-login = Login.as_view()
 
 # Create your views here.
 def getSmaregiAccessToken(request):
@@ -116,3 +119,23 @@ class LoginBata(View):
         params = urlencode(query)
         authorizeUrl = f'{authorizeUrl}?{params}'
         return redirect(authorizeUrl)
+
+class SignUp(View):
+    def post(self, request, *arg, **kwargs):
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+#            username = form.cleaned_data.get('username')
+            user = Accounts.objects.get(name=username)
+            login(request, user)
+            # return redirect('/')
+        return render(request, 'login.html', {'form': form,})           
+
+
+def sign_up(request):
+    logger = logging.getLogger('file')
+    logger.info(request)
+    data = request
+    post = request.POST
+    get = request.GET
+    put = request.PUT
+
