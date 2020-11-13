@@ -16,6 +16,10 @@ import time
 import jwt
 
 import logging
+from .serializer import AccountSerializer
+from rest_framework import viewsets, filters
+from django.views.decorators.csrf import csrf_exempt
+
 
 #ログイン機能
 class Login(View):
@@ -130,12 +134,12 @@ class SignUp(View):
             # return redirect('/')
         return render(request, 'login.html', {'form': form,})           
 
-
+@csrf_exempt
 def sign_up(request):
     logger = logging.getLogger('file')
-    logger.info(request)
-    data = request
-    post = request.POST
-    get = request.GET
-    put = request.PUT
+    #header = json.loads(request.header)
+    data = json.loads(request.body)
+    logger.info(data)
+    #logger.info(header)
+
 

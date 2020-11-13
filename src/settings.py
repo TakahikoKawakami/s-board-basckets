@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'basckets.apps.BascketsConfig',
+	'rest_framework',
     'accounts',
     'bootstrap4',
 ]
