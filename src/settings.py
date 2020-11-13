@@ -108,7 +108,20 @@ if (ENV_DIVISION == 'STAGING'):
 			'PASSWORD': MYSQL_PASSWORD,
         }
     }
+if (ENV_DIVISION == 'PRODUCTION'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': MYSQL_DB_NAME,
+			'USER': MYSQL_USER,
+			'PASSWORD': MYSQL_PASSWORD,
+        }
+    }
 
+if (ENV_DIVISION == 'STAGING'):
+	CSRF_COOKIE_SECURE = False
+if (ENV_DIVISION == 'PRODUCTION'):
+	CSRF_COOKIE_SECURE = True
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -202,3 +215,4 @@ LOGGING = {
         },
     },
 }
+
