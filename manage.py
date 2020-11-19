@@ -1,5 +1,5 @@
 import sys
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from database import db
 from flask_script import Manager, Server
 from flask_migrate import Migrate, MigrateCommand
@@ -42,8 +42,22 @@ def index():
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     try:
-        if request.method == 'GET':
-            return request.args.get('title', '')
+        if request.method == 'GET': # login
+            if ('contract_id' in session):
+                account = models.accounts.showByContractId(session['contract_id'])
+                if (account != None):
+                    return 'logined ' + account.contract_id
+                else:
+                    session.pop['contract_id']
+                    return 'session failed ?'
+            else:
+                _contractId = request.args.get('contract_id', '')
+                account = models.accounts.showByContractId(_contractId)
+                if (account != None):
+                    session['contract_id'] = _contractId
+                    return 'set'
+                else:
+                    return 'who?'
         elif request.method == 'POST':
             _contractId = request.form['contract_id']
             _status = request.form['status']
@@ -61,6 +75,8 @@ def testDelete():
         if request.method == 'POST':
             contractId = request.form['contract_id']
             account = models.accounts.showByContractId(contractId)
+            if (account == None):
+                return 'non type error'
             account.delete()
             return redirect('/')
         else:
