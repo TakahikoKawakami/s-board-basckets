@@ -1,8 +1,3 @@
-#from django.contrib.auth.models import AbstractUser
-#
-#class User(AbstractUser):
-#    pass
-
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -42,6 +37,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self._create_user(username, email, password, **extra_fields)
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     """

@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls), 
     path('relations/', include('basckets.urls')),
     path('accounts/', include('accounts.urls')),
+#    path('test/', include('test.urls')),
 ]

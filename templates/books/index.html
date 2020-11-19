@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>アカウント一覧</h1>
+<div>
+    <form action="/test">
+        <p><label>contract_id: </label></p>
+        <input type="text" name="contract_id" value="">
+        <p><label>status: </label></p>
+        <input type="text" name="status" value="">
+
+        <button type="submit" formmethod="get">GET</button>
+        <button type="submit" formmethod="post">POST</button>
+    </form>
+</div>
+<div>
+    <form action="/test/delete">
+        <p><label>contract_id: </label></p>
+        <input type="text" name="contract_id" value="">
+        <button type="submit" formmethod="post">DELETE</button>
+    </form>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>契約ID</th>
+                <th>ステータス</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td>{{ account.id }}</td>
+                <td>{{ account.contract_id }}</td>
+                <td>{{ account.status }}</td>
+            </tr>
+            {% else %}
+                <td>書籍が登録されていません</td>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

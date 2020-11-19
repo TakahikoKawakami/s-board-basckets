@@ -15,29 +15,28 @@ import environ
 import datetime
 import logging
 
+from sqlalchemy import create_engine
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 env = environ.Env()
 
-# 環境変数でDJANGO_READ_ENV_FILEをTrueにしておくと.envを読んでくれる。
-# env_file = str(BASE_DIR.path('.env'))
-env.read_env('.env')
+env.read_env()
 ENV_DIVISION = env('ENV_DIVISION')
+
+APP_URI = env('APP_URI')
+
 SMAREGI_CLIENT_ID = env('SMAREGI_CLIENT_ID')
 SMAREGI_CLIENT_SECRET = env('SMAREGI_CLIENT_SECRET')
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', 's-board.from-garage.work']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 's-board.from-garage.work']
 
 # Application definition
 
@@ -48,10 +47,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'basckets.apps.BascketsConfig',
-	'rest_framework',
-    'accounts',
+    'rest_framework',
     'bootstrap4',
+    'basckets.apps.BascketsConfig',
+    'accounts',
+    'testPage',
 ]
 
 MIDDLEWARE = [
@@ -89,18 +89,16 @@ WSGI_APPLICATION = 'src.wsgi.application'
 
 
 # Database
-MYSQL_DB_NAME = env('MYSQL_DB_NAME')
-MYSQL_USER = env('MYSQL_USER')
-MYSQL_PASSWORD = env('MYSQL_PASSWORD')
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 if (ENV_DIVISION == 'LOCAL'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
+    DATABASE_NAME = 'db.sqlite3'
+    DATABASE_FILE = os.path.join(BASE_DIR, DATABASE_NAME)
+    DATABASE_ENGINE = create_engine('sqlite:///' + databese_file, convert_unicode=True)
+    DATABASE_URI = 'sqlite:///sqlite3.db'
 if (ENV_DIVISION == 'STAGING'):
+    MYSQL_DB_NAME = env('MYSQL_DB_NAME')
+    MYSQL_USER = env('MYSQL_USER')
+    MYSQL_PASSWORD = env('MYSQL_PASSWORD')
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -110,19 +108,22 @@ if (ENV_DIVISION == 'STAGING'):
         }
     }
 if (ENV_DIVISION == 'PRODUCTION'):
+    MYSQL_DB_NAME = env('MYSQL_DB_NAME')
+    MYSQL_USER = env('MYSQL_USER')
+    MYSQL_PASSWORD = env('MYSQL_PASSWORD')
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': MYSQL_DB_NAME,
-			'USER': MYSQL_USER,
-			'PASSWORD': MYSQL_PASSWORD,
+            'USER': MYSQL_USER,
+            'PASSWORD': MYSQL_PASSWORD,
         }
     }
 
 if (ENV_DIVISION == 'STAGING'):
-	CSRF_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 if (ENV_DIVISION == 'PRODUCTION'):
-	CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -140,8 +141,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-AUTH_USER_MODEL = 'accounts.User'
 
 #REST_FRAMEWORK = {
 #    'DEFAULT_PERMISSION_CLASSES': (
@@ -217,3 +216,6 @@ LOGGING = {
     },
 }
 
+
+
+AUTH_USER_MODEL = 'accounts.User'
