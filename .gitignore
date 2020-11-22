@@ -17,7 +17,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/
 lib64/
 parts/
 sdist/
@@ -132,4 +132,8 @@ dmypy.json
 .pyre/
 
 /db.sqlite
-/django/frontend/node_modules/*
+*/_django/frontend/node_modules/*
+*/_django/*
+/_django/*
+/_django/frontend/*
+/_django/frontend/node_modules/*
