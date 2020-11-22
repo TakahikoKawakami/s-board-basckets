@@ -5,21 +5,22 @@ from sqlalchemy.ext.declarative import declarative_base
 
 import os
 
-import settings
-
-
-db = SQLAlchemy()
-
-db_session = scoped_session(sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=settings.DATABASE_ENGINE
-    ))
-Base = declarative_base()
-Base.query = db_session.query_property()
-
-
-def init_db():
-    Base.metadatacreate_all(bind=settings.DATABASE_ENGINE)
     
+class Database():
+    db = SQLAlchemy()
 
+    def __init__(self, app):
+        self.config = app.config
+        self.app = app.app
+        self.db.init_app(self.app)
+        self.db.app = self.app
+        self.db_session = scoped_session(sessionmaker(
+            autocommit=False,
+            autoflush=False,
+            bind=self.config.DATABASE_ENGINE
+            ))
+        self.Base = declarative_base()
+        self.Base.query = self.db_session.query_property()
+        
+    def init_db():
+        self.Base.metadatacreate_all(bind=self.config.DATABASE_ENGINE)
