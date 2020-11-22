@@ -1,23 +1,46 @@
-#!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
-""" bascket """
-
 import os
 import sys
-sys.path.append(os.getcwd()) # 現在のディレクトリを環境変数に一時的に取り込む
+from flask import Flask,\
+                  render_template,\
+                  request,\
+                  redirect,\
+                  url_for,\
+                  session,\
+                  Blueprint
 
-def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.settings')
-    try:
-        from django.core.management import execute_from_command_line
-    except ImportError as exc:
-        raise ImportError(
-            "Couldn't import Django. Are you sure it's installed and "
-            "available on your PYTHONPATH environment variable? Did you "
-            "forget to activate a virtual environment?"
-        ) from exc
-    execute_from_command_line(sys.argv)
+# sys.path.append(os.getcwd()) # 現在のディレクトリを環境変数に一時的に取り込む
+
+from authorizations.controllers.AuthController import route as authRoute
+from application import Application
+from database import Database
 
 
-if __name__ == '__main__':
-    main()
+
+homeRoute =  Blueprint('home', __name__)
+@homeRoute.route('/')
+def index():
+    from authorizations.models import Accounts
+    account = Accounts.Account
+    accounts = account.query.order_by(account.id.asc())
+    return render_template("books/index.html",
+                            accounts=accounts)
+
+
+routes = [
+    authRoute,
+    homeRoute
+]
+
+app = Application()
+app.setRoute(routes)
+
+
+
+#app.pyをターミナルから直接呼び出した時だけ、app.run()を実行する
+if __name__ == "__main__":
+    args = sys.argv
+    if ('db' in args) or ('runserver' in args):
+        app.manager.run()
+        app.db.create_all()
+    else: # 引数がない場合(debug用)
+        app.app.run(debug=True, use_reloader=False)
