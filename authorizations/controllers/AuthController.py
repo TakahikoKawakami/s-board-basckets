@@ -1,3 +1,4 @@
+import datetime
 from flask import Blueprint, \
                   render_template,\
                   url_for,\
@@ -33,6 +34,24 @@ route = Blueprint('accounts', __name__, url_prefix='/accounts')
 @route.route('/authorize', methods=['GET'])
 def authorize():
     return authorizeApi.authorize()
+
+
+@route.route('/token', methods=['GET'])
+def getToken():
+    contractId = session['contract_id']
+    result = authorizeApi.getAccessToken(
+        contractId,
+        [
+            'pos.products:read',
+            'pos.transactions:read'
+        ]
+    )
+    print(result)
+
+    session['access_token'] = result['access_token']
+    session['access_token_expires_in'] = datetime.datetime.now() + datetime.timedelta(seconds=result['expires_in'])
+    
+    return {'contractId':session['contract_id'], 'accessToken': session['access_token'], 'expires' : session['access_token_expires_in']}
 
 
 @route.route('/login', methods=['GET'])
