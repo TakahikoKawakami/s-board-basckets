@@ -31,6 +31,7 @@ authorizeApi = AuthorizeApi(apiConfig, appConfig.APP_URI + '/accounts/login')
 
 route = Blueprint('accounts', __name__, url_prefix='/accounts')
 
+
 @route.route('/authorize', methods=['GET'])
 def authorize():
     return authorizeApi.authorize()
@@ -51,7 +52,13 @@ def getToken():
     session['access_token'] = result['access_token']
     session['access_token_expires_in'] = datetime.datetime.now() + datetime.timedelta(seconds=result['expires_in'])
     
-    return {'contractId':session['contract_id'], 'accessToken': session['access_token'], 'expires' : session['access_token_expires_in']}
+    return render_template("books/index.html",
+                            message = {
+                                'contractId': session['contract_id'],
+                                'accessToken': session['access_token'],
+                                'accessTokenExpireIn': session['access_token_expires_in']
+                            }
+    )
 
 
 @route.route('/login', methods=['GET'])
@@ -67,7 +74,8 @@ def login():
         registeredAccount = account.register()
     
     session['contract_id'] = result['contract']['id']
-    return session['contract_id']
+    return render_template("books/index.html",
+                            message=session['contract_id'])
 
 
 @route.route('', methods=['GET', 'POST'])

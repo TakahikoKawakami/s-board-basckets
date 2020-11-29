@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 {% block body %}
+<h1>logs...</h1>
+{{ message }}
 <h1>アカウント一覧</h1>
 <div>
+<!--    <a href="/basckets">取引取得</a> -->
+    <a href="/basckets/transactions">取引取得</a>
     <a href="/accounts/token">トークン取得</a>
     <a href="/accounts/authorize">ログイン認証</a>
-    <form action="/test">
+    <form action="/accounts">
         <p><label>contract_id: </label></p>
         <input type="text" name="contract_id" value="">
         <p><label>status: </label></p>

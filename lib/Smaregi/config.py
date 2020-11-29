@@ -6,7 +6,7 @@ class config():
     def __init__(self, env_division, clientId, clientSecret):
         if (env_division == self.ENV_DIVISION_LOCAL) or (env_division == self.ENV_DIVISION_STAGING):
             self.uriAccess = 'https://id.smaregi.dev' # app/sb_skc130x6/token'            
-            self.uriApi = 'https://api.smaregi.dev'            
+            self.uriApi = 'https://api.smaregi.dev'
         else:
             self.uriAccess = 'https://id.smaregi.jp'
             self.uriApi = 'https://api.smaregi.jp'
@@ -14,6 +14,9 @@ class config():
         self.smaregiClientId = clientId
         self.smaregiClientSecret = clientSecret        
         self._uriInfo = self.uriAccess + 'userinfo'            
+
+        self.accessToken = ''
+        self.contractId = ''
 #        smaregiClientId = getattr(settings, "SMAREGI_CLIENT_ID", None)
 #        smaregiClientSecret = getattr(settings, "SMAREGI_CLIENT_SECRET", None)
 #        base = base64.b64encode((smaregiClientId+":"+smaregiClientSecret).encode())

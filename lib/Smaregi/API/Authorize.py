@@ -4,13 +4,12 @@ from flask import redirect
 import requests
 import json
 import time
-import jwt
 import logging
 from urllib.parse import urlencode
 
-from .BaseApi import BaseApi
+from .BaseIdentificationApi import BaseIdentificationApi
 
-class AuthorizeApi(BaseApi):
+class AuthorizeApi(BaseIdentificationApi):
     def __init__(self, config, redirectUri):
         super().__init__(config)
         self.redirectUri = redirectUri
@@ -64,17 +63,7 @@ class AuthorizeApi(BaseApi):
         
 
     def _getUserAccessToken(self, code):
-        base = base64.b64encode(
-            (
-                self.config.smaregiClientId + 
-                ":" + 
-                self.config.smaregiClientSecret
-            ).encode())
-        smaregiAuth = "Basic " + str(base).split("'")[1]
-        headers = {
-            'Authorization': smaregiAuth,
-            'Content-Type':	'application/x-www-form-urlencoded',        
-        }
+        headers = self._getHeader()
         body = {
             'grant_type':'authorization_code',
             'code': code,

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>logs...</h1>
+{{ message }}
+<h1>アカウント一覧</h1>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
+    <style type="text/css">
+      #network {
+        width:  50vw;
+        height: 50vh;
+        border: 1px solid #000;
+      }
+    </style>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <div id="network"></div>
+    <script type="text/javascript">
+      var nodes = new vis.DataSet({{ nodes | tojson }});
+      var edges = new vis.DataSet({{ edges | tojson }});
+/*      var edges = new vis.DataSet([
+        {from: 1, to: 2, width: 20},
+        {from: 1, to: 3, arrows: 'to'},
+        {from: 3, to: 4, arrows: 'to'},
+        {from: 6, to: 1, arrows: 'to'},
+        {from: 7, to: 8, arrows: 'to'},
+        {from: 8, to: 7, arrows: 'to'},
+      ]); */
+      var container = document.getElementById('network');
+      var data = {
+        nodes: nodes,
+        edges: edges
+      };
+      var options = {
+      };
+      var network = new vis.Network(container, data, options);
+      
+      network.on("click", function(params) {
+        if (params.nodes.length == 1) {
+          var nodeId = params.nodes[0];
+          var node = nodes.get(nodeId);
+          console.log(node.label + 'がクリックされました');
+        }
+      });
+    </script>
+{% endblock %}

@@ -10,7 +10,8 @@ from flask import Flask,\
 
 # sys.path.append(os.getcwd()) # 現在のディレクトリを環境変数に一時的に取り込む
 
-from authorizations.controllers.AuthController import route as authRoute
+from authorizations.controllers import AuthController
+from baskets.controllers import BasketController
 from application import Application
 from database import Database
 
@@ -23,11 +24,13 @@ def index():
     account = Accounts.Account
     accounts = account.query.order_by(account.id.asc())
     return render_template("books/index.html",
-                            accounts=accounts)
+                            accounts=accounts,
+                            message = '')
 
 
 routes = [
-    authRoute,
+    AuthController.route,
+    BasketController.route,
     homeRoute
 ]
 
