@@ -1,0 +1,47 @@
+body {
+  background: #444;
+  color: white;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input, textarea {
+  padding: 10px 5px;
+}
+
+button {
+  margin-top: 20px;
+}
+
+
+.container-fluid {
+  display: flex;
+  justify-content: center;
+  
+  .row {
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+#network {
+  width:  50vw;
+  height: 50vh;
+  border: 1px solid #000;
+}
+
+.network-wrapper {
+	display: flex;
+	justify-content: center;
+}
+
+
+

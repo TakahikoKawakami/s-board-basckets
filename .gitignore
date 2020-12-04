@@ -137,3 +137,4 @@ dmypy.json
 /_django/*
 /_django/frontend/*
 /_django/frontend/node_modules/*
+/node_modules/*

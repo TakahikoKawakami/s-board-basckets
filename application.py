@@ -1,7 +1,9 @@
+import datetime
 from flask import Flask,\
                   Blueprint
 from flask_script import Manager, Server
 from flask_migrate import Migrate, MigrateCommand
+import pyjade
 
 from config import AppConfig
 
@@ -18,6 +20,7 @@ class Application():
         self.config = AppConfig()
         self.app.secret_key = self.config.SECRET_KEY
         self.app.config.from_object(self.config)
+        self.app.jinja_env.add_extension('pyjade.ext.jinja.PyJadeExtension')
         
         self.setDatabase()
         self.setManager()
@@ -39,4 +42,12 @@ class Application():
         for route in routeArray:
             self.app.register_blueprint(route)
         return self.app
+        
+
+    @app.context_processor
+    def add_staticfile():
+        def staticfile_cp(fname):
+            path = '/static/css/' + fname + '?v=' + datetime.datetime.today().strftime('%y%m%d%H%M%S%F')
+            return path
+        return dict(staticfile=staticfile_cp)
 

@@ -3,34 +3,99 @@
     <head>
        <meta charset="utf-8">
        <meta name="viewport" content="width=device-width, initial-scale=1">
-       <title>flask_app</title>
-       <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
-       <link href="http://localhost:8080/static/app.css" rel="stylesheet">
+       <title>バスケット分析</title>
+       <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet"> -->
+			<link href="{{ staticfile('style.css') }}" rel="stylesheet">
+      <!-- <script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script> -->
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.body-container{
+  height: 90vh;
+
+  display: grid;
+  grid-template-rows: 30px 1fr 30px;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "header"
+    "main"
+    "footer";
+}
+header {
+  background-color: #faa;
+  grid-area: header;
+	
+	display:flex;
+	justify-content: center;
+}
+main {
+  overflow-y: scroll;
+  grid-area: main;
+}
+p {
+  margin: 10px;
+}
+footer {
+	background-color: #aaf;
+	grid-area: footer;
+}
+section {
+    margin: 10px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 5px;
+}    
+h1 {
+  font-size: 1em;
+}
+
+nav {
+	width: 99vw;
+}
+
+.nav-container {
+	display: flex;
+	justify-content: space-between;	
+	width: 100%;
+}
+
+.menu-container {
+	display: flex;
+}
+
+.main-container {
+	background: blue;
+}
+
+.menu-item {
+	margin-left: 5px;
+}
+
+</style>
    </head>
-    <body>
-    <header>
-        <nav class="navbar navbar-default">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="#">読書履歴</a>
-                </div>
-                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                    <ul class="nav navbar-nav">
-                        <li><a href="books/index.html">書籍一覧</a></li>
-                        <li><a>記録一覧</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container-fluid">
-        <div class="row">
-            {% block body %}{% endblock %}
-        </div>
-    </div>
-    <footer>
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-    </footer>
-    </body>
+	 
+	<body>
+		<div class="body-container">
+			<header>
+				<nav>
+					<div class="nav-container">
+						<div>logo</div>
+						<div class="menu-container">
+							<div class="menu-item">ログイン</div>
+							<div class="menu-item">ログアウト</div>
+						</div>
+					</div>
+				</nav>
+			</header>
+			<main>
+				{% block body %}
+				{% endblock %}
+			</main>
+			<footer>footer</footer>
+		</div>
+	<script></script>
+	</body>
 </html>

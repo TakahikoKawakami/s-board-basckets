@@ -16,16 +16,17 @@ from application import Application
 from database import Database
 
 
-
 homeRoute =  Blueprint('home', __name__)
 @homeRoute.route('/')
 def index():
     from authorizations.models import Accounts
     account = Accounts.Account
     accounts = account.query.order_by(account.id.asc())
-    return render_template("books/index.html",
-                            accounts=accounts,
-                            message = '')
+    return render_template("index.jade")
+#    return render_template("books/index.html",
+#                            accounts=accounts,
+#                            message = '')
+
 
 
 routes = [
@@ -37,6 +38,8 @@ routes = [
 app = Application()
 app.setRoute(routes)
 
+
+    
 
 
 #app.pyをターミナルから直接呼び出した時だけ、app.run()を実行する
