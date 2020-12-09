@@ -2,10 +2,10 @@ from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolea
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 
-from database import Database
+from database import db
 
 
-class Account(Database.db.Model):
+class Account(db.Model):
     """
     アカウントモデル
     """
@@ -26,17 +26,17 @@ class Account(Database.db.Model):
 
     def register(self):
         # insert into users(name, address, tel, mail) values(...)
-        Database.db.session.add(self)
-        Database.db.session.commit()
+        db.session.add(self)
+        db.session.commit()
         return self
     
     def delete(self):
-        Database.db.session.delete(self)
-        Database.db.session.commit()
+        db.session.delete(self)
+        db.session.commit()
         return self
 
 def showByContractId(_contractId):
-    account = Database.db.session.query(Account).filter(Account.contract_id == _contractId).first()
+    account = db.session.query(Account).filter(Account.contract_id == _contractId).first()
     return account
 #    return Account(account.contract_id, account.status)
 

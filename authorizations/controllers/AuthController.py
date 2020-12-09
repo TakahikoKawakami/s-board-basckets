@@ -6,7 +6,7 @@ from flask import Blueprint, \
                   redirect,\
                   session
 
-import logging
+from logging import getLogger
 
 from ..models import Accounts as models
 
@@ -31,9 +31,11 @@ authorizeApi = AuthorizeApi(apiConfig, appConfig.APP_URI + '/accounts/login')
 
 route = Blueprint('accounts', __name__, url_prefix='/accounts')
 
+logger = getLogger('flask.app')
 
 @route.route('/authorize', methods=['GET'])
 def authorize():
+    logger.debug('authorize')
     return authorizeApi.authorize()
 
 
@@ -102,7 +104,7 @@ def test():
             _status = request.form['status']
             account = models.Account(_contractId, _status)
             registeredAccount = account.register()
-            return redirect(url_for('route.index'))
+            return redirect(url_for('home.index'))
         else:
             return abort(400)
     except Exception as e:

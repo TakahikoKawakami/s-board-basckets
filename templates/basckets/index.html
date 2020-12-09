@@ -2,50 +2,6 @@
 {% extends "base.html" %}
 {% block body %}
 <style type="text/css">
-.test1 {
-	background: skyblue;
-}
-.test2 {
-	background: pink;
-}
-.test3 {
-	background: gray;
-}
-.basket-container {
-	display: grid;
-	grid-template-rows: auto 1fr;
-	grid-template-columns:1fr 1fr 1fr;
-}
-.basket-search {
-	grid-column: 1/4;
-}
-.basket-ranking {
-	grid-column: 1/2;
-}
-.basket-network {
-	grid-column: 2/4;
-	display: grid;
-	justify-content: center;
-}
-
-#network {
-	width:  50vw;
-	height: 50vh;
-	border: 1px solid #000;
-}
-form {
-	margin: auto;
-}
-.form-group {
-	display: flex;
-	justify-content: center;
-}
-.item {
-	grid-column: 
-}
-#search-expand {
-	display:none;
-}
 
 </style>
 	<div id="basket-main">
@@ -99,23 +55,23 @@ form {
 		  monthNames: [ "1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月" ]// 初期値[ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
 		});
 		
-		// var nodes = new vis.DataSet({{ nodes | tojson }});
-		// var edges = new vis.DataSet({{ edges | tojson }});
-		// var container = document.getElementById('network');
-		// var data = {
-		// 	nodes: nodes,
-		// 	edges: edges
-		// };
-		// var options = {
-		// };
-		// var network = new vis.Network(container, data, options);
+		var nodes = new vis.DataSet({{ nodes | tojson }});
+		var edges = new vis.DataSet({{ edges | tojson }});
+		var container = document.getElementById('network');
+		var data = {
+			nodes: nodes,
+			edges: edges
+		};
+		var options = {
+		};
+		var network = new vis.Network(container, data, options);
 		
-		// network.on("click", function(params) {
-		// 	if (params.nodes.length == 1) {
-		// 		var nodeId = params.nodes[0];
-		// 		var node = nodes.get(nodeId);
-		// 		console.log(node.label + 'がクリックされました');
-		// 	}
-		// });
+		network.on("click", function(params) {
+			if (params.nodes.length == 1) {
+				var nodeId = params.nodes[0];
+				var node = nodes.get(nodeId);
+				console.log(node.label + 'がクリックされました');
+			}
+		});
 	</script>
 {% endblock %}

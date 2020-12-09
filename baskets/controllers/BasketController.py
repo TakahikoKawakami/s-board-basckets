@@ -52,7 +52,7 @@ def getTransaction():
     print (result['nodes'])
     print ('edges')
     print (result['edges'])
-    return render_template("basckets/index.html",
+    return render_template("basckets/index.jade",
 #        message = json.dumps(basket, indent=4),
         message = basket.salesRanking(),
         nodes = result['nodes'],
