@@ -1,7 +1,8 @@
 import pyfpgrowth
 
+from .AbstractBaskets import AbstractBasket
 
-class Basket():
+class Basket(AbstractBasket):
     def __init__(self):
         self._inputData = []
         self._output = {}
@@ -78,3 +79,49 @@ class Basket():
     
 # result = bascket().append(inputData).analyze().result
 
+class MockBasket(AbstractBasket):
+    def append(self, transactionDetailList):
+        pass
+
+
+    def analyze(self):
+        return self
+
+
+    @property
+    def result(self):
+        return {
+            'nodes': [
+                {
+                    'id': 'product_1',
+                    "label": 'product_1',
+                    "value": 1,
+                },
+                {
+                    'id': 'product_2',
+                    "label": 'product_2',
+                    "value": 1,
+                },
+                {
+                    'id': 'product_3',
+                    "label": 'product_3',
+                    "value": 3,
+                },
+            ],
+            'edges': [
+                {
+                    "from": 'product_1',
+                    "to": 'product_2',
+                    "value": 1
+                },
+                {
+                    "from": 'product_1',
+                    "to": 'product_3',
+                    "value": 3
+                }
+            ]
+        }
+
+    
+    def salesRanking(self, top=1):
+        pass

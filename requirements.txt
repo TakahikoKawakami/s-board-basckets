@@ -43,6 +43,7 @@ pyfpgrowth==1.0
 pygobject==3.26.1
 pyjade==4.0.0
 pyparsing==2.4.7
+pypugjs==5.9.8
 python-dateutil==2.8.1
 python-dotenv==0.15.0
 python-editor==1.0.4

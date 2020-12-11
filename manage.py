@@ -12,30 +12,16 @@ from flask_migrate import Migrate, MigrateCommand
 
 from authorizations.controllers import AuthController
 from baskets.controllers import BasketController
+from home.controllers import HomeController
 from application import app, setRoute
 from database import db
 
 
-homeRoute =  Blueprint('home', __name__)
-@homeRoute.route('/')
-def index():
-    from authorizations.models import Accounts
-
-    app.logger.debug('hello')
-
-    account = Accounts.Account
-    accounts = account.query.order_by(account.id.asc())
-    # return render_template("index.jade")
-    return render_template(
-        "books/index.html",
-        accounts=accounts,
-        message = ''
-    )
 
 setRoute([
+    HomeController.route,
     AuthController.route,
     BasketController.route,
-    homeRoute
 ])
 
 db.init_app(app)

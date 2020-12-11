@@ -39,7 +39,8 @@ class AppConfig(object):
     DATABASE_ENGINE = None
     DATABASE_URI = None
     SQLALCHEMY_DATABASE_URI = None
-        
+
+    ENV_DIVISION_MOCK = 'MOCK'
     ENV_DIVISION_LOCAL = 'LOCAL'
     ENV_DIVISION_STAGING = 'STAGING'
     ENV_DIVISION_PRODUCTION = 'PROD'
@@ -50,7 +51,7 @@ class AppConfig(object):
     elif (ENV_DIVISION == ENV_DIVISION_STAGING):        
         DEBUG = False
         TESTING = True
-    elif (ENV_DIVISION == ENV_DIVISION_LOCAL):
+    elif (ENV_DIVISION == ENV_DIVISION_LOCAL or ENV_DIVISION == ENV_DIVISION_MOCK):
         DEBUG = True
         TESTING = True
     

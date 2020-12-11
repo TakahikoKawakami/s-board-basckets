@@ -1,10 +1,11 @@
 class config():
+    ENV_DIVISION_MOCK = 'MOCK'
     ENV_DIVISION_LOCAL = 'LOCAL'
     ENV_DIVISION_STAGING = 'STAGING'
     ENV_DIVISION_PRODUCTION = 'PROD'
     
     def __init__(self, env_division, clientId, clientSecret):
-        if (env_division == self.ENV_DIVISION_LOCAL) or (env_division == self.ENV_DIVISION_STAGING):
+        if (env_division in (self.ENV_DIVISION_MOCK, self.ENV_DIVISION_LOCAL, self.ENV_DIVISION_STAGING)):
             self.uriAccess = 'https://id.smaregi.dev' # app/sb_skc130x6/token'            
             self.uriApi = 'https://api.smaregi.dev'
         else:

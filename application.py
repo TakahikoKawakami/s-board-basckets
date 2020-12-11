@@ -3,7 +3,7 @@ from flask import Flask,\
                   Blueprint
 import logging
 import logging.handlers
-import pyjade
+import pypugjs
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
@@ -14,6 +14,7 @@ from config import AppConfig
 from database import Database
 from logging.config import dictConfig
 
+# TODO: dictConfig、sessionからcontractId取得時に、format内にcontractIdを埋め込むこと
 dictConfig({
     'version': 1,
     'formatters': {
@@ -51,7 +52,7 @@ config = AppConfig()
 app.secret_key = config.SECRET_KEY
 app.config.from_object(config)
 
-app.jinja_env.add_extension('pyjade.ext.jinja.PyJadeExtension')
+app.jinja_env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
 
 db = SQLAlchemy(app)
 

@@ -13,9 +13,12 @@ from lib.Smaregi.config import config as SmaregiConfig
 from lib.Smaregi.API.POS.TransactionsApi import TransactionsApi
 
 from config import AppConfig
+from factories.ModelFactory import ModelFactory
 from baskets.models.Baskets import Basket
 
 appConfig = AppConfig()
+modelFactory = ModelFactory(appConfig)
+
 apiConfig = SmaregiConfig(
     appConfig.ENV_DIVISION,
     appConfig.SMAREGI_CLIENT_ID,
@@ -38,7 +41,7 @@ def beforeRequest():
 @route.route('/transactions', methods=['GET'])
 def getTransaction():
     targetTransactionHeadList = transactionsApi.getTransaction()
-    basket = Basket()
+    basket = modelFactory.createBasket()
 
     for transactionHead in targetTransactionHeadList:
         transactionDetailList = transactionsApi.\
@@ -52,7 +55,7 @@ def getTransaction():
     print (result['nodes'])
     print ('edges')
     print (result['edges'])
-    return render_template("basckets/index.jade",
+    return render_template("basckets/index.pug",
 #        message = json.dumps(basket, indent=4),
         message = basket.salesRanking(),
         nodes = result['nodes'],
