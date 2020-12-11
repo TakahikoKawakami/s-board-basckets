@@ -1,8 +1,6 @@
 import pyfpgrowth
 
-from .AbstractBaskets import AbstractBasket
-
-class Basket(AbstractBasket):
+class Basket():
     def __init__(self):
         self._inputData = []
         self._output = {}
@@ -79,7 +77,7 @@ class Basket(AbstractBasket):
     
 # result = bascket().append(inputData).analyze().result
 
-class MockBasket(AbstractBasket):
+class MockBasket():
     def append(self, transactionDetailList):
         pass
 

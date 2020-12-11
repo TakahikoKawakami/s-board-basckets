@@ -17,12 +17,19 @@ class Account(db.Model):
     modified_at = Column(DateTime)
 
     #初期化
-    def __init__(self, contractId, status):
-        self.contract_id = contractId
-        self.status = status
+    def __init__(self):
+        pass
 
     def __repr__(self):
         return "Account<{}, {}, {}>".format(self.id, self.contract_id, self.status)
+
+    @property
+    def contractId(self, contractId):
+        self.contract_id = contractId
+
+    @property
+    def status(self, status):
+        self.status = status
 
     def register(self):
         # insert into users(name, address, tel, mail) values(...)
@@ -35,11 +42,35 @@ class Account(db.Model):
         db.session.commit()
         return self
 
-def showByContractId(_contractId):
-    account = db.session.query(Account).filter(Account.contract_id == _contractId).first()
-    return account
+    def showByContractId(self, _contractId):
+        account = db.session.query(Account).filter(Account.contract_id == _contractId).first()
+        return account
 #    return Account(account.contract_id, account.status)
 
 
-if __name__ == "__main__":
-    pass
+class MockAccount():
+    def __init__(self):
+        pass
+
+    @property
+    def contractId(self, contractId):
+        pass
+
+    
+    @property
+    def status(self, status):
+        pass
+
+
+    def register(self):
+        return self
+
+
+    def delete(self):
+        return self
+
+
+    def showByContractId(self, _contractId):
+        return self
+
+    

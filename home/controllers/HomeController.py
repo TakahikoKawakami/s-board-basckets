@@ -28,14 +28,6 @@ def index():
     logger.debug('access')
     # account = Accounts.Account
     # accounts = account.query.order_by(account.id.asc())
-    accounts = []
-    logger.debug('go to index')
-    return render_template(
-        "books/index.html",
-        accounts=accounts,
-        message = ''
-    )
-
     if ('contract_id' in session):
         account = Accounts.Account
         accounts = account.query.order_by(account.id.asc())
