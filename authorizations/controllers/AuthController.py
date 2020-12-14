@@ -57,19 +57,20 @@ def getToken():
     session['access_token'] = result['access_token']
     session['access_token_expires_in'] = datetime.datetime.now() + datetime.timedelta(seconds=result['expires_in'])
     
-    return render_template("books/index.html",
-                            message = {
-                                'contractId': session['contract_id'],
-                                'accessToken': session['access_token'],
-                                'accessTokenExpireIn': session['access_token_expires_in']
-                            }
-    )
-
+    if request.args.get('next') is not None:
+        return redirect(request.args.get('next'))
+        
 
 @route.route('/login', methods=['GET'])
 def login():
+    logger.info('login!!!')
     code = request.args.get('code')
     state = request.args.get('state')
+
+    logger.info('code: {code}, state: {state}')
+    if (code is None or state is None):
+        return redirect('/accounts/authorize')
+
     result = authorizeApi.getUserInfo(code, state)
     
     requestContractId = result['contract']['id']
@@ -80,9 +81,14 @@ def login():
         accountModel.status = 'start'
         registeredAccount = accountModel.register()
     
-    session['contract_id'] = result['contract']['id']
-    return render_template("books/index.html",
-                            message=session['contract_id'])
+    session['contract_id'] = requestContractId
+    return redirect('/')
+
+
+@route.route('/logout', methods=['GET'])
+def logout():
+    session.clear()
+    return redirect('/')
 
 
 @route.route('', methods=['GET', 'POST'])

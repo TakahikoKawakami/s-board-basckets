@@ -42,7 +42,8 @@ dictConfig({
     'root': {
         'level': 'INFO',
         'handlers': ['wsgi', 'application']
-    }
+    },
+    'disable_existing_loggers': False,
 })
 
 app = Flask(__name__)

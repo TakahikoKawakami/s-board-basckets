@@ -1,3 +1,0 @@
-[2020-12-11 00:08:25,176][INFO] in _internal::_log: 172.30.0.1 - - [11/Dec/2020 00:08:25] "[37mGET / HTTP/1.0[0m" 200 -
-[2020-12-11 00:08:25,260][INFO] in _internal::_log: 172.30.0.1 - - [11/Dec/2020 00:08:25] "[33mGET /favicon.ico HTTP/1.0[0m" 404 -
-[2020-12-11 00:11:48,071][INFO] in _internal::_log:  * Detected change in '/config/workspace/s-board-baskets/baskets/models/Baskets.py', reloading

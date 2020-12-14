@@ -1,10 +1,32 @@
-import pyfpgrowth
+from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolean, DateTime, Enum
+from sqlalchemy.orm import relationship, backref
+from datetime import datetime
 
-class Basket():
+from database import db
+
+import pyfpgrowth
+import logging
+
+class Basket(db.Model):
+    """
+    買い物かごモデル
+    """
+    __tablename__ = "baskets"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    contract_id = Column(Unicode(32), nullable=False)
+    transaction_date = Column(DateTime, nullable=False)
+    analyze_result = Column(Integer, nullable=False)
+
+
+    created_at = Column(DateTime)
+    modified_at = Column(DateTime)
+
+
     def __init__(self):
         self._inputData = []
         self._output = {}
         self._products = {}
+        self._logger = logging.getLogger('flask.app')
         
         
     def __resp__(self):
@@ -32,8 +54,10 @@ class Basket():
         return self
         
                 
-    def analyze(self):
-        patterns = pyfpgrowth.find_frequent_patterns(self._inputData, 2)
+    def analyze(self, rate=1):
+        targetCount = len(self._inputData) * rate / 100.0
+        patterns = pyfpgrowth.find_frequent_patterns(self._inputData, targetCount)
+        self._logger.info(patterns)
         edges = []
         nodes = []
         for k,v in patterns.items():
@@ -57,23 +81,49 @@ class Basket():
         
         return self
     
+
+    def resultByProductId(self, productId):
+        edges = self._output['edges']
+        targetEdges = []
+        for edge in edges:
+            if (productId == edge["from"]):
+                targetEdges.append({
+                    "target": edge["to"],
+                    "value": edge["value"]
+                })
+            elif (productId == edge["to"]):
+                targetEdges.append({
+                    "target": edge["from"],
+                    "value": edge["value"]
+                })
+        self._logger.info(targetEdges)
+        return targetEdges
+
     
     @property
     def result(self):
         return self._output
         
         
-    def salesRanking(self, top=1):
+    def salesRanking(self, top=0):
         nodes = self._output['nodes']
-        print('nodes : ')
-        print (nodes)
+        sortedNodesByProductIdList = sorted(nodes, key=lambda x: x['value'], reverse=True)
+        targetNodes = sortedNodesByProductIdList[0: top]
+        result = []
+        for node in targetNodes:
+            self._logger.info(node['id'])
+            newNode = node['relations'] = self.relationRanking(node['id'])
+            result.append(node)
+        self._logger.info(result)
+        return result
+
+
+    def relationRanking(self, productId, top=1):
+        nodes = self.resultByProductId(productId)
         sortedProductIdList = sorted(nodes, key=lambda x: x['value'], reverse=True)
-        print (sortedProductIdList)
-        print (sortedProductIdList[0: top])
 
         return sortedProductIdList[0: top]
-        
-        
+
     
 # result = bascket().append(inputData).analyze().result
 

@@ -1,6 +1,6 @@
 body {
-  background: #444;
-  color: white;
+  background: #ffffff;
+  color: #000000;
 }
 
 .container {
@@ -21,25 +21,13 @@ button {
   margin-top: 20px;
 }
 
-
-#network {
-  width:  50vw;
-  height: 50vh;
-  border: 1px solid #000;
-}
-
-.network-wrapper {
-	display: flex;
-	justify-content: center;
-}
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 .body-container{
-  height: 90vh;
+  height: 100vh;
 
   display: grid;
   grid-template-rows: 30px 1fr 30px;
@@ -109,25 +97,22 @@ nav {
 	background: gray;
 }
 .basket-container {
-	display: grid;
-	grid-template-rows: auto 1fr;
-	grid-template-columns:1fr 1fr 1fr;
+	display: flex;
+  align-items: center;
+  
 }
 .basket-search {
-	grid-column: 1/4;
 }
 .basket-ranking {
-	grid-column: 1/2;
 }
 .basket-network {
-	grid-column: 2/4;
-	display: grid;
-	justify-content: center;
+	display: flex;
+  justify-content: center;
 }
 
 #network {
-	width:  50vw;
-	height: 50vh;
+	width:  80%;
+	height: 500px;
 	border: 1px solid #000;
 }
 form {
@@ -146,5 +131,7 @@ form {
 #search-expand {
 	display:none;
 }
-
+.expand {
+  display: none;
+}
 

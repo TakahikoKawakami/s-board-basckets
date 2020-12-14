@@ -1,5 +1,64 @@
 html
-    title 
+    title かごの中身
     head
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
     body
-        h1 hello jade!
+        .container
+            icon#logo.content log
+            h1.content かごの中身
+            session.content.
+                スマレジでたてた取引から、売上に色々な傾向が分ります。<br />
+                このアプリでは、分析、見える化し、その分析の手助けを致します。
+
+            #button-section
+                .button-group.content
+                    a.btn.primary(href="/accounts/login") 利用する
+                    a.btn.secondary(href="/login_demo") デモを体験してみる
+
+    style.
+        body {
+            text-align: center;
+        }
+
+        #logo {
+        }
+
+        .container {
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+            margin: 5em 0 1em;
+        }
+
+        .content {
+            margin: 1.0em;
+            
+        }
+
+        #button-section {
+            background-color: #f0f0f0;
+            width: 80vw;
+            margin: auto;
+        }
+        .button-group {
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+        }
+
+        a.btn {
+            margin: 1em;
+
+            border: 1px solid;
+            border-radius: 5px;
+        }
+
+        .btn.primary {
+            color: white;
+            background-color:#6633ff;
+        }
+
+        .btn.secondary {
+            color: white;
+            background-color:#777777;
+        }
