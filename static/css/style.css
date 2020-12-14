@@ -106,14 +106,18 @@ nav {
 .basket-ranking {
 }
 .basket-network {
-	display: flex;
-  justify-content: center;
 }
 
+.graph {
+  display: flex;
+  justify-content: center;
+
+}
 #network {
 	width:  80%;
 	height: 500px;
-	border: 1px solid #000;
+  border: 1px solid #000;
+  text-align: center;
 }
 form {
 	margin: auto;

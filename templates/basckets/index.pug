@@ -17,7 +17,14 @@
                         button#search-expand-btn button
                 #search-expand.expand expand
                 a(href="") 分析
-        .basket-ranking 購入数ランキング
+        .summary Pick Up!
+            p.
+                この期間、xxx時からyyy時の間で、product1とproduct2を一緒に購入している、
+                customerGroupのgenderが多い
+            p.
+                この結果から考えられる人物像に向け、新たな商品や商品配置を考えてみましょう！
+        .basket-ranking 
+            h2 購入数ランキング
             ul.ranking
                 {% for rank in ranking %}
                 li 
@@ -30,8 +37,10 @@
                     //-     li test-test2
                     //-     li test-test3
                 {% endfor %}
-        .basket-network 相関図
-            #network
+        .basket-network 
+            h2 相関図
+            .graph
+                #network
 //- datepicker.js
 link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css")
 script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js")
