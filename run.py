@@ -1,4 +1,4 @@
-from app import app
+from application import app
 
 
 """Webサーバを立ち上げる際に実行するファイル"""

@@ -7,32 +7,30 @@ from flask import Flask,\
                   url_for,\
                   session,\
                   Blueprint
+from flask_script import Manager, Server
+from flask_migrate import Migrate, MigrateCommand
 
-# sys.path.append(os.getcwd()) # 現在のディレクトリを環境変数に一時的に取り込む
-
-from authorizations.controllers.AuthController import route as authRoute
-from application import Application
-from database import Database
-
-
-
-homeRoute =  Blueprint('home', __name__)
-@homeRoute.route('/')
-def index():
-    from authorizations.models import Accounts
-    account = Accounts.Account
-    accounts = account.query.order_by(account.id.asc())
-    return render_template("books/index.html",
-                            accounts=accounts)
+from authorizations.controllers import AuthController
+from baskets.controllers import BasketController
+from home.controllers import HomeController
+from application import app, setRoute
+from database import db
 
 
-routes = [
-    authRoute,
-    homeRoute
-]
 
-app = Application()
-app.setRoute(routes)
+setRoute([
+    HomeController.route,
+    AuthController.route,
+    BasketController.route,
+])
+
+db.init_app(app)
+db.app = app
+
+migrate = Migrate(app, db, compare_type=True)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
+manager.add_command('runserver', Server(host='0.0.0.0', port='5500'))
 
 
 
@@ -40,7 +38,8 @@ app.setRoute(routes)
 if __name__ == "__main__":
     args = sys.argv
     if ('db' in args) or ('runserver' in args):
-        app.manager.run()
-        app.db.create_all()
+        manager.run()
+        db.create_all()
     else: # 引数がない場合(debug用)
-        app.app.run(debug=True, use_reloader=False)
+        # app.run(debug=True, use_reloader=False, host='0.0.0.0' ,port=5500)
+        app.run(debug=True, use_reloader=True, host='0.0.0.0' ,port=5500)

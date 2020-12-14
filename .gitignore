@@ -60,6 +60,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+*.log.*
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -137,3 +138,4 @@ dmypy.json
 /_django/*
 /_django/frontend/*
 /_django/frontend/node_modules/*
+/node_modules/*

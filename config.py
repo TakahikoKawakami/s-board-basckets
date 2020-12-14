@@ -7,7 +7,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 """original"""
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
@@ -39,7 +39,8 @@ class AppConfig(object):
     DATABASE_ENGINE = None
     DATABASE_URI = None
     SQLALCHEMY_DATABASE_URI = None
-        
+
+    ENV_DIVISION_MOCK = 'MOCK'
     ENV_DIVISION_LOCAL = 'LOCAL'
     ENV_DIVISION_STAGING = 'STAGING'
     ENV_DIVISION_PRODUCTION = 'PROD'
@@ -50,7 +51,7 @@ class AppConfig(object):
     elif (ENV_DIVISION == ENV_DIVISION_STAGING):        
         DEBUG = False
         TESTING = True
-    elif (ENV_DIVISION == ENV_DIVISION_LOCAL):
+    elif (ENV_DIVISION == ENV_DIVISION_LOCAL or ENV_DIVISION == ENV_DIVISION_MOCK):
         DEBUG = True
         TESTING = True
     

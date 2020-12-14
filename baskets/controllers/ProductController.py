@@ -1,3 +1,36 @@
+import datetime
+from flask import Blueprint, \
+                  render_template,\
+                  url_for,\
+                  request,\
+                  redirect,\
+                  session
+
+import logging
+
+
+from lib.Smaregi.config import config as SmaregiConfig
+from lib.Smaregi.API.Authorize import AuthorizeApi
+
+from config import AppConfig
+
+appConfig = AppConfig()
+apiConfig = SmaregiConfig(
+    appConfig.ENV_DIVISION,
+    appConfig.SMAREGI_CLIENT_ID,
+    appConfig.SMAREGI_CLIENT_SECRET
+)
+authorizeApi = AuthorizeApi(apiConfig, appConfig.APP_URI + '/accounts/login')
+
+route = Blueprint('accounts', __name__, url_prefix='/accounts')
+
+
+@route.before_request
+def beforeRequest():
+    if not ('contract_id' in session):
+        if ()
+    self.getToken()
+
 class ProductController():
     __init__(self, api):
         self.smaregiApi = api
