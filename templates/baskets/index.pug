@@ -1,0 +1,42 @@
+{% extends "base.pug" %}
+{% block body %}
+
+#basket-main.test1
+    h1 バスケット分析
+        .container
+            form(action="summary", method="get")
+                .form__group
+                    div.
+                        分析対象
+                    .button__radio
+                        //- input -> label の順番（cssの関係）
+                        input#target-category(type="radio" name="target" value="0" checked=true)
+                        label(for="target-category") 部門
+                        input#target-product(type="radio" name="target" value="1" checked=false)
+                        label(for="target-product") 商品
+                .form__group
+                    div.
+                        対象店舗
+                    select#(name="target-store")
+                        {% for store in stores %}
+                        option(value="store.storeId") {{ store.storeId }} - {{ store.storeName }}
+                        {% endfor %}
+
+                button(type="submit") submit
+.sel.sel--black-panther
+    select#select-profession(name="select-profession")
+        option(value="" disabled) Profession
+        option(value="hacker") Hacker
+        option(value="gamer") Gamer
+        option(value="developer") Developer
+        option(value="programmer") Programmer
+        option(value="designer") Designer
+hr.rule
+script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js")
+link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato|Quicksand")
+link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css")
+
+style.
+
+
+{% endblock %}

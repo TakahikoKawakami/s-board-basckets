@@ -36,6 +36,7 @@ route = Blueprint('accounts', __name__, url_prefix='/accounts')
 
 logger = getLogger('flask.app')
 
+
 @route.route('/authorize', methods=['GET'])
 def authorize():
     logger.debug('authorize')
@@ -44,12 +45,16 @@ def authorize():
 
 @route.route('/token', methods=['GET'])
 def getToken():
+    if not ('contract_id' in session):
+        return redirect('/')
+
     contractId = session['contract_id']
     result = authorizeApi.getAccessToken(
         contractId,
         [
             'pos.products:read',
-            'pos.transactions:read'
+            'pos.transactions:read',
+            'pos.stores:read',
         ]
     )
     print(result)

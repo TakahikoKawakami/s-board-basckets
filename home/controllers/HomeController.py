@@ -37,3 +37,8 @@ def index():
     else:
         logger.debug('go to welcome')
         return render_template("home/welcome.pug")
+
+
+@route.route('/component_test')
+def component_test():
+    return render_template("home/component_test.pug")

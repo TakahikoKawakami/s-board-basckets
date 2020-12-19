@@ -1,0 +1,13 @@
+:root {
+    --color__text: #838E95;
+    --color__text__reverse: #eeebe7;
+    --color__background: #eeebe7;
+    --color__unselected: #B69E86;
+    --color__selected: #7D5A5E;
+    --color__base: #B69E86;
+    --color__danger: #991F3C;
+  
+    --font__base: "FontAwesome";
+    --fontsize__base: 1.5em;
+    --fontsize__navbar: 16px;
+  }

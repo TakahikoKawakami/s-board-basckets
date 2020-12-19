@@ -1,0 +1,53 @@
+{% extends "base.pug" %}
+{% block body %}
+.center(style="display:grid; grid-templates-columns:1fr; align-items:center; margin:3em;")
+    h1 h1-text
+    h2 h2-text
+    h3 h3-text
+    h4 h4-text
+    h5 h5-text
+    p p-text
+
+    a(href="/component_test") リンク
+    ul
+        li ul-test1
+        li ul-test2
+        li ul-test3
+    ol
+        li ol-test1
+        li ol-test2
+        li ol-test3
+
+    img(src="http://placehold.js/100x100.png", alt="")
+
+    table
+        tr
+            th th
+            th th-text
+        tr
+            td td
+            td td-text
+
+    hr
+
+    input#input(type="text", name="", placeholder="input-text-here")label(for="input") input-text
+    input#button(type="button", value="")label(for="button") input-button
+    input#checkbox(type="checkbox", name="")label(for="checkbox") input-checkbox
+    input#radio(type="radio", name="")label(for="radio") input-radio
+    input#datepicker(type="date", name="")label(for="datepicker")
+
+    textarea textarea
+
+    button button
+
+.sel.sel--black-panther
+    select#select-profession(name="select-profession")
+        option(value="" disabled) Profession
+        option(value="hacker") Hacker
+        option(value="gamer") Gamer
+        option(value="developer") Developer
+        option(value="programmer") Programmer
+        option(value="designer") Designer
+hr.rule
+    //- button button
+{% endblock %}

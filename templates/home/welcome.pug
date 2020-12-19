@@ -2,6 +2,10 @@ html
     title ミエルカ
     head
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(rel="stylesheet", href="{{ staticfile('destyle.css') }}")
+        link(rel="stylesheet", href="{{ staticfile('style.css') }}")
+        link(rel="stylesheet", href="{{ staticfile('button.css') }}")
+
     body
         .container
             icon#logo.content log
@@ -16,23 +20,11 @@ html
                     a.btn.secondary(href="/login_demo") デモを体験してみる
 
     style.
-        body {
-            text-align: center;
-        }
-
         #logo {
         }
 
-        .container {
-            display: flex;
-            flex-flow: column;
-            justify-content: center;
-            margin: 5em 0 1em;
-        }
-
         .content {
-            margin: 1.0em;
-            
+            margin: 1.0em;            
         }
 
         #button-section {
@@ -48,6 +40,9 @@ html
 
         a.btn {
             margin: 1em;
+            height: 3em;
+            padding-top:auto;
+            padding-bottom:auto;
 
             border: 1px solid;
             border-radius: 5px;

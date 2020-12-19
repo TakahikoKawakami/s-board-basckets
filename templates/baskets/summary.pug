@@ -15,8 +15,27 @@
                         input#search-to.datepicker(name="", placeholder="")
                     .item
                         button#search-expand-btn button
-                #search-expand.expand expand
-                a(href="") 分析
+                    .item
+                        button#search-expand-btn 検索条件を保存
+                #search-expand.expand
+                    .button__radio
+                        div.
+                            分析対象
+                        //- input -> label の順番（cssの関係）
+                        input#target-category(type="radio" name="target" value="0" checked=true)
+                        label(for="target-category") 部門
+                        input#target-product(type="radio" name="target" value="1" checked=false)
+                        label(for="target-product") 商品
+                    .button__radio
+                        div.
+                            対象店舗
+                        //- input -> label の順番（cssの関係）
+                        input#target-category(type="radio" name="target" value="0" checked=true)
+                        label(for="target-category") 部門
+                        input#target-product(type="radio" name="target" value="1" checked=false)
+                        label(for="target-product") 商品
+
+                button(href="" style="width: 80%; text-align: center;") 分析
         .summary Pick Up!
             p.
                 この期間、xxx時からyyy時の間で、product1とproduct2を一緒に購入している、
@@ -74,6 +93,9 @@ script.
         edges: edges
     };
     var options = {
+        nodes: {
+            shape: "dot",
+        }
     };
     var network = new vis.Network(container, data, options);
     

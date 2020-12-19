@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolean, DateTime, Enum
+from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolean, DateTime, Enum, Text
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 
@@ -15,7 +15,8 @@ class Basket(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     contract_id = Column(Unicode(32), nullable=False)
     transaction_date = Column(DateTime, nullable=False)
-    analyze_result = Column(Integer, nullable=False)
+    analyze_result = Column(Text, nullable=False)
+    analyze_condition = Column(Text)
 
 
     created_at = Column(DateTime)
