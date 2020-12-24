@@ -19,6 +19,10 @@ body {
   margin-right: auto;
 }
 
+h1 {
+  margin-bottom: 10px;
+}
+
 form {
   display: flex;
   flex-direction: column;
@@ -98,11 +102,14 @@ nav {
   flex-flow: column;
   justify-content: center;
 
-  width: 80vw;
+  width: 90%;
 }
 
 .form__group {
-  display:flex;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
   margin: 10px auto;
 }
 
@@ -145,6 +152,12 @@ nav {
 .test3 {
 	background: gray;
 }
+
+.basket__main {
+  display:grid;
+  grid-template-columns: 1fr;
+}
+
 .basket-container {
 	display: flex;
   align-items: center;
@@ -167,6 +180,8 @@ nav {
 	height: 500px;
   border: 1px solid #000;
   text-align: center;
+
+  margin:30px;
 }
 
 .form-group {

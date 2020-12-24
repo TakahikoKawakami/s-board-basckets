@@ -1,5 +1,8 @@
 from baskets.models.Baskets import Basket, MockBasket
 from authorizations.models.Accounts import Account, MockAccount
+from baskets.models.BasketAnalyses import BasketAnalysis
+from baskets.models.BasketAnalysisConditions import BasketAnalysisCondition
+from baskets.models.BasketAnalysisStores import BasketAnalysisStore
 
 
 class ModelFactory():
@@ -28,3 +31,35 @@ class ModelFactory():
         elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_MOCK):
             return MockAccount()
 
+
+    def createBasketAnalysis(self):
+        if   (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_PRODUCTION):
+            return BasketAnalysis()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_STAGING):
+            return BasketAnalysis()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_LOCAL):
+            return BasketAnalysis()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_MOCK):
+            return BasketAnalysis()
+
+
+    def createBasketAnalysisCondition(self):
+        if   (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_PRODUCTION):
+            return BasketAnalysisCondition()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_STAGING):
+            return BasketAnalysisCondition()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_LOCAL):
+            return BasketAnalysisCondition()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_MOCK):
+            return BasketAnalysisCondition()
+
+
+    def createBasketAnalysisStore(self):
+        if   (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_PRODUCTION):
+            return BasketAnalysisStore()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_STAGING):
+            return BasketAnalysisStore()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_LOCAL):
+            return BasketAnalysisStore()
+        elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_MOCK):
+            return BasketAnalysisStore()

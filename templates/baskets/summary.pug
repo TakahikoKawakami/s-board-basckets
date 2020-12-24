@@ -1,65 +1,28 @@
 {% extends "base.pug" %}
 {% block body %}
 
-#basket-main
+#basket__main
     h1 バスケット分析
     #basket-container
-        #basket-search
-            form(action="", method="get")
-                .form-group
-                    .item
-                        label(for="search-from") 分析開始日
-                        input#search-from.datepicker(name="", placeholder="")
-                    .item
-                        label(for="search-to") 分析終了日
-                        input#search-to.datepicker(name="", placeholder="")
-                    .item
-                        button#search-expand-btn button
-                    .item
-                        button#search-expand-btn 検索条件を保存
-                #search-expand.expand
-                    .button__radio
-                        div.
-                            分析対象
-                        //- input -> label の順番（cssの関係）
-                        input#target-category(type="radio" name="target" value="0" checked=true)
-                        label(for="target-category") 部門
-                        input#target-product(type="radio" name="target" value="1" checked=false)
-                        label(for="target-product") 商品
-                    .button__radio
-                        div.
-                            対象店舗
-                        //- input -> label の順番（cssの関係）
-                        input#target-category(type="radio" name="target" value="0" checked=true)
-                        label(for="target-category") 部門
-                        input#target-product(type="radio" name="target" value="1" checked=false)
-                        label(for="target-product") 商品
-
-                button(href="" style="width: 80%; text-align: center;") 分析
+        div.
+            長さ#{ nodes.length }
+        div.
         .summary Pick Up!
-            p.
-                この期間、xxx時からyyy時の間で、product1とproduct2を一緒に購入している、
+            //- p.
+                {{ store.storeName }}店舗の{{ search_from }}から{{ search_to }}の期間、xxx時からyyy時の間で、product1とproduct2を一緒に購入している、
                 customerGroupのgenderが多い
             p.
+                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、{{ pickUpMessage.product1 }}と{{ pickUpMessage.product2 }}を一緒に購入されることが多い
+            p.
                 この結果から考えられる人物像に向け、新たな商品や商品配置を考えてみましょう！
-        .basket-ranking 
-            h2 購入数ランキング
-            ul.ranking
-                {% for rank in ranking %}
-                li 
-                    div(style="display:grid; grid-template-rows:1fr 1fr")
-                        dev(style="font-size: 24px;") {{ rank.label }} {{rank.value}}回
-                        dev(style="text-align: right") 最も一緒に購入された商品 {{rank.relations}}
-                    //-     dev(class="list__expand_btn__" + i) button
-                    //- ul(class="list__extend__" + i).expand.ranking
-                    //-     li test-test1
-                    //-     li test-test2
-                    //-     li test-test3
-                {% endfor %}
+        a(href="") ネットワーク図
         .basket-network 
             h2 相関図
             .graph
                 #network
+        hr
+        a(href="/baskets/index") もう一度分析する
+
 //- datepicker.js
 link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css")
 script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js")

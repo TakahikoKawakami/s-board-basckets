@@ -25,11 +25,12 @@ class Account(db.Model):
 
     @property
     def contractId(self, contractId):
+        return self.contract_id
+
+    @contractId.setter
+    def contractId(self, contractId):
         self.contract_id = contractId
 
-    @property
-    def status(self, status):
-        self.status = status
 
     def register(self):
         # insert into users(name, address, tel, mail) values(...)

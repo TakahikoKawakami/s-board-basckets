@@ -1,5 +1,10 @@
 import datetime
 from flask import Flask,\
+                  render_template,\
+                  request,\
+                  redirect,\
+                  url_for,\
+                  session,\
                   Blueprint
 import logging
 import logging.handlers
@@ -13,6 +18,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from config import AppConfig
 from database import Database
 from logging.config import dictConfig
+from authorizations.controllers import AuthController
+from baskets.controllers import BasketController
+from home.controllers import HomeController
 
 # TODO: dictConfig、sessionからcontractId取得時に、format内にcontractIdを埋め込むこと
 dictConfig({
@@ -35,12 +43,13 @@ dictConfig({
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'formatter': 'application',
             'filename': './log/test.log',
-            'backupCount': 3,
-            'when': 'D',
+            'when': 'MIDNIGHT',
+            'backupCount': 31,
+            'encoding': 'utf-8'
         }
     },
     'root': {
-        'level': 'INFO',
+        'level': 'DEBUG',
         'handlers': ['wsgi', 'application']
     },
     'disable_existing_loggers': False,
@@ -57,10 +66,21 @@ app.jinja_env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
 
 db = SQLAlchemy(app)
 
+db.init_app(app)
+db.app = app
+
+
 def setRoute(routeArray):
     for route in routeArray:
         app.register_blueprint(route)
     return app
+
+
+setRoute([
+    HomeController.route,
+    AuthController.route,
+    BasketController.route,
+])
 
 
 @app.context_processor

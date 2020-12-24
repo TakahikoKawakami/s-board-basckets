@@ -43,6 +43,23 @@ class BaseServiceApi(BaseApi):
         return body
         
         
+    def _getBodyForDetail(self, field=None, sort=None, whereDict=None):
+        body = {
+        }
+        if (field is not None):
+            body.update({
+                'fields': field
+            })
+        if (sort is not None):
+            body.update({
+                'sort': sort
+            })
+        if (whereDict is not None):
+            body.update(whereDict)
+
+        return body
+
+        
     def _api(self, uri, header, body):
         response = requests.get(self.uri, headers=header, params=urlencode(body))
         resultList = response.json()

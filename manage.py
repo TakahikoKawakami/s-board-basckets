@@ -1,31 +1,11 @@
 import os
 import sys
-from flask import Flask,\
-                  render_template,\
-                  request,\
-                  redirect,\
-                  url_for,\
-                  session,\
-                  Blueprint
 from flask_script import Manager, Server
 from flask_migrate import Migrate, MigrateCommand
 
-from authorizations.controllers import AuthController
-from baskets.controllers import BasketController
-from home.controllers import HomeController
-from application import app, setRoute
+from application import app
 from database import db
 
-
-
-setRoute([
-    HomeController.route,
-    AuthController.route,
-    BasketController.route,
-])
-
-db.init_app(app)
-db.app = app
 
 migrate = Migrate(app, db, compare_type=True)
 manager = Manager(app)
