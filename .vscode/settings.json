@@ -13,5 +13,16 @@
         "test_*.py"
     ],
     "python.jediEnabled": true,
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+        //   {
+        //     "scope": "meta.function-call.generic.python",
+        //     "settings": {
+        //       "foreground": "#FFaaFF"
+        //     }
+        //   }
+        ]
+    },
+    "editor.renderWhitespace":"boundary"
 }

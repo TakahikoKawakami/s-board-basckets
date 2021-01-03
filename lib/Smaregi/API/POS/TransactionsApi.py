@@ -15,8 +15,7 @@ class TransactionsApi(BaseServiceApi):
         self.uri = self.uriPos + '/transactions'
         
         header = self._getHeader()
-        body = self._getBody(
-            'transactionHeadId,sumDate', sort, whereDict)
+        body = self._getBody(sort=sort, whereDict=whereDict)
         
         result = self._api(self.uri, header, body)
         return result
@@ -28,11 +27,7 @@ class TransactionsApi(BaseServiceApi):
         self.uri = self.uriPos + '/transactions/' + transactionHeadId + '/details'
         
         header = self._getHeader()
-        body = self._getBody(
-            'transactionHeadId,transactionDetailId,productId,productName,salesPrice,categoryId,categoryName',
-            sort,
-            whereDict
-        )
+        body = self._getBody(sort=sort, whereDict=whereDict)
         
         result = self._api(self.uri, header, body)
         return result

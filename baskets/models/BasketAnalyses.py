@@ -1,13 +1,12 @@
 from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolean, Date, DateTime, Enum, Text
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime
-from pprint import pprint
-from datetime import datetime
-import json
-from database import db
-
-import pyfpgrowth
+import ujson
 import logging
+from pprint import pprint, pformat
+
+from baskets.entities.Pyfpgrowth import Pyfpgrowth as PyfpgrowthEntity
+from database import db
 from common.abstracts.AbstractModel import AbstractModel
 
 class BasketAnalysis(AbstractModel):
@@ -22,7 +21,11 @@ class BasketAnalysis(AbstractModel):
 
     #初期化
     def __init__(self):
-        pass
+        self._targetData = [] # basket entity list
+        self._targetList = [] # list for pyfpgrowth
+        self._result = {} # result of pyfpgrowth
+
+        self._logger = logging.getLogger('flask.app')
 
 
     def __repr__(self):
@@ -30,13 +33,87 @@ class BasketAnalysis(AbstractModel):
 
 
     @property
+    def targetData(self) -> list:
+        return self._targetData
+
+
+    @targetData.setter
+    def targetData(self, val:list):
+        self._targetData = val
+
+
+    @property
+    def result(self) -> dict:
+        return self._result
+
+
+    def appendData(self, basketModel) -> None:
+        self._targetData.append(basketModel)
+
+
+    def _convertListToData(self) -> None:
+        """targetData -> targetList に変換します
+        """
+        self._targetList = []
+        for basketModel in self._targetData:
+            self._targetList.append(basketModel.convertListForAnalysis())
+
+
+    def analyze(self, rate=1):
+        self._convertListToData()
+        # 何回出現したデータを対象とするか
+        targetCount = len(self._targetList) * rate / 100.0
+
+        # バスケット分析実施 tupple型をキーに持つ辞書を取得する
+        patterns = PyfpgrowthEntity.createAndfindFrequentPatterns(self._targetList, targetCount)
+        
+        self._logger.info("---- pyfpgrowth find_frequent_patterns ----")
+        for line in pformat(patterns).split('\n'):
+            self._logger.debug(line)
+        
+        # pyfpgrowthの結果をそのまま保存
+        self.analyzedResult = patterns
+
+        # edges = []
+        # nodes = []
+        # for k,v in patterns.items():
+        #     if (len(k) == 1):
+        #         if (k[0].startswith('product__')):
+        #             key = k[0].split('product__')[1]
+        #             nodes.append({
+        #                 "id": key,
+        #                 "label": key,
+        #                 "value": v
+        #             })
+        #     elif (len(k) == 2):
+        #         if (k[0].startswith('product__') and k[1].startswith('product__')):
+        #             key = []
+        #             key.append(k[0].split('product__')[1])
+        #             key.append(k[1].split('product__')[1])
+        #         edges.append({
+        #             "from": key[0],
+        #             "to": key[1],
+        #             "value": v
+        #         })
+    
+        # self._result['nodes'] = nodes
+        # self._result['edges'] = edges
+        
+        return self
+
+    @property
     def analyzedResult(self):
-        return json.loads(self.analyzed_result)
+        return PyfpgrowthEntity.createByJson(self.analyzed_result)
 
 
     @analyzedResult.setter
-    def analyzedResult(self, val):
-        self.analyzed_result = json.dumps(val)
+    def analyzedResult(self, _pyfpgrowthEntity):
+        """setter
+
+        Arguments:
+            _pyfpgrowthEntity {PyfpGrouth} -- baskets.entities.Pyfpgrowthクラス
+        """
+        self.analyzed_result = _pyfpgrowthEntity.stringPatterns
 
 
     @property
@@ -56,3 +133,7 @@ class BasketAnalysis(AbstractModel):
             db.func.date(BasketAnalysis.analysis_condition_date) <= _analysisConditionDateTo,
         ).all()
         return result 
+
+
+def MockBasketAnalysis():
+    pass

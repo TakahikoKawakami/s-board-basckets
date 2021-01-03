@@ -2,11 +2,13 @@ from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolea
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 from pprint import pprint
+import json
 
 from database import db
 
 import pyfpgrowth
 import logging
+
 
 class Basket(db.Model):
     """
@@ -28,150 +30,127 @@ class Basket(db.Model):
         self._inputData = []
         self._output = {}
         self._products = {}
+
+        self._productList = [] # {"id": xxx, "name": yyy}形式のdictリスト
+        self._customerGroupIdList = []
+        self._storeId = ""
+        self._memberId = ""
+        self._customerSexDict = {} # {"male": 1, "female": 2, "unknown": 3}
+        self._entryDateDivision = "" # 取引日時を２時間毎に区分わけ
+
         self._logger = logging.getLogger('flask.app')
         
         
     def __resp__(self):
-        pass
+        return "Basket entity<{}, {}, {}, {}, {}>".format(self._productList, self._customerGroupId, self._storeId, self._memberId, self._customerSexDict)
         
         
     def __str__(self):
-        return \
-            "input: " + self._inputData + "\n" + \
-            "output: " + self._output
-
-
-    def append(self, transactionDetailList):
-        result = []
-        for transactionDetail in transactionDetailList:
-            result.append(
-                transactionDetail['productId']
-            )
-            self._products[transactionDetail['productId']] = \
-                transactionDetail['productName']
-            
-
-        self._inputData.append(result)
-
-        return self
-        
-                
-    def analyze(self, rate=1):
-        targetCount = len(self._inputData) * rate / 100.0
-        patterns = pyfpgrowth.find_frequent_patterns(self._inputData, targetCount)
-        self._logger.info(patterns)
-        edges = []
-        nodes = []
-        for k,v in patterns.items():
-            if (len(k) == 1):
-                print(k)
-                productId = k[0]
-                nodes.append({
-                    "id": productId,
-                    "label": self._products[productId],
-                    "value": v
-                })
-            elif (len(k) == 2):
-                edges.append({
-                    "from": k[0],
-                    "to": k[1],
-                    "value": v
-                })
-    
-        self._output['nodes'] = nodes
-        self._output['edges'] = edges
-        
-        return self
-    
-
-    def resultByProductId(self, productId):
-        edges = self._output['edges']
-        targetEdges = []
-        for edge in edges:
-            if (productId == edge["from"]):
-                targetEdges.append({
-                    "target": edge["to"],
-                    "value": edge["value"]
-                })
-            elif (productId == edge["to"]):
-                targetEdges.append({
-                    "target": edge["from"],
-                    "value": edge["value"]
-                })
-        self._logger.info(targetEdges)
-        return targetEdges
-
-    
-    @property
-    def result(self):
-        return self._output
-        
-        
-    def salesRanking(self, top=0):
-        nodes = self._output['nodes']
-        sortedNodesByProductIdList = sorted(nodes, key=lambda x: x['value'], reverse=True)
-        targetNodes = sortedNodesByProductIdList[0: top]
-        result = []
-        for node in targetNodes:
-            self._logger.info(node['id'])
-            newNode = node['relations'] = self.relationRanking(node['id'])
-            result.append(node)
-        self._logger.info(result)
-        return result
-
-
-    def relationRanking(self, productId, top=1):
-        nodes = self.resultByProductId(productId)
-        sortedProductIdList = sorted(nodes, key=lambda x: x['value'], reverse=True)
-
-        return sortedProductIdList[0: top]
-
-    
-# result = bascket().append(inputData).analyze().result
-
-class MockBasket():
-    def append(self, transactionDetailList):
         pass
-
-
-    def analyze(self):
-        return self
-
-
-    @property
-    def result(self):
-        return {
-            'nodes': [
+    
+    
+    def setByTransactionDetailList(self, _transactionDetailList)-> None:
+        """取引明細からバスケットentityに必要なデータを抽出、セットします
+        
+        Arguments:
+            transactionDetail {[type]} -- [description]
+        """
+        for transactionDetail in _transactionDetailList:
+            self._productList.append(
                 {
-                    'id': 'product_1',
-                    "label": 'product_1',
-                    "value": 1,
-                },
-                {
-                    'id': 'product_2',
-                    "label": 'product_2',
-                    "value": 1,
-                },
-                {
-                    'id': 'product_3',
-                    "label": 'product_3',
-                    "value": 3,
-                },
-            ],
-            'edges': [
-                {
-                    "from": 'product_1',
-                    "to": 'product_2',
-                    "value": 1
-                },
-                {
-                    "from": 'product_1',
-                    "to": 'product_3',
-                    "value": 3
+                    "id": transactionDetail['productId'],
+                    "name": transactionDetail['productName'],
+                    "categoryId": transactionDetail['categoryId'],
                 }
-            ]
-        }
+            )
+    
+
+    def setByTransactionHead(self, _transactionHead) -> None:
+        """取引ヘッダからバスケットentityに必要なデータを抽出、セットします
+
+        Arguments:
+            _transactionHead {[type]} -- [description]
+        """
+        if _transactionHead["customerId"] is not None:
+            self._memberId = _transactionHead["customerId"]
+        else:
+            self._memberId = "非会員"
+            
+        if _transactionHead["customerGroupId"] is not None:
+            self._customerGroupIdList.append(_transactionHead["customerGroupId"])
+        for i in range(2,6):
+            if _transactionHead["customerGroupId" + str(i)] is not None:
+                self._customerGroupIdList.append(_transactionHead["customerGroupId" + str(i)])
+                
+        self._storeId = _transactionHead["storeId"]
+        self._customerSexDict["male"] = _transactionHead["guestNumbersMale"]
+        self._customerSexDict["female"] = _transactionHead["guestNumbersFemale"]
+        self._customerSexDict["unknown"] = _transactionHead["guestNumbersUnknown"]
+        # TODO 取引日時区分
 
     
-    def salesRanking(self, top=1):
-        pass
+    def convertListForAnalysis(self) -> list:
+        """当entityをバスケット分析用のリスト型に変換します
+
+        Returns:
+            list -- [description]
+        """
+        result = []
+        for product in self._productList:
+            result.append("product__" + json.dumps(product))
+        if "male" in self._customerSexDict and int(self._customerSexDict["male"]) != 0:
+            result.append("customerSexMale")
+        if "female" in self._customerSexDict and int(self._customerSexDict["female"]) != 0:
+            result.append("customerSexFemale")
+        if "unknown" in self._customerSexDict and int(self._customerSexDict["unknown"]) != 0:
+            result.append("customerSexUnknown")
+        if self._storeId != "":
+            result.append("storeId:" + self._storeId)
+        if self._memberId != "":
+            result.append("memberId:" + self._memberId)
+        
+        return result
+        
+
+    @property
+    def customerGroupIdList(self)->list:
+        return self._customerGroupIdList
+
+
+    @customerGroupIdList.setter
+    def customerGroupIdList(self, val:list) -> None:
+        self._customerGroupIdList = val
+
+    
+    @property
+    def storeId(self)->int:
+        return self._storeId
+
+
+    @storeId.setter
+    def storeId(self, val:int) -> None:
+        self._storeId = val
+
+
+    @property
+    def memberId(self)->int:
+        return self._memberId
+
+
+    @memberId.setter
+    def memberId(self, val:int) -> None:
+        self._memberId = val
+
+
+    @property
+    def customerSexDict(self)->dict:
+        return self._customerSexDict
+
+
+    @customerSexDict.setter
+    def customerSexDict(self, val:dict) -> None:
+        self._customerSexDict = val
+
+
+def MockBasket():
+    pass
