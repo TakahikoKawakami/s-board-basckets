@@ -19,9 +19,8 @@ class BasketAnalysisStore(AbstractModel):
     """
     __tablename__ = "basket_analysis_store"
     
-    basket_analysis_id = Column(Unicode(32), ForeignKey('basket_analysis.id'), nullable=False)
+    daily_basket_list_id = Column(Unicode(32), ForeignKey('daily_basket_list.id'), nullable=False)
     store_id = Column(Unicode(32), nullable=False)
-
 
 
     #初期化

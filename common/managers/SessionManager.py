@@ -1,6 +1,7 @@
 from flask import session
 
 KEY_CONTRACT_ID = "contract_id"
+KEY_ACCESS_TOKEN = "access_token"
 
 
 def getByKey(_key):

@@ -2,7 +2,7 @@ from baskets.models.Baskets import Basket, MockBasket
 from authorizations.models.Accounts import Account, MockAccount
 from baskets.models.BasketAnalyses import BasketAnalysis
 from baskets.models.BasketAnalysisConditions import BasketAnalysisCondition
-from baskets.models.BasketAnalysisStores import BasketAnalysisStore
+from baskets.models.DailyBasketList import DailyBasketList
 
 
 class ModelFactory():
@@ -54,12 +54,12 @@ class ModelFactory():
             return BasketAnalysisCondition()
 
 
-    def createBasketAnalysisStore(self):
+    def createDailyBasketList(self):
         if   (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_PRODUCTION):
-            return BasketAnalysisStore()
+            return DailyBasketList()
         elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_STAGING):
-            return BasketAnalysisStore()
+            return DailyBasketList()
         elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_LOCAL):
-            return BasketAnalysisStore()
+            return DailyBasketList()
         elif (self._appConfig.ENV_DIVISION == self._appConfig.ENV_DIVISION_MOCK):
-            return BasketAnalysisStore()
+            return DailyBasketList()

@@ -65,7 +65,7 @@ class BasketAnalysis(AbstractModel):
         targetCount = len(self._targetList) * rate / 100.0
 
         # バスケット分析実施 tupple型をキーに持つ辞書を取得する
-        patterns = PyfpgrowthEntity.createAndfindFrequentPatterns(self._targetList, targetCount)
+        patterns = PyfpgrowthEntity.createByDataList(self._targetList, targetCount)
         
         self._logger.info("---- pyfpgrowth find_frequent_patterns ----")
         for line in pformat(patterns).split('\n'):
@@ -74,36 +74,11 @@ class BasketAnalysis(AbstractModel):
         # pyfpgrowthの結果をそのまま保存
         self.analyzedResult = patterns
 
-        # edges = []
-        # nodes = []
-        # for k,v in patterns.items():
-        #     if (len(k) == 1):
-        #         if (k[0].startswith('product__')):
-        #             key = k[0].split('product__')[1]
-        #             nodes.append({
-        #                 "id": key,
-        #                 "label": key,
-        #                 "value": v
-        #             })
-        #     elif (len(k) == 2):
-        #         if (k[0].startswith('product__') and k[1].startswith('product__')):
-        #             key = []
-        #             key.append(k[0].split('product__')[1])
-        #             key.append(k[1].split('product__')[1])
-        #         edges.append({
-        #             "from": key[0],
-        #             "to": key[1],
-        #             "value": v
-        #         })
-    
-        # self._result['nodes'] = nodes
-        # self._result['edges'] = edges
-        
         return self
 
     @property
     def analyzedResult(self):
-        return PyfpgrowthEntity.createByJson(self.analyzed_result)
+        return PyfpgrowthEntity.createByPatternJson(self.analyzed_result)
 
 
     @analyzedResult.setter
@@ -132,7 +107,7 @@ class BasketAnalysis(AbstractModel):
             db.func.date(BasketAnalysis.analysis_condition_date) >= _analysisConditionDateFrom,
             db.func.date(BasketAnalysis.analysis_condition_date) <= _analysisConditionDateTo,
         ).all()
-        return result 
+        return result
 
 
 def MockBasketAnalysis():

@@ -13,8 +13,8 @@ class config():
             self.uriApi = 'https://api.smaregi.jp'
 
         self.smaregiClientId = clientId
-        self.smaregiClientSecret = clientSecret        
-        self._uriInfo = self.uriAccess + 'userinfo'            
+        self.smaregiClientSecret = clientSecret
+        self._uriInfo = self.uriAccess + 'userinfo'
 
         self.accessToken = ''
         self.contractId = ''

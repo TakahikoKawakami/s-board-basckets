@@ -3,17 +3,17 @@ from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 
 from database import db
+from common.abstracts.AbstractModel import AbstractModel
 
 
-class Product(db.Model):
+class Product(AbstractModel):
     """
     商品モデル
     """
     __tablename__ = "products"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    contract_id = Column(Unicode(32), nullable=False)
+    product_id = Column(Integer)
     name = Column(Unicode(255), nullable=False)
-    color = Column(Unicode(64), nullable=False)
+    color = Column(Unicode(64))
     size = Column(Unicode(64))
     image = Column(Unicode(511))
     price = Column(Integer)
@@ -29,25 +29,14 @@ class Product(db.Model):
 
 
     def __repr__(self):
-        return "Product<{}, {}, {}>".format(self.id, self.productId, self.productName)
+        return "Product<{}, {}>".format(self.product_id, self.productName)
 
 
-    def register(self):
-        # insert into users(name, address, tel, mail) values(...)
-        db.session.add(self)
-        db.session.commit()
-        return self
-    
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-        return self
+    @property
+    def productId(self) ->int:
+        return self.product_id
 
 
-    def showByProductId(self, _contractId, _productId):
-        product = db.session.query(self).filter(
-            self.contract_id == _contractId,
-            self.id == _productId
-        ).first()
-        return account
+    @productId.setter
+    def productId(self, val) -> None:
+        self.product_id = val

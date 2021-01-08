@@ -18,7 +18,8 @@ from config import AppConfig
 from factories.ModelFactory import ModelFactory
 from baskets.models.Baskets import Basket
 from baskets.repositories.BasketAnalysesRepository import BasketAnalysesRepository
-from common.DictionaryUtil import DictionaryUtil
+from common.utils.DictionaryUtil import DictionaryUtil
+from baskets.entities.Pyfpgrowth import Pyfpgrowth
 
 
 logger = logging.getLogger('flask.app')
@@ -98,7 +99,8 @@ def summary():
         basketAnalysis = modelFactory.createBasketAnalysis()
         for sumDate, transactionHeadList in sumDateCategorizedTransactionHeadList.items():
             # 締め日データが既にあれば無視。なければレコード作成
-            existedRecords = BasketAnalysesRepository.getAnalysesByStoreIdAndSumDate(targetStoreId, sumDate)
+            existedRecords = BasketAnalysesRepository.getDailyBasketListByStoreIdAndSumDate(targetStoreId, sumDate)
+            # existedRecords = BasketAnalysesRepository.getAnalysesByStoreIdAndSumDate(targetStoreId, sumDate)
             if (existedRecords == []):
                 _registerBasketAnalysesData(transactionHeadList, targetStoreId, sumDate)
             
@@ -108,28 +110,28 @@ def summary():
         logger.error(e.args[0])
         return redirect(url_for('baskets.index'))
     
-    # 指定された期間の分析結果を取得
-    basketAnalysis = modelFactory.createBasketAnalysis()
-    basketAnalysesList = basketAnalysesRepository.getAnalysesByStoreIdAndAnalysisConditionDateRange(
+    # 指定された期間のバスケットを取得
+    dailyBasketListModelList = basketAnalysesRepository.getDailyBasketListByStoreIdAndAnalysisConditionDateRange(
         targetStoreId,
         targetDateFrom,
         targetDateTo
     )
-    if (len(basketAnalysesList) > 0):
-        mergedPyfpgrowthEntity = basketAnalysesList[0].analyzedResult
-        basketAnalysesList.pop(0)
+    # 全データをマージ
+    mergedBasketList = []
+    for dailyBasketListModel in dailyBasketListModelList:
+        mergedBasketList += dailyBasketListModel.basketList
+    mergedPyfpgrowthEntity = Pyfpgrowth.createByDataList(mergedBasketList, 0.1)
 
-        for basketAnalysis in basketAnalysesList:
-            mergedPyfpgrowthEntity.merge(basketAnalysis.analyzedResult)
+    vis = None
+    if mergedPyfpgrowthEntity is not None:
+        logger.debug("-----merged fpgrowth-----")
+        # logger.debug(mergedPyfpgrowthEntity.patterns)
 
-    logger.debug("-----merged fpgrowth-----")
-    logger.debug(mergedPyfpgrowthEntity.patterns)
-
-    result = mergedPyfpgrowthEntity.convertToVisJs() 
+        vis = mergedPyfpgrowthEntity.convertToVisJs()
+        # vis = mergedPyfpgrowthEntity.result
     
     logger.debug("-----analyzed result list-----")
-    logger.debug(result["edges"])
-    ranking =[]# basket.salesRanking(top=3)
+    logger.debug(vis)
     #basket.relationRanking("8000002")
     
 #    rules = pyfpgrowth.generate_association_rules(patterns, 0.7)
@@ -141,22 +143,55 @@ def summary():
             'from': targetDateFrom,
             'to': targetDateTo,
             'store': targetStore,
+            'productFrom': mergedPyfpgrowthEntity.result[0]['from'],
+            'productTo': mergedPyfpgrowthEntity.result[0]['to'],
     }
-    if (len(ranking) != 0):
-        pickUpMessage['product1'] = ranking[0]['label']
-        pickUpMessage['product2'] = ranking[0]['relations']
 
     return render_template("baskets/summary.pug",
         contractId = session['contract_id'],
         store = targetStore,
         search_from = targetDateFrom,
         search_to = targetDateTo,
-        nodes = result['nodes'],
-        edges = result['edges'],
-        pickUpMessage = pickUpMessage,
-        ranking = ranking
+        # # vis = vis,
+        nodes = vis['nodes'],
+        edges = vis['edges'],
+        pickUpMessage = pickUpMessage
     )
     
+
+def _getBasketsByTransactionHeadList(_transactionHeadList, sumDate):
+    """取引ヘッダリストに紐づく全取引明細を取得し、日別バスケット分析用データモデルを返却します
+
+    Arguments:
+        _transactionHeadList {TransactionHead} -- APIで取得した取引ヘッダリスト
+        _sumDate {str} -- 締め日（Y-m-d）
+
+    Returns:
+        BasketAnalysis -- バスケット分析モデル（分析済）
+    """
+    
+    dailyBasketListDict = {}
+    for transactionHead in _transactionHeadList:
+        transactionDetailList = transactionsApi.getTransactionDetail(transactionHead['transactionHeadId'])
+        basketModel = modelFactory.createBasket()
+        basketModel.setByTransactionHead(transactionHead)
+        basketModel.setByTransactionDetailList(transactionDetailList)
+
+        if (basketModel.storeId not in dailyBasketListDict.keys()):
+            dailyBasketListDict[basketModel.storeId] = []
+
+        dailyBasketListDict[basketModel.storeId].append(basketModel)
+        
+    resultList = []
+    for storeId, dailyBasketList in dailyBasketListDict.items():
+        dailyBasketListModel = modelFactory.createDailyBasketList()
+        dailyBasketListModel.basketList = dailyBasketList
+        dailyBasketListModel.storeId = storeId
+        dailyBasketListModel.targetDate = datetime.datetime.strptime(sumDate, "%Y-%m-%d")
+        resultList.append(dailyBasketListModel)
+        
+    return resultList
+
 
 def _getAndAnalyzeBasketDataByTransactionHeadList(_transactionHeadList, sumDate):
     """取引ヘッダリストに紐づく全取引明細を取得し、バスケット分析モデルを返却します
@@ -190,17 +225,13 @@ def _registerBasketAnalysesData(_transactionHeadList, _storeId: int, _sumDate: s
         _storeId {int} -- [description]
         _sumDate {str} -- [description]
     """
+    logger.debug("-----register basket analysis-----")
     basketAnalysesRepository = BasketAnalysesRepository(modelFactory)
 
-    basketAnalysis = _getAndAnalyzeBasketDataByTransactionHeadList(_transactionHeadList, _sumDate)
-    registeredBasketAnalysis = basketAnalysesRepository.registerBasketAnalysis(basketAnalysis)
-    logger.debug("-----register basket analysis-----")
-    logger.debug(registeredBasketAnalysis)
-
-    basketAnalysisStore = modelFactory.createBasketAnalysisStore()
-    basketAnalysisStore.basketAnalysisId = registeredBasketAnalysis.id
-    basketAnalysisStore.storeId = _storeId
-    basketAnalysesRepository.registerBasketAnalysisStore(basketAnalysisStore)
+    dailyBasketListModelList = _getBasketsByTransactionHeadList(_transactionHeadList, _sumDate)
+    for dailyBasketListModel in dailyBasketListModelList:
+        registered = basketAnalysesRepository.registerDailyBasketList(dailyBasketListModel)
+        logger.debug(registered)
 
 
 def _joinResult(_resultList) -> dict:
@@ -218,31 +249,3 @@ def _joinResult(_resultList) -> dict:
             result[key] += value
 
     return PyfpgrowthEntity
-
-
-def _convertPyfpgrowthToVisJS(pyfpgrowth):
-    pass
-        # edges = []
-        # nodes = []
-        # for k,v in patterns.items():
-        #     if (len(k) == 1):
-        #         if (k[0].startswith('product__')):
-        #             key = k[0].split('product__')[1]
-        #             nodes.append({
-        #                 "id": key,
-        #                 "label": key,
-        #                 "value": v
-        #             })
-        #     elif (len(k) == 2):
-        #         if (k[0].startswith('product__') and k[1].startswith('product__')):
-        #             key = []
-        #             key.append(k[0].split('product__')[1])
-        #             key.append(k[1].split('product__')[1])
-        #         edges.append({
-        #             "from": key[0],
-        #             "to": key[1],
-        #             "value": v
-        #         })
-    
-        # self._result['nodes'] = nodes
-        # self._result['edges'] = edges

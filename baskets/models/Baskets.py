@@ -98,16 +98,28 @@ class Basket(db.Model):
         result = []
         for product in self._productList:
             result.append("product__" + json.dumps(product))
+
         if "male" in self._customerSexDict and int(self._customerSexDict["male"]) != 0:
-            result.append("customerSexMale")
+            _customerSexDict = {}
+            _customerSexDict["sex"] = "male"
+            result.append("customerSex__" + json.dumps(_customerSexDict))
         if "female" in self._customerSexDict and int(self._customerSexDict["female"]) != 0:
-            result.append("customerSexFemale")
+            _customerSexDict = {}
+            _customerSexDict["sex"] = "female"
+            result.append("customerSex__" + json.dumps(_customerSexDict))
         if "unknown" in self._customerSexDict and int(self._customerSexDict["unknown"]) != 0:
-            result.append("customerSexUnknown")
+            _customerSexDict = {}
+            _customerSexDict["sex"] = "unknown"
+            result.append("customerSex__" + json.dumps(_customerSexDict))
         if self._storeId != "":
-            result.append("storeId:" + self._storeId)
+            _store = {}
+            _store['id'] = self._storeId
+            result.append("store__" + json.dumps(_store))
+
         if self._memberId != "":
-            result.append("memberId:" + self._memberId)
+            _member = {}
+            _member['id'] = self._memberId
+            result.append("member__" + json.dumps(_member))
         
         return result
         

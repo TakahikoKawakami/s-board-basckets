@@ -5,14 +5,12 @@
     h1 バスケット分析
     #basket-container
         div.
-            長さ#{ nodes.length }
-        div.
         .summary Pick Up!
             //- p.
                 {{ store.storeName }}店舗の{{ search_from }}から{{ search_to }}の期間、xxx時からyyy時の間で、product1とproduct2を一緒に購入している、
                 customerGroupのgenderが多い
             p.
-                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、{{ pickUpMessage.product1 }}と{{ pickUpMessage.product2 }}を一緒に購入されることが多い
+                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、{{ pickUpMessage.productFrom }}を購入したお客様は、{{ pickUpMessage.productTo }}も一緒に購入されることが多い
             p.
                 この結果から考えられる人物像に向け、新たな商品や商品配置を考えてみましょう！
         a(href="") ネットワーク図
@@ -20,34 +18,27 @@
             h2 相関図
             .graph
                 #network
+                #circle-option.circle-option
+                    span.el-icon-edit.
+                        edit
+                    span.el-icon-delete.
+                        delete
+                    span.el-icon-help.
+                        help
+                    span.el-icon-close.
+                        close
         hr
         a(href="/baskets/index") もう一度分析する
 
 //- datepicker.js
-link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css")
-script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js")
-script(src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js")
+//- link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css")
+//- script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js")
+//- script(src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js")
 
 //- vis.js	
 link(rel="stypesheet", href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css")
 script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js")
 script.
-    $("#search-expand-btn").on('click', function() {
-        $("#search-expand").slideToggle();
-        return false;
-    });
-    //- for i in range(0, 3):
-    //-     $("#list__expand__btn__" + i).on('click', function() {
-    //-         $("#list__expand__" + i).slideToggle();
-    //-         return false;
-    //-     });
-    
-    $(".datepicker").datepicker({
-        dateFormat: 'yy-mm-dd',
-        firstDay: 0, //0?6　0が日曜、1が月曜、2が火曜・・・・6が土曜
-        monthNames: [ "1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月" ]// 初期値[ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
-    });
-    
     var nodes = new vis.DataSet({{ nodes | tojson }});
     var edges = new vis.DataSet({{ edges | tojson }});
     var container = document.getElementById('network');
@@ -62,13 +53,41 @@ script.
     };
     var network = new vis.Network(container, data, options);
     
-    network.on("click", function(params) {
-        if (params.nodes.length == 1) {
-            var nodeId = params.nodes[0];
-            var node = nodes.get(nodeId);
-            console.log(node.label + 'がクリックされました');
+      // 点击鼠标事件
+    this.network.on("click", (e) => {
+        this.selectedId = e.nodes[0];
+        if (e.nodes.length) {
+            let p = this.network.getPositions(e.nodes[0]);
+            let nodeId = e.nodes[0];
+            console.log(p[nodeId]);
+            // 获取缩放尺寸
+            let scale = this.network.getScale();
+            // canvas->dom 坐标转化
+            let domPosi = this.network.canvasToDOM({
+                x: p[nodeId]["x"],
+                y: p[nodeId]["y"],
+        });
+        console.log("domPosi ", domPosi["x"], domPosi["y"]);
+        // 设置环形位置;
+        this.setCirclePostion(
+            domPosi["x"],// - 42,
+            domPosi["y"],// + 10,
+            scale + 0.4
+        );
+        } else {
+        this.hideCircle();
         }
     });
+        //  设置环形位置
+    function setCirclePostion(x, y, scale) {
+        let circle = document.getElementById("circle-option");
+        circle.style = `left: ${x}px; top: ${y}px;transform:scale(${scale});display:block;`;
+    };
+    // 隐藏圆环选项
+    function hideCircle() {
+        let circle = document.getElementById("circle-option");
+        circle.style = `display:none;`;
+    };
 style.
     ranking{
     margin: 0;
@@ -135,4 +154,51 @@ style.
     font-size: 11px;
     }
 
+style(lang="less").
+    .circle-option {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100px;
+    height: 100px;
+    border: 30px solid rgba(200, 200, 200, 0.7);
+    border-radius: 50px;
+    box-sizing: border-box;
+    z-index: 10;
+    display: none;
+    span {
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: 30px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        font-size: 10px;
+        color: white;
+        cursor: pointer;
+        &:hover {
+        color: #1b68ff;
+        }
+        &:nth-child(1) {
+        left: 5px;
+        top: -25px;
+        }
+    
+        &:nth-child(2) {
+        left: 37px;
+        top: 10px;
+        }
+    
+        &:nth-child(3) {
+        left: 5px;
+        top: 44px;
+        }
+    
+        &:nth-child(4) {
+        left: -27px;
+        top: 10px;
+        }
+    }
+    }
 {% endblock %}
