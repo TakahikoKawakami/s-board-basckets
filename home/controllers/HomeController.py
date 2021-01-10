@@ -29,6 +29,7 @@ def index():
 
     if ('contract_id' in session):
         logger.debug('go to index')
+        return redirect(url_for('baskets.index'))
         return render_template(
             "home/index.pug",
             contractId = session['contract_id'],

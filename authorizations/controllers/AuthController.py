@@ -87,7 +87,7 @@ def login():
         registeredAccount = accountModel.register()
     
     session['contract_id'] = requestContractId
-    return redirect('/')
+    return redirect(url_for('baskets.index'))
 
 
 @route.route('/logout', methods=['GET'])

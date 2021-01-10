@@ -8,7 +8,7 @@ from flask import Blueprint, \
 import logging
 import datetime
 
-import common.managers.SessionManager
+from common.managers import SessionManager
 
 from baskets.repositories.BasketAnalysesRepository import BasketAnalysesRepository
 from baskets.repositories.StoresRepository import StoresRepository

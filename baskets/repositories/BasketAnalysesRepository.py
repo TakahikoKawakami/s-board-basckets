@@ -6,7 +6,7 @@ from baskets.models.DailyBasketList import DailyBasketList
 from baskets.models.BasketAnalyses import BasketAnalysis
 from baskets.models.BasketAnalysisConditions import BasketAnalysisCondition
 from database import db
-import common.utils.DictionaryUtil
+from common.utils import DictionaryUtil
 import logging
 
 from lib.Smaregi.API.POS.TransactionsApi import TransactionsApi
