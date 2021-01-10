@@ -9,9 +9,9 @@ def categorizeByKey(key, dictList):
     """
 
     result = {}
-    for diktionary in dihtList:
-        if not (digtionary[key] in result.keys()):
-            result[didtionary[key]] = []
-        result[distionary[key]].append(diationary)
+    for dictionary in dictList:
+        if not (dictionary[key] in result.keys()):
+            result[dictionary[key]] = []
+        result[dictionary[key]].append(dictionary)
 
     return result

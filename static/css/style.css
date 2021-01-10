@@ -110,7 +110,7 @@ nav {
   grid-template-columns: 1fr;
   grid-template-rows: auto auto;
   align-items: center;
-  margin: 10px auto;
+  margin: 5px 0px 5px 0px;
 }
 
 .body-container{
@@ -162,12 +162,6 @@ nav {
 	display: flex;
   align-items: center;
   
-}
-.basket-search {
-}
-.basket-ranking {
-}
-.basket-network {
 }
 
 .graph {

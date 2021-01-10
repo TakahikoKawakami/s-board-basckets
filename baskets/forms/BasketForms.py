@@ -1,13 +1,25 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, ValidationError
 from wtforms.fields.html5 import DateField
+from wtforms.validators import Required, Length
 
 class BasketForm(FlaskForm):
-    storeField = SelectField( "店舗選択",
-        choices = [ ]
+    storeField = SelectField( "分析する店舗は？",
+        choices = [ ],
+        validators = [
+            Required(u"分析する店舗を選択してください"),
+        ]
     )
-    dateFromField = DateField("開始日")
-    dateToField = DateField("終了日")
+    dateFromField = DateField("いつから分析する？",
+        validators = [
+            Required(u"分析を開始する日付を選択してください"),
+        ]
+    )
+    dateToField = DateField("いつまで分析する？",
+        validators = [
+            Required(u"分析を終了する日付を選択してください"),
+        ]
+    )
 
     def validate_storeField(self, storeField):
         """validation for store

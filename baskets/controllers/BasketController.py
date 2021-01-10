@@ -46,7 +46,7 @@ def index():
     global accessToken
     global contractId
 
-    form = BasketForm()
+    form = BasketForm(request.args, meta={'csrf': False, 'locales':['ja']})
     storesRepository = StoresRepository().withSmaregiApi(accessToken, contractId)
     storeList = storesRepository.getStoreList()
     form.setStoreList(storeList)
@@ -64,7 +64,7 @@ def summary():
     global accessToken
     global contractId
 
-    form = BasketForm(request.args, meta={'csrf': False})
+    form = BasketForm(request.args, meta={'csrf': False, 'locales':['ja']})
     storesRepository = StoresRepository().withSmaregiApi(accessToken, contractId)
     storeList = storesRepository.getStoreList()
     
@@ -129,7 +129,7 @@ def summary():
     }
 
     return render_template("baskets/summary.pug",
-        contractId = session['contract_id'],
+        contractId = contractId,
         store = targetStore,
         search_from = targetDateFrom,
         search_to = targetDateTo,
