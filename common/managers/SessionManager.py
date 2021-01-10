@@ -2,6 +2,7 @@ from flask import session
 
 KEY_CONTRACT_ID = "contract_id"
 KEY_ACCESS_TOKEN = "access_token"
+KEY_ACCESS_TOKEN_EXPIRES_IN = "access_token_expires_in"
 
 
 def getByKey(_key):
