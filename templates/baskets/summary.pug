@@ -10,7 +10,18 @@
                 {{ store.storeName }}店舗の{{ search_from }}から{{ search_to }}の期間、xxx時からyyy時の間で、product1とproduct2を一緒に購入している、
                 customerGroupのgenderが多い
             p.
-                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、{{ pickUpMessage.productFrom }}を購入したお客様は、{{ pickUpMessage.productTo }}も一緒に購入されることが多い
+                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、
+                (
+                {% for product in pickUpMessage.productFrom %}
+                {{product.label}}, 
+                {% endfor %}
+                )の組み合わせを購入したお客様は、
+                (
+                {% for product in pickUpMessage.productTo %}
+                {{product.label}}, 
+                {% endfor %}
+                )
+                の組み合わせも一緒に購入されることが多い
             p.
                 この結果から考えられる人物像に向け、新たな商品や商品配置を考えてみましょう！
         a(href="") ネットワーク図

@@ -27,10 +27,10 @@ dictConfig({
     'version': 1,
     'formatters': {
         'default': {
-        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+        'format': '[%(asctime)s] %(levelname)s in %(module)s(%(lineno)d): %(message)s',
         },
         'application': {
-        'format': '[%(asctime)s][%(levelname)-5s] in %(module)s::%(funcName)s: %(message)s', # 5s: 右寄せ -5s: 左寄せ
+        'format': '[%(asctime)s][%(levelname)-5s] in %(module)s::%(funcName)s(%(lineno)d): %(message)s', # 5s: 右寄せ -5s: 左寄せ
         }
     },
     'handlers': {
