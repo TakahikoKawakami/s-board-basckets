@@ -20,6 +20,7 @@ from baskets.models.Baskets import Basket
 from baskets.repositories.BasketAnalysesRepository import BasketAnalysesRepository
 from common.utils.DictionaryUtil import DictionaryUtil
 from baskets.entities.Pyfpgrowth import Pyfpgrowth
+from baskets.forms.BasketForms import BasketForm
 
 
 logger = logging.getLogger('flask.app')
@@ -36,7 +37,6 @@ transactionsApi = TransactionsApi(apiConfig)
 storesApi = StoresApi(apiConfig)
 
 route = Blueprint('baskets', __name__, url_prefix='/baskets')
-
 
 
 @route.before_request
@@ -56,25 +56,44 @@ def beforeRequest():
 
 @route.route('/index', methods=['GET'])
 def index():
+    global storesApi
+    form = BasketForm()
     storeList = storesApi.getStoreList()
+    form.setStoreList(storeList)
     logger.info(storeList)
-    return render_template('baskets/index.pug',stores=storeList)
+    return render_template(
+        'baskets/index.pug',
+        form = form,
+        message = "",
+        stores = storeList
+    )
 
 
 @route.route('/summary', methods=['GET'])
 def summary():
-    targetStoreId = request.args.get('condition_store')
-    targetDateFrom = request.args.get('condition_date_from')
-    targetDateTo = request.args.get('condition_date_to')
-    if  (targetStoreId is None) or\
-        (targetDateFrom is None) or (targetDateFrom == "") or\
-        (targetDateTo is None) or (targetDateTo == ""):
-        return redirect(url_for('baskets.index'))
+    global storesApi
+    global transactionsApi
+
+    form = BasketForm(request.args, meta={'csrf': False})
+    storeList = storesApi.getStoreList()
+    form.setStoreList(storeList)
+    if not form.validate():
+        message = "validation error"
+        return render_template(
+            'baskets/index.pug',
+            form = form,
+            message = message,
+            stores = storeList
+        )
+
+    targetStoreId = form.storeField.data
+    targetDateFrom = form.dateFromField.data
+    targetDateTo = form.dateToField.data
 
     logger.info("-----search condition-----")
     logger.info("storeId     : " + targetStoreId)
-    logger.info("search_from : " + targetDateFrom)
-    logger.info("search_to   : " + targetDateTo)
+    logger.info("search_from : " + targetDateFrom.strftime("%Y-%m-%d"))
+    logger.info("search_to   : " + targetDateTo.strftime("%Y-%m-%d"))
 
     # 分析期間の取引ヘッダを取得
     targetTransactionHeadList = transactionsApi.getTransaction(

@@ -4,19 +4,29 @@
 #basket-main
     h1 バスケット分析
         div.
-            {{ errorMessage }}
+            {{ message }}
         .container
             form(action="summary", method="get")
-                //- .form__group
-                //-     div.
-                //-         分析対象
-                //-     .button__radio
-                //-         //- input -> label の順番（cssの関係）
-                //-         input#target-category(type="radio" name="target" value="0" checked=true)
-                //-         label(for="target-category") 部門
-                //-         input#target-product(type="radio" name="target" value="1" checked=false)
-                //-         label(for="target-product") 商品
-                .form__group
+                {{ form.hidden_tag() }}
+                div(style="margin: 10px;")
+                    {% for error in form.storeField.errors %}
+                    span(style="colod: red;")
+                    {% endfor %}
+                    {% for error in form.dateFromField.errors %}
+                    span(style="colod: red;")
+                    {% endfor %}
+                    {% for error in form.dateToField.errors %}
+                    span(style="colod: red;")
+                    {% endfor %}
+
+                    {{ form.storeField.label }}:
+                    {{ form.storeField(class="sel sel--black-panther") }}
+
+                    {{ form.dateFromField.label }}:
+                    {{ form.dateFromField()}}
+
+                    {{ form.dateToField.label }}:
+                    {{ form.dateToField()}}
                     div どの店舗で分析する？
                     .sel.sel--black-panther.test2
                         select#select-store(name="condition_store")
