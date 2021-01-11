@@ -23,6 +23,11 @@ h1 {
   margin-bottom: 10px;
 }
 
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 form {
   display: grid;
   place-items: center;
@@ -179,17 +184,28 @@ nav {
 	background: gray;
 }
 
-.basket__main {
-  display:grid;
-  grid-template-columns: 1fr;
-}
+  /* .basket__main {
+    display:grid;
+    grid-template-columns: 1fr;
+  } */
 
 .basket-container {
-	display: flex;
-  align-items: center;
-  
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
+.summary {
+  padding: 0.5em;
+}
+
+.summary__productFrom {
+  color: var(--color__selected);
+}
+
+.summary__productTo {
+  color: var(--color__danger);
+}
 .graph {
   display: flex;
   justify-content: center;

@@ -44,6 +44,8 @@ class BasketForm(FlaskForm):
             raise ValidationError("[開始日] 指定できる日付は昨日までです")
         if (dateFromField.data > self.dateToField.data):
             raise ValidationError("[開始日][終了日] 日付の大小関係が不正です")
+        if (self.dateToField.data - dateFromField.data).days > 31:
+            raise ValidationError("[開始日][終了日] 分析できる期間は最大1ヶ月です")
 
 
 

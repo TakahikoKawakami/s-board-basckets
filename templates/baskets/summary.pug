@@ -3,35 +3,43 @@
 
 #basket__main
     h1 分析結果
+    hr
     #basket-container
-        div.
-        .summary Pick Up!
-            //- p.
-                {{ store.storeName }}店舗の{{ search_from }}から{{ search_to }}の期間、xxx時からyyy時の間で、product1とproduct2を一緒に購入している、
-                customerGroupのgenderが多い
-            p.
-                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、
+        h2 Pick Up!
+        .summary
+            div.
+                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、<br>
                 {% if pickUpMessage.productFrom == None %}
                 取引が存在しないか、関係性を見つけられませんでした。<br>
                 分析期間を変更して、再度分析してみてください。
-                
+            
                 {% else %}
+                <br>
+            .summary__productFrom.
                 (
                 {% for product in pickUpMessage.productFrom %}
                 {{product.label}}, 
                 {% endfor %}
-                )の組み合わせを購入したお客様は、
+                )
+            div.
+                の組み合わせを購入したお客様は、<br>
+            .summary__productTo.
                 (
                 {% for product in pickUpMessage.productTo %}
                 {{product.label}}, 
                 {% endfor %}
                 )
-                の組み合わせも一緒に購入されることが多い
-                この結果から考えられる人物像に向け、新たな商品や商品配置を考えてみましょう！
-                {% endif %}
+            div.
+                の組み合わせも一緒に購入されることが多いようです。<br><br>
+                この結果から考えられる人物像に向け、
+                <br>
+                新たな商品や商品配置を考えてみましょう！
+            {% endif %}
 
+        hr
         .basket-network 
-            h2 相関図
+            h2 ネットワーク図
+            a 見方はこちら
             .graph
                 #network
                 #circle-option.circle-option
@@ -98,12 +106,13 @@ script.
         //  设置环形位置
     function setCirclePostion(x, y, scale) {
         let circle = document.getElementById("circle-option");
-        circle.style = `left: ${x}px; top: ${y}px;transform:scale(${scale});display:block;`;
+        //- circle.style = `left: ${x}px; top: ${y}px;transform:scale(${scale});display:block;`;
+        circle.style = 'display: block;';
     };
     // 隐藏圆环选项
     function hideCircle() {
         let circle = document.getElementById("circle-option");
-        circle.style = `display:none;`;
+        circle.style = 'display:none;';
     };
 style.
     ranking{

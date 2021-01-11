@@ -8,13 +8,13 @@
             {{ form.hidden_tag() }}
             div(style="margin: 10px;")
                 {% for error in form.storeField.errors %}
-                span(style="color: red;") {{error}}<br>
+                span(style="color: var(--color__danger);") {{error}}<br>
                 {% endfor %}
                 {% for error in form.dateFromField.errors %}
-                span(style="color: red;") {{error}}<br>
+                span(style="color: var(--color__danger);") {{error}}<br>
                 {% endfor %}
                 {% for error in form.dateToField.errors %}
-                span(style="color: red;") {{error}}<br>
+                span(style="color: var(--color__danger);") {{error}}<br>
                 {% endfor %}
 
             .form__group
