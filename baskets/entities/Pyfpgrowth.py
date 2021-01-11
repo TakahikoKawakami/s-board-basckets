@@ -54,29 +54,30 @@ class Pyfpgrowth():
         # リフト値（7番目の要素）でソート
 
         result = []
-        for s in sorted(stats, key = lambda x: x[6], reverse = True):
+        if len(itemsets) > 0:
+            for s in sorted(stats, key = lambda x: x[6], reverse = True):
 
-            lhs = pyfpgrowth._decode(s[0], _numberKeyDict)
-            rhs = pyfpgrowth._decode(s[1], _numberKeyDict)
+                lhs = pyfpgrowth._decode(s[0], _numberKeyDict)
+                rhs = pyfpgrowth._decode(s[1], _numberKeyDict)
 
-            support = s[2]
-            confidence = s[3]
-            lift = s[6]
+                support = s[2]
+                confidence = s[3]
+                lift = s[6]
 
-            # print(f"lhs = {lhs}, rhs = {rhs}, support = {support}, confidence = {confidence}, lift = {lift}")
+                # print(f"lhs = {lhs}, rhs = {rhs}, support = {support}, confidence = {confidence}, lift = {lift}")
 
-            if lift < 2:
-                break
+                if lift < 2:
+                    break
 
-            result.append(
-                {
-                    "from": lhs,
-                    "to": rhs,
-                    "support": support,
-                    "confidence": confidence,
-                    "lift": lift
-                }
-            )
+                result.append(
+                    {
+                        "from": lhs,
+                        "to": rhs,
+                        "support": support,
+                        "confidence": confidence,
+                        "lift": lift
+                    }
+                )
         pyfpgrowth._result = result
         return pyfpgrowth
 

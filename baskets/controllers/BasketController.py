@@ -120,12 +120,17 @@ def summary():
 #    rules = pyfpgrowth.generate_association_rules(patterns, 0.7)
     targetStore = storesRepository.getStoreById(targetStoreId) 
 
+    pickUpProductFrom = None
+    pickUpProductTo = None
+    if (len(mergedPyfpgrowthEntity.result) > 0):
+        pickUpProductFrom = mergedPyfpgrowthEntity.result[0]['from']
+        pickUpProductTo = mergedPyfpgrowthEntity.result[0]['to']
     pickUpMessage = {
             'store': targetStore,
             'from': targetDateFrom,
             'to': targetDateTo,
-            'productFrom': mergedPyfpgrowthEntity.result[0]['from'],
-            'productTo': mergedPyfpgrowthEntity.result[0]['to'],
+            'productFrom': pickUpProductFrom,
+            'productTo': pickUpProductTo,
     }
 
     return render_template("baskets/summary.pug",

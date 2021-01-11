@@ -2,7 +2,7 @@
 {% block body %}
 
 #basket__main
-    h1 バスケット分析
+    h1 分析結果
     #basket-container
         div.
         .summary Pick Up!
@@ -11,6 +11,11 @@
                 customerGroupのgenderが多い
             p.
                 {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、
+                {% if pickUpMessage.productFrom == None %}
+                取引が存在しないか、関係性を見つけられませんでした。<br>
+                分析期間を変更して、再度分析してみてください。
+                
+                {% else %}
                 (
                 {% for product in pickUpMessage.productFrom %}
                 {{product.label}}, 
@@ -22,9 +27,9 @@
                 {% endfor %}
                 )
                 の組み合わせも一緒に購入されることが多い
-            p.
                 この結果から考えられる人物像に向け、新たな商品や商品配置を考えてみましょう！
-        a(href="") ネットワーク図
+                {% endif %}
+
         .basket-network 
             h2 相関図
             .graph

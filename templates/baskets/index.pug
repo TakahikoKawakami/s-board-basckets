@@ -3,34 +3,34 @@
 
 #basket-main
     h1 バスケット分析
-        .container
-            form(action="summary", method="get")
-                {{ form.hidden_tag() }}
-                div(style="margin: 10px;")
-                    {% for error in form.storeField.errors %}
-                    span(style="color: red;") {{error}}
-                    {% endfor %}
-                    {% for error in form.dateFromField.errors %}
-                    span(style="color: red;") {{error}}
-                    {% endfor %}
-                    {% for error in form.dateToField.errors %}
-                    span(style="color: red;") {{error}}
-                    {% endfor %}
+    .container
+        form(action="summary", method="get")
+            {{ form.hidden_tag() }}
+            div(style="margin: 10px;")
+                {% for error in form.storeField.errors %}
+                span(style="color: red;") {{error}}<br>
+                {% endfor %}
+                {% for error in form.dateFromField.errors %}
+                span(style="color: red;") {{error}}<br>
+                {% endfor %}
+                {% for error in form.dateToField.errors %}
+                span(style="color: red;") {{error}}<br>
+                {% endfor %}
 
-                .form__group.test1
-                    {{ form.storeField.label }}
-                    {{ form.storeField(class="sel sel--black-panther") }}
-                    
-                .form__group
-                    {{ form.dateFromField.label }}
-                    {{ form.dateFromField()}}
+            .form__group
+                {{ form.storeField.label() }}
+                {{ form.storeField() }}
+                
+            .form__group
+                {{ form.dateFromField.label() }}
+                {{ form.dateFromField()}}
 
-                .form__group
-                    {{ form.dateToField.label }}
-                    {{ form.dateToField()}}
+            .form__group
+                {{ form.dateToField.label() }}
+                {{ form.dateToField()}}
 
 
-                button(type="submit") submit
+            button(type="submit") 分析開始
 
 //- datepicker.js
 link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css")

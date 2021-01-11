@@ -24,29 +24,52 @@ h1 {
 }
 
 form {
-  display: flex;
-  flex-direction: column;
-  margin: auto;  
+  display: grid;
+  place-items: center;
+  
+  width: 90%;
+  margin: 5px;  
 }
 
-input, textarea {
+input {
   padding: 10px 5px;
+  border-bottom: 4px solid var(--color__text);
+}
+
+select {
+  padding: 10px 5px;
+  border-bottom: 4px solid var(--color__text);
 }
 
 button {
   margin-top: 20px;
   border-radius: 5px;
-	border-left: 1px solid var(--color__text);
-	border-right: 1px solid var(--color__text);
-	border-bottom: 4px solid var(--color__text);
+	border-left: 2px solid var(--color__text);
+	border-right: 2px solid var(--color__text);
+  border-bottom: 8px solid var(--color__text);
+  background-color: var(--color__base);
+  color: var(--color__text__reverse);
+
+  padding: 15px;
+  
+  cursor: pointer;
 }
 
 button:hover {
-  margin-top: 20px;
+  /* margin-top: 20px;
   border-radius: 5px;
 	border-left: 4px solid var(--color__text);
 	border-right: 4px solid var(--color__text);
-	border-bottom: 8px solid var(--color__text);
+  border-bottom: 8px solid var(--color__text); */
+  
+  opacity: 0.8;
+}
+
+button:active {
+  -webkit-transform: translate(0.2px);
+  -moz-transform: translate(0.2px);
+  transform: translate(0.2px);
+  border-bottom: none;
 }
 
 
@@ -88,8 +111,8 @@ nav {
 
 
 #basket-main {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr;
   width: 100vw;
 }
 
@@ -108,9 +131,10 @@ nav {
 .form__group {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: auto auto;
-  align-items: center;
-  margin: 5px 0px 5px 0px;
+  place-items: center;
+  text-align: center;
+  width: 100%;
+  margin: 5px 0px 50px 0px;
 }
 
 .body-container{
@@ -176,11 +200,6 @@ nav {
   text-align: center;
 
   margin:30px;
-}
-
-.form-group {
-	display: flex;
-	justify-content: center;
 }
 
 .item {
