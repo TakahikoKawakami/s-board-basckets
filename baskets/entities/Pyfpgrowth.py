@@ -205,6 +205,9 @@ class Pyfpgrowth():
         edges = []
         nodes = []
 
+        if len(self._result) <= 0:
+            return {"nodes": nodes, "edges": edges}
+            
         _maxConfidence = max([nodeGroup['confidence'] for nodeGroup in self._result])
         for nodeGroup in self._result:
             print(str(nodeGroup['confidence']) + ' :: ' + str(_maxConfidence) + " :: " + str(nodeGroup['confidence']/_maxConfidence))

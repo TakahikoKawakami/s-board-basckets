@@ -85,6 +85,8 @@ header {
 main {
   overflow-y: scroll;
   grid-area: main;
+  padding-top: 30px;
+  padding-bottom: 50px;
 }
 p {
   margin: 10px;
