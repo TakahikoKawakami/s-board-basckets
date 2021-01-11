@@ -39,8 +39,8 @@ class BasketForm(FlaskForm):
 
 
     def validate_dateFromField(self, dateFromField):
-        _now = datetime.date.today()
-        if (dateFromField.data >= _now):
+        _today = datetime.date.today()
+        if (dateFromField.data >= _today):
             raise ValidationError("[開始日] 指定できる日付は昨日までです")
         if (dateFromField.data > self.dateToField.data):
             raise ValidationError("[開始日][終了日] 日付の大小関係が不正です")
@@ -48,8 +48,8 @@ class BasketForm(FlaskForm):
 
 
     def validate_dateToField(self, dateToField):
-        _now = datetime.date.today()
-        if (dateToField.data >= _now):
+        _today = datetime.date.today()
+        if (dateToField.data >= _today):
             raise ValidationError("[終了日] 指定できる日付は昨日までです")
         
 

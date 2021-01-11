@@ -46,7 +46,7 @@ class Pyfpgrowth():
         itemsets = dict(fp.frequent_itemsets(_encodedList, 0.01))
         pyfpgrowth._patterns = itemsets
         # アソシエーションルールの抽出
-        rules = fp.association_rules(itemsets, 0.7)
+        rules = fp.association_rules(itemsets, 0.6)
         pyfpgrowth._rules = rules
         # リフト値を含んだ結果を取得
         stats = fp.rules_stats(rules, itemsets, len(_encodedList))
@@ -66,7 +66,7 @@ class Pyfpgrowth():
 
                 # print(f"lhs = {lhs}, rhs = {rhs}, support = {support}, confidence = {confidence}, lift = {lift}")
 
-                if lift < 2:
+                if lift < 1:
                     break
 
                 result.append(
@@ -204,7 +204,10 @@ class Pyfpgrowth():
 
         edges = []
         nodes = []
+
+        _maxConfidence = max([nodeGroup['confidence'] for nodeGroup in self._result])
         for nodeGroup in self._result:
+            print(str(nodeGroup['confidence']) + ' :: ' + str(_maxConfidence) + " :: " + str(nodeGroup['confidence']/_maxConfidence))
             # edgesがlimitを超えたら了
             if (len(edges) > self.MAX_EDGE_COUNT): break
 
@@ -233,7 +236,8 @@ class Pyfpgrowth():
                 edge = {
                     "from": nodeGroup['from'][0]["id"],
                     "to": nodeGroup['to'][0]["id"],
-                    "width": nodeGroup['confidence']/ 10.0,
+                    "width": nodeGroup['confidence'] / _maxConfidence * 3,
+                    # "width": nodeGroup['confidence'],
                     "arrows": "to",
                 }
                 edges.append(edge)

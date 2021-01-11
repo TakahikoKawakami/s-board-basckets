@@ -93,7 +93,7 @@ footer {
   color: var(--color__text__reverse);
   background-color: var(--color__base);
   font-size: var(--fontsize__navbar);
-	grid-area: footer;
+  grid-area: footer;
 }
 section {
     margin: 10px;
