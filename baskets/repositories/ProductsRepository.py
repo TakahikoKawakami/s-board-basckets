@@ -1,6 +1,6 @@
 import common.managers.SessionManager as sessionManager
 from common.abstracts.AbstractRepository import AbstractRepository
-from datetime import datetime
+import datetime
 from database import db
 from baskets.models.Products import Product as ProductModel
 
@@ -48,6 +48,6 @@ class ProductsRepository(AbstractRepository):
     @staticmethod
     def registerProduct(model):
         model.contractId = sessionManager.getByKey(sessionManager.KEY_CONTRACT_ID)
-        model.createdAt = datetime.now()
-        model.modifiedAt = datetime.now()
+        model.createdAt = datetime.datetime.now()
+        model.modifiedAt = datetime.datetime.now()
         return model.register()

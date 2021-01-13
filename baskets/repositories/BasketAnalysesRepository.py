@@ -1,6 +1,6 @@
 import common.managers.SessionManager as sessionManager
 from common.abstracts.AbstractRepository import AbstractRepository
-from datetime import datetime
+import datetime
 from baskets.models.Baskets import Basket
 from baskets.models.DailyBasketList import DailyBasketList
 from baskets.models.BasketAnalyses import BasketAnalysis
@@ -21,24 +21,24 @@ class BasketAnalysesRepository(AbstractRepository):
     @staticmethod
     def registerBasketAnalysis(model):
         model.contractId = sessionManager.getByKey(sessionManager.KEY_CONTRACT_ID)
-        model.createdAt = datetime.now()
-        model.modifiedAt = datetime.now()
+        model.createdAt = datetime.datetime.now()
+        model.modifiedAt = datetime.datetime.now()
         return model.register()
 
 
     @staticmethod
     def registerBasketAnalysisStore(model):
         model.contractId = sessionManager.getByKey(sessionManager.KEY_CONTRACT_ID)
-        model.createdAt = datetime.now()
-        model.modifiedAt = datetime.now()
+        model.createdAt = datetime.datetime.now()
+        model.modifiedAt = datetime.datetime.now()
         return model.register()
 
 
     @staticmethod
     def registerDailyBasketList(model):
         model.contractId = sessionManager.getByKey(sessionManager.KEY_CONTRACT_ID)
-        model.createdAt = datetime.now()
-        model.modifiedAt = datetime.now()
+        model.createdAt = datetime.datetime.now()
+        model.modifiedAt = datetime.datetime.now()
         return model.register()
 
 
@@ -105,7 +105,7 @@ class BasketAnalysesRepository(AbstractRepository):
 
                     _dailyBasketListModelList = self.getBasketListByTransactionHeadList(_transactionHeadList, _sumDate)
                     for _dailyBasketListModel in _dailyBasketListModelList:
-                        _registered = basketAnalysesRepository.registerDailyBasketList(_dailyBasketListModel)
+                        _registered = self.registerDailyBasketList(_dailyBasketListModel)
                         # self._logger.debug(_registered)
                 
             self.commit()
