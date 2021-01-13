@@ -43,3 +43,4 @@ def index():
 @route.route('/component_test')
 def component_test():
     return render_template("home/component_test.pug")
+

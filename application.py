@@ -70,6 +70,11 @@ db.init_app(app)
 db.app = app
 
 
+@HomeController.route.route('/favicon.ico')
+def favicon():
+    return app.send_static_file("favicon.ico")
+    
+
 def setRoute(routeArray):
     for route in routeArray:
         app.register_blueprint(route)
