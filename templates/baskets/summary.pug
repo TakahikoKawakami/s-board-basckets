@@ -39,30 +39,41 @@
         hr
         .basket-network 
             h2 ネットワーク図
-            a 見方はこちら
+            button#for-network-modal.modal__open 見方はこちら
             .graph
-                #network
                 #circle-option.circle-option
-                    span.el-icon-edit.
-                        edit
-                    span.el-icon-delete.
-                        delete
-                    span.el-icon-help.
-                        help
-                    span.el-icon-close.
-                        close
+                    ul.network__option
+                        li edit
+                        li delete
+                        li link
+                #network
         hr
         button
             a(href="/baskets/index") 条件を変えてもう一度分析する 
+    #network-modal.modal
+        .modal__background.modal__close
+            .modal__content
+                .modal__content__inner
+                    div modaltest
+                    button.modal__close とじる
 
 //- datepicker.js
 //- link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css")
-//- script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js")
+script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js")
 //- script(src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js")
 
 //- vis.js	
 link(rel="stypesheet", href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css")
 script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js")
+script.
+    $(function() {
+        $('.modal__open').click(function(i) {
+            $('.modal').fadeIn(200);
+        });
+        $('.modal__close').click(function(i) {
+            $('.modal').fadeOut(200);
+        });
+    })
 script.
     var nodes = new vis.DataSet({{ nodes | tojson }});
     var edges = new vis.DataSet({{ edges | tojson }});
@@ -74,12 +85,34 @@ script.
     var options = {
         nodes: {
             shape: "dot",
+        },
+        interaction: {
+            hover: true
         }
     };
     var network = new vis.Network(container, data, options);
     
+    this.network.on("hoverNode", (e) => {
+        console.log('hovered');
+        this.hoveredId = e.node;
+
+        let node = nodes.get(this.hoveredId);
+        node.color = "#7D5A5E";
+        nodes.update(node);
+    });
+
+    this.network.on("blurNode", (e) => {
+        console.log('blured');
+        this.bluredNode = e.node;
+
+        let node = nodes.get(this.bluredNode);
+        node.color = "#B69E86";
+        nodes.update(node);
+    });
+
       // 点击鼠标事件
-    this.network.on("click", (e) => {
+    this.network.on("selectNode", (e) => {
+        console.log('selected');
         this.selectedId = e.nodes[0];
         if (e.nodes.length) {
             let p = this.network.getPositions(e.nodes[0]);
@@ -91,23 +124,59 @@ script.
             let domPosi = this.network.canvasToDOM({
                 x: p[nodeId]["x"],
                 y: p[nodeId]["y"],
-        });
-        console.log("domPosi ", domPosi["x"], domPosi["y"]);
-        // 设置环形位置;
-        this.setCirclePostion(
-            domPosi["x"],// - 42,
-            domPosi["y"],// + 10,
-            scale + 0.4
-        );
+            });
+            //- let domPosi = e.pointer.DOM;
+            let node = nodes.get(this.selectedId);
+            node.color = "#7D5A5E";
+            nodes.update(node);
+            console.log(node);
+            console.log(this.network.getConnectedEdges(this.selectedId));
+            
+
+            console.log("domPosi ", domPosi["x"], domPosi["y"]);
+            console.log("pointerDOM ", e.pointer.DOM.x, e.pointer.DOM.y);
+            containerPos = container.getBoundingClientRect();
+            // 设置环形位置;
+            this.setCirclePostion(
+                node,
+                e.pointer.DOM.x + containerPos.left,
+                e.pointer.DOM.y + containerPos.top,
+                scale + 0.4
+            );
         } else {
-        this.hideCircle();
+            this.hideCircle();
         }
     });
+
+    this.network.on("deselectNode", (e) => {
+        console.log('decelected');
+        this.selectedId = e.previousSelection.nodes[0];
+        console.log(this.selectedId);
+        if (e.previousSelection.nodes.length) {
+            let node = nodes.get(this.selectedId);
+            node.color = "#B69E86";
+            nodes.update(node);
+            console.log(node);
+            console.log(this.network.getConnectedEdges(this.selectedId));
+            this.hideCircle();
+        }
+    });
+
+
         //  设置环形位置
-    function setCirclePostion(x, y, scale) {
-        let circle = document.getElementById("circle-option");
-        //- circle.style = `left: ${x}px; top: ${y}px;transform:scale(${scale});display:block;`;
-        circle.style = 'display: block;';
+    function setCirclePostion(node, x, y, scale) {
+        let menu = document.getElementById("circle-option");
+        menu.innerHTML = `
+            <ul>
+                <li>
+                    <a href=https://www1.smaregi.jp/control/master/product/detail.html?productId=${node.id}>
+                        商品ページを開く
+                    </a>
+                </li>
+            </ul>
+        `;
+        menu.style = `left: ${x+30}px; top: ${y}px;transform:scale(${scale});display:block;`;
+        //- circle.style = 'display: block;';
     };
     // 隐藏圆环选项
     function hideCircle() {
@@ -182,49 +251,17 @@ style.
 
 style(lang="less").
     .circle-option {
+    background: rgba(255, 255, 255, 0.5);
     position: absolute;
     left: 0px;
     top: 0px;
-    width: 100px;
+    width: 150px;
     height: 100px;
-    border: 30px solid rgba(200, 200, 200, 0.7);
-    border-radius: 50px;
+    border: 3px solid rgba(200, 200, 200, 0.7);
+    border-radius: 5px;
     box-sizing: border-box;
     z-index: 10;
     display: none;
-    span {
-        position: absolute;
-        left: 0;
-        right: 0;
-        width: 30px;
-        height: 20px;
-        line-height: 20px;
-        text-align: center;
-        font-size: 10px;
-        color: white;
-        cursor: pointer;
-        &:hover {
-        color: #1b68ff;
-        }
-        &:nth-child(1) {
-        left: 5px;
-        top: -25px;
-        }
-    
-        &:nth-child(2) {
-        left: 37px;
-        top: 10px;
-        }
-    
-        &:nth-child(3) {
-        left: 5px;
-        top: 44px;
-        }
-    
-        &:nth-child(4) {
-        left: -27px;
-        top: 10px;
-        }
-    }
+    font-size: 16px;
     }
 {% endblock %}

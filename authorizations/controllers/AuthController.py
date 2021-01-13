@@ -19,6 +19,9 @@ from ..models import Accounts as models
 from lib.Smaregi.config import config as SmaregiConfig
 from lib.Smaregi.API.Authorize import AuthorizeApi
 
+
+from common.managers import SessionManager
+
 from config import AppConfig
 from factories.ModelFactory import ModelFactory
 
@@ -63,7 +66,15 @@ def getToken():
     session['access_token_expires_in'] = datetime.datetime.now() + datetime.timedelta(seconds=result['expires_in'])
     
     if request.args.get('next') is not None:
-        return redirect(request.args.get('next'))
+        _queryParams = SessionManager.get(SessionManager.KEY_QUERY_PARAMS_FOR_REDIRECT)
+        _queryString = '?'
+        for _query, _value in _queryParams.items():
+            _queryString += _query + "=" + _value + "&"
+        _queryString = _queryString.rstrip("&")
+
+        SessionManager.remove(SessionManager.KEY_QUERY_PARAMS_FOR_REDIRECT)
+
+        return redirect(request.args.get('next') + _queryString)
         
 
 @route.route('/login', methods=['GET'])

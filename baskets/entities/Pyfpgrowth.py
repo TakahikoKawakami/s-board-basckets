@@ -207,10 +207,9 @@ class Pyfpgrowth():
 
         if len(self._result) <= 0:
             return {"nodes": nodes, "edges": edges}
-            
-        _maxConfidence = max([nodeGroup['confidence'] for nodeGroup in self._result])
+
+        _maxLift = max([nodeGroup['lift'] for nodeGroup in self._result])
         for nodeGroup in self._result:
-            print(str(nodeGroup['confidence']) + ' :: ' + str(_maxConfidence) + " :: " + str(nodeGroup['confidence']/_maxConfidence))
             # edgesがlimitを超えたら了
             if (len(edges) > self.MAX_EDGE_COUNT): break
 
@@ -222,7 +221,9 @@ class Pyfpgrowth():
                     node = {
                         "id": nodeFrom["id"],
                         "label": nodeFrom["label"],
-                        "value": 1
+                        "value": 1,
+                        "uri": "/",
+                        "color": "#B69E86",
                     }
                     nodes.append(node)
             for node in nodeGroup['to']:
@@ -232,6 +233,7 @@ class Pyfpgrowth():
                         "id": nodeTo["id"],
                         "label": nodeTo["label"],
                         "value": 1,
+                        "color": "#B69E86",
                     }
                     nodes.append(node)
             
@@ -239,7 +241,7 @@ class Pyfpgrowth():
                 edge = {
                     "from": nodeGroup['from'][0]["id"],
                     "to": nodeGroup['to'][0]["id"],
-                    "width": nodeGroup['confidence'] / _maxConfidence * 3,
+                    "width": nodeGroup['lift'] / _maxLift * 5,
                     # "width": nodeGroup['confidence'],
                     "arrows": "to",
                 }

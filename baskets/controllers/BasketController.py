@@ -34,11 +34,15 @@ def beforeRequest():
     if contractId is None:
         return redirect('/')
     if accessToken is None:
-        return redirect(url_for('accounts.getToken') + '?next=' + request.url)
+        SessionManager.set(SessionManager.KEY_QUERY_PARAMS_FOR_REDIRECT, request.args)
+        _urlWithoutQueryParams = request.url.rstrip("?")
+        return redirect(url_for('accounts.getToken') + '?next=' + _urlWithoutQueryParams)
     if expiresIn is not None:
         now = datetime.datetime.now()
         if (expiresIn < now):
-            return redirect(url_for('accounts.getToken') + '?next=' + request.url)
+            SessionManager.set(SessionManager.KEY_QUERY_PARAMS_FOR_REDIRECT, request.args)
+            _urlWithoutQueryParams = request.url.split("?")[0]
+            return redirect(url_for('accounts.getToken') + '?next=' + _urlWithoutQueryParams)
 
 
 @route.route('/index', methods=['GET'])

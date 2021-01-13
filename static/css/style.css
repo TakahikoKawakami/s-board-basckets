@@ -48,6 +48,7 @@ select {
 
 button {
   margin-top: 20px;
+  margin-bottom: 20px;
   border-radius: 5px;
 	border-left: 2px solid var(--color__text);
 	border-right: 2px solid var(--color__text);
@@ -61,6 +62,10 @@ button {
 }
 
 button:hover {
+  -webkit-transform: translate(0.2px);
+  -moz-transform: translate(0.2px);
+  transform: translate(0.2px);
+  border-bottom: 3px solid var(--color__text);
   /* margin-top: 20px;
   border-radius: 5px;
 	border-left: 4px solid var(--color__text);
@@ -213,7 +218,7 @@ nav {
 }
 #network {
 	width:  80%;
-	height: 500px;
+	height: 90vh;
   border: 1px solid #000;
   text-align: center;
 
@@ -231,3 +236,39 @@ nav {
   display: none;
 }
 
+
+.modal {
+  display: none;
+  height: 100vh;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+}
+
+.modal__background {
+  background: rgba(0,0,0,0.6);
+  height: 100vh;
+  width: 100%;
+}
+
+.modal__content {
+  background: var(--color_background);
+  left: 50%;
+  top: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 5px;
+  width: 50%;
+}
+
+.modal__content__inner {
+  position: relative;
+  padding: 24px;
+}
+
+.modal__close {
+  position: absolute;
+  top: 13px;
+  right: 10px;
+}
