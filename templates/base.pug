@@ -5,7 +5,7 @@ html(lang="en")
         meta(http-equiv="Content-Type", content="text/html;charset=UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title バスケット分析
-        link(rel="shortcut icon", href="/static/favicon.ico", type="image/x-icon")
+        link(rel="shortcut icon", href="{{ staticfile('favicon.ico') }}", type="image/x-icon")
         link(rel="stylesheet", href="{{ staticfile('css/destyle.css') }}")
         link(rel="stylesheet", href="{{ staticfile('css/root.css') }}")
         link(rel="stylesheet", href="{{ staticfile('css/style.css') }}")
@@ -21,7 +21,8 @@ html(lang="en")
             header
                 nav
                     .nav-container
-                        div logo
+                        div
+                            img(src="{{ staticfile('image/logo.jpg') }}", alt="logo", style="height:32px;")
                         .menu-container 
                             {{ contractId }}
                             a.menu-item(href="/accounts/logout") ログアウト

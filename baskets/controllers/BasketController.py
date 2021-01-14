@@ -57,6 +57,7 @@ def index():
     logger.info(storeList)
     return render_template(
         'baskets/index.pug',
+        contractId = contractId,
         form = form,
         message = "",
         stores = storeList
