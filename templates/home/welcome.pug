@@ -1,34 +1,39 @@
 html
-    title ミエルカ
+    title Look into Baskets
     head
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        link(rel="stylesheet", href="{{ staticfile('destyle.css') }}")
-        link(rel="stylesheet", href="{{ staticfile('style.css') }}")
-        link(rel="stylesheet", href="{{ staticfile('button.css') }}")
+        link(rel="stylesheet", href="{{ staticfile('css/destyle.css') }}")
+        link(rel="stylesheet", href="{{ staticfile('css/root.css') }}")
+        link(rel="stylesheet", href="{{ staticfile('css/style.css') }}")
+        link(rel="stylesheet", href="{{ staticfile('css/button.css') }}")
 
     body
         .container
-            icon#logo.content log
-            h1.content かごの中身
+            .title
+                img(src="{{ staticfile('image/logo.jpg') }}", alt="title-logo", style="width:50%;")
             session.content.
                 スマレジでたてた取引から、売上に色々な傾向が分ります。<br />
                 このアプリでは、分析、見える化し、その分析の手助けを致します。
 
             #button-section
                 .button-group.content
-                    a.btn.primary(href="/accounts/login") 利用する
-                    a.btn.secondary(href="/login_demo") デモを体験してみる
+                    button
+                        a(href="/accounts/login") はじめる
+                    //- a.btn.secondary(href="/login_demo") デモを体験してみる
 
     style.
-        #logo {
+        .title {
+            background: var(--color__base);
+            width:100vw;
+            height: 10%;
         }
 
         .content {
-            margin: 1.0em;            
+            margin: 1.0em;
         }
 
         #button-section {
-            background-color: #f0f0f0;
+            //- background-color: #f0f0f0;
             width: 80vw;
             margin: auto;
         }
