@@ -39,7 +39,6 @@
         hr
         .basket-network 
             h2 ネットワーク図
-            button#for-network-modal.modal__open 見方はこちら
             .graph
                 #circle-option.circle-option
                     ul.network__option
@@ -47,6 +46,7 @@
                         li delete
                         li link
                 #network
+            button#for-network-modal.modal__open 見方はこちら
         hr
         button
             a(href="/baskets/index") 条件を変えてもう一度分析する 
@@ -54,7 +54,10 @@
         .modal__background.modal__close
             .modal__content
                 .modal__content__inner
-                    div modaltest
+                    img(src="{{ staticfile('image/explain/network_1.PNG') }}", alt="", style="width:80%;")
+                    hr
+                    img(src="{{ staticfile('image/explain/network_2.PNG') }}", alt="", style="width:80%;")
+                    hr
                     button.modal__close とじる
 
 //- datepicker.js
