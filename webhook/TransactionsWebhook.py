@@ -1,3 +1,4 @@
+from flask import request
 from webhook import route
 
 
@@ -12,6 +13,11 @@ def beforeRequest():
 
 
 @route.route('/accounts', methods=['POST'])
+def signUp():
+    print('signUp!!!')
+    return '', 200
+
+@route.route('', methods=['POST'])
 def webhook():
-    print('webhook!!!')
+    print(request.get_data())
     return '', 200

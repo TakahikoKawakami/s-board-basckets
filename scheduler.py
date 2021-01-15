@@ -6,6 +6,7 @@ def hello():
 
 
 def syncTodaysBasket():
+    _allAccounts = ""
     BasketScheduler.syncTodaysBasket()
 
 
