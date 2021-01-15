@@ -22,6 +22,8 @@ from authorizations.controllers import AuthController
 from baskets.controllers import BasketController
 from home.controllers import HomeController
 
+from webhook import route as WebhookRoute, TransactionsWebhook
+
 # TODO: dictConfig、sessionからcontractId取得時に、format内にcontractIdを埋め込むこと
 dictConfig({
     'version': 1,
@@ -85,6 +87,7 @@ setRoute([
     HomeController.route,
     AuthController.route,
     BasketController.route,
+    WebhookRoute,
 ])
 
 
