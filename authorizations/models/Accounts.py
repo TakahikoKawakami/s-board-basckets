@@ -9,6 +9,9 @@ class Account(db.Model):
     """
     アカウントモデル
     """
+    STATUS_START = 'start'
+    STATUS_STOP = 'stop'
+    
     __tablename__ = "accounts"
     id = Column(Integer, primary_key=True, autoincrement=True)
     contract_id = Column(Unicode(32), nullable=False)

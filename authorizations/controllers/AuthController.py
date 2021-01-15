@@ -60,7 +60,6 @@ def getToken():
             'pos.stores:read',
         ]
     )
-    print(result)
 
     session['access_token'] = result['access_token']
     session['access_token_expires_in'] = datetime.datetime.now() + datetime.timedelta(seconds=result['expires_in'])
@@ -107,59 +106,7 @@ def logout():
     return redirect('/')
 
 
-@route.route('', methods=['GET', 'POST'])
-def test():
-    try:
-        if request.method == 'GET': # login
-            accountModel = modelFactory.createAccount()
-
-            if ('contract_id' in session):
-                account = accountModel.showByContractId(session['contract_id'])
-                if (account != None):
-                    return 'logined ' + account.contract_id
-                else:
-                    session.pop['contract_id']
-                    return 'session failed ?'
-            else:
-                _contractId = request.args.get('contract_id', '')
-                account = accountModel.showByContractId(_contractId)
-                if (account != None):
-                    session['contract_id'] = _contractId
-                    return 'set'
-                else:
-                    return 'who?'
-        elif request.method == 'POST':
-            accountModel = modelFactory.createAccount()
-            _contractId = request.form['contract_id']
-            _status = request.form['status']
-
-            accountModel.contractId = _contractId
-            accountModel.status = _status
-
-            registeredAccount = accountModel.register()
-            return redirect(url_for('home.index'))
-        else:
-            return abort(400)
-    except Exception as e:
-        return str(e)
-        
-
-@route.route('delete', methods=['POST'])
-def testDelete():
-    try:
-        if request.method == 'POST':
-            contractId = request.form['contract_id']
-            accountmodel = modelFactory.createAccount()
-            account = accountModel.showByContractId(contractId)
-            
-            if (account == None):
-                return 'non type error'
-            account.delete()
-            return redirect('/')
-        else:
-            return abort(400)
-    except Exception as e:
-        return str(e)
-        
-
-
+@route.route('/webhook')
+def webhook():
+    print('webhook!!!')
+    return '', 200

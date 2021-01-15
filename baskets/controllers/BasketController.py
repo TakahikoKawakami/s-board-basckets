@@ -10,6 +10,7 @@ import datetime
 
 from common.managers import SessionManager
 
+from authorizations.repositories.AccountsRepository import AccountsRepository
 from baskets.repositories.BasketAnalysesRepository import BasketAnalysesRepository
 from baskets.repositories.StoresRepository import StoresRepository
 from baskets.entities.Pyfpgrowth import Pyfpgrowth
@@ -148,3 +149,17 @@ def summary():
         pickUpMessage = pickUpMessage
     )
     
+
+class BasketScheduler():
+    @staticmethod
+    def syncTodaysBasket():
+        _accountsRepository = AccountsRepository().withSmaregiApi(None, None)
+        _accountList = _accountsRepository.getActiveAccountList()
+
+        for _account in _accountList:
+            _contractId = _account.contractId
+            result = _accountsRepository.getAccessTokenByContractId(contractId)
+
+            session['access_token'] = result['access_token']
+            session['access_token_expires_in'] = datetime.datetime.now() + datetime.timedelta(seconds=result['expires_in'])
+        return "hello"
