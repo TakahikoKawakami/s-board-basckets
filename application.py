@@ -10,7 +10,7 @@ import logging
 import logging.handlers
 import pypugjs
 
-import scheduler
+# import scheduler
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
@@ -20,9 +20,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from config import AppConfig
 from database import Database
 from logging.config import dictConfig
-from authorizations.controllers import AuthController
-from baskets.controllers import BasketController
-from home.controllers import HomeController
+from app.controllers.AuthController import route as AuthRoute
+from app.controllers.BasketController import route as BasketRoute
+from app.controllers.HomeController import route as HomeRoute
 
 from webhook import route as WebhookRoute, TransactionsWebhook
 
@@ -74,7 +74,7 @@ db.init_app(app)
 db.app = app
 
 
-@HomeController.route.route('/favicon.ico')
+@HomeRoute.route('/favicon.ico')
 def favicon():
     return app.send_static_file("favicon.ico")
     
@@ -86,9 +86,9 @@ def setRoute(routeArray):
 
 
 setRoute([
-    HomeController.route,
-    AuthController.route,
-    BasketController.route,
+    HomeRoute,
+    AuthRoute,
+    BasketRoute,
     WebhookRoute,
 ])
 

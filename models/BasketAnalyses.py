@@ -5,7 +5,7 @@ import ujson
 import logging
 from pprint import pprint, pformat
 
-from baskets.entities.Pyfpgrowth import Pyfpgrowth as PyfpgrowthEntity
+from entities.Pyfpgrowth import Pyfpgrowth as PyfpgrowthEntity
 from database import db
 from common.abstracts.AbstractModel import AbstractModel
 

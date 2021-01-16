@@ -10,11 +10,11 @@ import datetime
 
 from common.managers import SessionManager
 
-from authorizations.repositories.AccountsRepository import AccountsRepository
-from baskets.repositories.BasketAnalysesRepository import BasketAnalysesRepository
-from baskets.repositories.StoresRepository import StoresRepository
-from baskets.entities.Pyfpgrowth import Pyfpgrowth
-from baskets.forms.BasketForms import BasketForm
+from repositories.AccountsRepository import AccountsRepository
+from repositories.BasketAnalysesRepository import BasketAnalysesRepository
+from repositories.StoresRepository import StoresRepository
+from entities.Pyfpgrowth import Pyfpgrowth
+from app.forms.BasketForms import BasketForm
 
 
 logger = logging.getLogger('flask.app')

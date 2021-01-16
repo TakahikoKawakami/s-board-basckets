@@ -1,10 +1,10 @@
 import common.managers.SessionManager as sessionManager
 from common.abstracts.AbstractRepository import AbstractRepository
 import datetime
-from baskets.models.Baskets import Basket
-from baskets.models.DailyBasketList import DailyBasketList
-from baskets.models.BasketAnalyses import BasketAnalysis
-from baskets.models.BasketAnalysisConditions import BasketAnalysisCondition
+from models.Baskets import Basket
+from models.DailyBasketList import DailyBasketList
+from models.BasketAnalyses import BasketAnalysis
+from models.BasketAnalysisConditions import BasketAnalysisCondition
 from database import db
 from common.utils import DictionaryUtil
 import logging

@@ -23,22 +23,22 @@ def beforeRequest():
 #    self.getToken()
 
 
-# @route.route('/')
-def index(req, resp):
-    resp.text = "hello"
-    # logger.debug('access')
+@route.route('/')
+def index():
+    # resp.text = "hello"
+    logger.debug('access')
 
-    # if ('contract_id' in session):
-    #     logger.debug('go to index')
-    #     return redirect(url_for('baskets.index'))
-    #     return render_template(
-    #         "home/index.pug",
-    #         contractId = session['contract_id'],
-    #         message = ''
-    #     )
-    # else:
-    #     logger.debug('go to welcome')
-    #     return render_template("home/welcome.pug")
+    if ('contract_id' in session):
+        logger.debug('go to index')
+        return redirect(url_for('baskets.index'))
+        return render_template(
+            "home/index.pug",
+            contractId = session['contract_id'],
+            message = ''
+        )
+    else:
+        logger.debug('go to welcome')
+        return render_template("home/welcome.pug")
 
 
 @route.route('/component_test')

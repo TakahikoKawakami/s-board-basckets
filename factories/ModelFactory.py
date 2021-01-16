@@ -1,8 +1,8 @@
-from baskets.models.Baskets import Basket, MockBasket
-from authorizations.models.Accounts import Account, MockAccount
-from baskets.models.BasketAnalyses import BasketAnalysis
-from baskets.models.BasketAnalysisConditions import BasketAnalysisCondition
-from baskets.models.DailyBasketList import DailyBasketList
+from models.Baskets import Basket, MockBasket
+from models.Accounts import Account, MockAccount
+from models.BasketAnalyses import BasketAnalysis
+from models.BasketAnalysisConditions import BasketAnalysisCondition
+from models.DailyBasketList import DailyBasketList
 
 
 class ModelFactory():

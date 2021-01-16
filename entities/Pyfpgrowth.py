@@ -8,8 +8,8 @@ import ujson
 from orangecontrib.associate import fpgrowth as fp
 import logging
 
-from baskets.repositories.ProductsRepository import ProductsRepository
-from baskets.entities.VisJs import Node, Edge
+from repositories.ProductsRepository import ProductsRepository
+from entities.VisJs import Node, Edge
 
 
 class Pyfpgrowth():

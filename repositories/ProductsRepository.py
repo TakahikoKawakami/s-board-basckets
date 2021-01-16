@@ -2,7 +2,7 @@ import common.managers.SessionManager as sessionManager
 from common.abstracts.AbstractRepository import AbstractRepository
 import datetime
 from database import db
-from baskets.models.Products import Product as ProductModel
+from models.Products import Product as ProductModel
 
 from config import AppConfig
 from lib.Smaregi.config import config as SmaregiConfig

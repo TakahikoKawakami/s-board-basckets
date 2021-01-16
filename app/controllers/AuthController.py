@@ -8,7 +8,7 @@ from flask import Blueprint, \
 
 from logging import getLogger
 
-from ..models import Accounts as models
+from models import Accounts as models
 
 
 """TODO: lib.Smaregiをpip installでimportできるようにする"""
