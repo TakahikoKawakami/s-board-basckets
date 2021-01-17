@@ -1,23 +1,18 @@
-from flask import request
-from webhook import route
+from repositories.AccountsRepository import AccountsRepository
+from repositories.TransactionsRepository import TransactionsRepository
+from repositories.BasketAnalysesRepository import BasketAnalysesRepository
 
+ACTION_CREATED = 'created'
 
-@route.before_request
-def beforeRequest():
-    pass        
-    # transactionsApi.config.accessToken = session['access_token']
-    # transactionsApi.config.contractId = session['contract_id']
-#    if not ('contract_id' in session):
-#        if ()
-#    self.getToken()
-
-
-@route.route('/accounts', methods=['POST'])
-def signUp():
-    print('signUp!!!')
-    return '', 200
-
-@route.route('', methods=['POST'])
-def webhook():
-    print(request.get_data())
-    return '', 200
+def received(contractId, event, body):
+    _accountsRepository = AccountsRepository().withSmaregiApi(None, contractId)
+    _accessToken = _accountsRepository.getAccessTokenByContractId(contractId)['access_token']
+    if body['action'] == ACTION_CREATED:
+        _targetTransactionHeadList = body['transactionHeadIds']
+        _transactionsRepository = TransactionsRepository().withSmaregiApi(_accessToken, contractId)
+        _basketAnalysesRepository = BasketAnalysesRepository()
+        for _transactionHeadId in _targetTransactionHeadList:
+            _transaction = _transactionsRepository.getTransactionById(_transactionHeadId)
+            _basketAnalysesRepository.register()
+            
+            print(body)

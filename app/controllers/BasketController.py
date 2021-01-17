@@ -13,6 +13,7 @@ from common.managers import SessionManager
 from repositories.AccountsRepository import AccountsRepository
 from repositories.BasketAnalysesRepository import BasketAnalysesRepository
 from repositories.StoresRepository import StoresRepository
+from entities.Baskets import Basket
 from entities.Pyfpgrowth import Pyfpgrowth
 from app.forms.BasketForms import BasketForm
 
@@ -33,7 +34,7 @@ def beforeRequest():
     accessToken = SessionManager.getByKey(SessionManager.KEY_ACCESS_TOKEN)
     expiresIn = SessionManager.getByKey(SessionManager.KEY_ACCESS_TOKEN_EXPIRES_IN)
     if contractId is None:
-        return redirect('/')
+        return redirect(url_for('home.index'))
     if accessToken is None:
         SessionManager.set(SessionManager.KEY_QUERY_PARAMS_FOR_REDIRECT, request.args)
         _urlWithoutQueryParams = request.url.rstrip("?")

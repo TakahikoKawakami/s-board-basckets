@@ -61,8 +61,8 @@ def getToken():
         ]
     )
 
-    session['access_token'] = result['access_token']
-    session['access_token_expires_in'] = datetime.datetime.now() + datetime.timedelta(seconds=result['expires_in'])
+    SessionManager.set(SessionManager.KEY_ACCESS_TOKEN, result.accessToken)
+    SessionManager.set(SessionManager.KEY_ACCESS_TOKEN_EXPIRES_IN, result.expirationDateTime)
     
     if request.args.get('next') is not None:
         _queryParams = SessionManager.get(SessionManager.KEY_QUERY_PARAMS_FOR_REDIRECT)
@@ -88,7 +88,7 @@ def login():
 
     result = authorizeApi.getUserInfo(code, state)
     
-    requestContractId = result['contract']['id']
+    requestContractId = result.contractId
     accountModel = modelFactory.createAccount()
     account = accountModel.showByContractId(requestContractId)
     if (account is None):

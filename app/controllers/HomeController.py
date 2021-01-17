@@ -11,16 +11,11 @@ import json
 
 logger = getLogger('flask.app')
 
-route =  Blueprint('home', __name__)
+route =  Blueprint('home', __name__, url_prefix='/home')
 
 @route.before_request
 def beforeRequest():
-    pass        
-    # transactionsApi.config.accessToken = session['access_token']
-    # transactionsApi.config.contractId = session['contract_id']
-#    if not ('contract_id' in session):
-#        if ()
-#    self.getToken()
+    pass
 
 
 @route.route('/')

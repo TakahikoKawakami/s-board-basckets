@@ -31,7 +31,7 @@ class AccountsRepository(AbstractRepository):
 
     def getAccessTokenByContractId(self, _contractId):
         _authorizeApi = AuthorizeApi(self._apiConfig, self._appConfig.APP_URI + '/accounts/login')
-        _resultList = _authorizeApi.getAccessToken(
+        _result = _authorizeApi.getAccessToken(
             _contractId,
             [
                 'pos.products:read',
@@ -39,3 +39,4 @@ class AccountsRepository(AbstractRepository):
                 'pos.stores:read',
             ]
         )
+        return _result

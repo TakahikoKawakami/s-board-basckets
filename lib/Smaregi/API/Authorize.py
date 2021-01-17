@@ -1,13 +1,12 @@
 from urllib.parse import urlencode
-from flask import redirect
 
 import requests
 import json
 import time
 import logging
-from urllib.parse import urlencode
 
 from .BaseIdentificationApi import BaseIdentificationApi
+from ..entities.Authorize import *
 
 class AuthorizeApi(BaseIdentificationApi):
     def __init__(self, config, redirectUri):
@@ -15,7 +14,7 @@ class AuthorizeApi(BaseIdentificationApi):
         self.redirectUri = redirectUri
         self.csrf = 'rundomStringForProdcution'
         self.uriAuth = self.config.uriAccess + '/authorize'
-        self.uriInfo = self.config.uriAccess + '/userinfo'    
+        self.uriInfo = self.config.uriAccess + '/userinfo'
 
 
     def authorize(self):
@@ -32,19 +31,13 @@ class AuthorizeApi(BaseIdentificationApi):
 
     def getUserInfo(self, code, state):
         userAccessToken = self._getUserAccessToken(code)
-        accessToken = userAccessToken['access_token']
+        accessToken = userAccessToken.accessToken
         infoHeader = {
             'Authorization': 'Bearer ' + accessToken
         }
         
         r_post = requests.post(self.uriInfo, headers=infoHeader).json()
-        return r_post
-#        token = self._generateJwt(r_post['contract'])
-#        tokenDecode = jwt.decode(token, 'secret', algorithm='HS256')
-#        return HttpResponse(token)
-
-#        form = LoginForm(request.POST)
-#        return render(request, 'login.html', {'form': form,})
+        return UserInfo(r_post)
 
 
     def getAccessToken(self, contractId, scopeList):
@@ -57,10 +50,10 @@ class AuthorizeApi(BaseIdentificationApi):
         }
         r_post = requests.post(url, headers=headers, data=urlencode(body))
         r_post = r_post.json()
-        return r_post
+        return AccessToken(r_psot['access_token']['expires_in'])
+        # return r_post
     #    return render(request, 's_board_relations/network.html')
-        pass
-        
+
 
     def _getUserAccessToken(self, code):
         headers = self._getHeader()
@@ -72,5 +65,5 @@ class AuthorizeApi(BaseIdentificationApi):
         encodedBody = urlencode(body)
         result = requests.post(self.uriAuth + '/token', headers=headers, data=urlencode(body))
         result = result.json()
-        return result
+        return UserAccessToken(result['access_token'])
 

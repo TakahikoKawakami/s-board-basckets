@@ -1,12 +1,12 @@
 import common.managers.SessionManager as sessionManager
 from common.abstracts.AbstractRepository import AbstractRepository
 import datetime
-from models.Baskets import Basket
 from models.DailyBasketList import DailyBasketList
 from models.BasketAnalyses import BasketAnalysis
 from models.BasketAnalysisConditions import BasketAnalysisCondition
 from database import db
 from common.utils import DictionaryUtil
+from entities.Baskets import Basket
 import logging
 
 from lib.Smaregi.API.POS.TransactionsApi import TransactionsApi
@@ -77,7 +77,7 @@ class BasketAnalysesRepository(AbstractRepository):
             [type] -- [description]
         """
         _transactionsApi = TransactionsApi(self._apiConfig)
-        _targetTransactionHeadList = _transactionsApi.getTransaction(
+        _targetTransactionHeadList = _transactionsApi.getTransactionHeadList(
             whereDict={
                 'store_id': _storeId,
                 'sum_date-from': _dateFrom,

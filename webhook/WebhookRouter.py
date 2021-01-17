@@ -1,6 +1,10 @@
 import responder
+from webhook import TransactionsWebhook
 
+EVENT_TRANSACTIONS = 'pos:transactions'
 
-def recieve(req):
-    for i in range(100):
-        print(req)
+def recieved(header, body):
+    _contractId = header['smaregi-contract-id']
+    _event = header['smaregi-event']
+    if (_event == EVENT_TRANSACTIONS):
+        TransactionsWebhook.received(_contractId, _event, body)

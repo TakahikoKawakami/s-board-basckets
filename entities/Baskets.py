@@ -10,22 +10,10 @@ import pyfpgrowth
 import logging
 
 
-class Basket(db.Model):
+class Basket():
     """
-    買い物かごモデル
+    買い物かごentity
     """
-    __tablename__ = "baskets"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    contract_id = Column(Unicode(32), nullable=False)
-    transaction_date = Column(DateTime, nullable=False)
-    analyze_result = Column(Text, nullable=False)
-    analyze_condition = Column(Text)
-
-
-    created_at = Column(DateTime)
-    modified_at = Column(DateTime)
-
-
     def __init__(self):
         self._inputData = []
         self._output = {}

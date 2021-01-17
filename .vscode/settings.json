@@ -24,5 +24,6 @@
         //   }
         ]
     },
-    "editor.renderWhitespace":"boundary"
+    "editor.renderWhitespace": "boundary",
+    "python.pythonPath": "/usr/bin/python3"
 }

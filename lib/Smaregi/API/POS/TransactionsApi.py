@@ -9,7 +9,7 @@ class TransactionsApi(BaseServiceApi):
         super().__init__(config)
 
 
-    def getTransaction(self, field=None, sort=None, whereDict=None):
+    def getTransactionHeadList(self, field=None, sort=None, whereDict=None):
         contractId = self.config.contractId
         self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
         self.uri = self.uriPos + '/transactions'
@@ -28,6 +28,18 @@ class TransactionsApi(BaseServiceApi):
         
         header = self._getHeader()
         body = self._getBody(sort=sort, whereDict=whereDict)
+        
+        result = self._api(self.uri, header, body)
+        return result
+        
+
+    def getTransaction(self,transactionHeadId, field=None, sort=None, whereDict=None):
+        contractId = self.config.contractId
+        self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
+        self.uri = self.uriPos + '/transactions/' + transactionHeadId
+        
+        header = self._getHeader()
+        body = self._getBodyForDetail(sort=sort, whereDict=whereDict)
         
         result = self._api(self.uri, header, body)
         return result

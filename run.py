@@ -19,10 +19,11 @@ api.logger = logging.getLogger('flask.app')
 @api.route('/webhook')
 async def webhook(req, resp):
     @api.background.task
-    def receivedWebhook(data):
-        WebhookRouter.recieve(data)
-    data = await req.media()
-    receivedWebhook(data)
+    def receivedWebhook(_header, _body):
+        WebhookRouter.recieved(_header, _body)
+    _header = req.headers
+    _body = await req.media()
+    receivedWebhook(_header, _body)
     resp.status_code = 200
 
 
