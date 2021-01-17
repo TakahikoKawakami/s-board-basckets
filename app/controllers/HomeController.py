@@ -25,7 +25,6 @@ def beforeRequest():
 
 @route.route('/')
 def index():
-    # resp.text = "hello"
     logger.debug('access')
 
     if ('contract_id' in session):

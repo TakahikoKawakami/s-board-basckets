@@ -8,6 +8,7 @@ from flask import Flask,\
                   Blueprint
 import logging
 import logging.handlers
+from logging.config import dictConfig
 import pypugjs
 
 # import scheduler
@@ -19,7 +20,6 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from config import AppConfig
 from database import Database
-from logging.config import dictConfig
 from app.controllers.AuthController import route as AuthRoute
 from app.controllers.BasketController import route as BasketRoute
 from app.controllers.HomeController import route as HomeRoute
@@ -32,9 +32,9 @@ dictConfig({
     'formatters': {
         'default': {
         'format': '[%(asctime)s] %(levelname)s in %(module)s(%(lineno)d): %(message)s',
-        },
-        'application': {
-        'format': '[%(asctime)s][%(levelname)-5s] in %(module)s::%(funcName)s(%(lineno)d): %(message)s', # 5s: 右寄せ -5s: 左寄せ
+        # },
+        # 'application': {
+        # 'format': '[%(asctime)s][%(levelname)-5s] in %(module)s::%(funcName)s(%(lineno)d): %(message)s', # 5s: 右寄せ -5s: 左寄せ
         }
     },
     'handlers': {
@@ -42,19 +42,22 @@ dictConfig({
             'class': 'logging.StreamHandler',
             'stream': 'ext://flask.logging.wsgi_errors_stream',
             'formatter': 'default'
-        },
-        'application': {
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'formatter': 'application',
-            'filename': './log/test.log',
-            'when': 'MIDNIGHT',
-            'backupCount': 31,
-            'encoding': 'utf-8'
+        # },
+        # 'application': {
+        #     'class': 'logging.handlers.TimedRotatingFileHandler',
+        #     'formatter': 'application',
+        #     'filename': './log/test.log',
+        #     'when': 'MIDNIGHT',
+        #     'backupCount': 31,
+        #     'encoding': 'utf-8'
         }
     },
     'root': {
         'level': 'DEBUG',
-        'handlers': ['wsgi', 'application']
+        'handlers': [
+            'wsgi',
+            # 'application'
+        ]
     },
     'disable_existing_loggers': False,
 })
