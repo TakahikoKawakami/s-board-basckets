@@ -6,7 +6,7 @@ import logging
 from pprint import pprint, pformat
 
 from entities.Pyfpgrowth import Pyfpgrowth as PyfpgrowthEntity
-from database import db
+import database as db
 from common.abstracts.AbstractModel import AbstractModel
 
 class BasketAnalysis(AbstractModel):

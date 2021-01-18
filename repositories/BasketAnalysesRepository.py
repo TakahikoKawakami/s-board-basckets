@@ -3,8 +3,7 @@ from common.abstracts.AbstractRepository import AbstractRepository
 import datetime
 from models.DailyBasketList import DailyBasketList
 from models.BasketAnalyses import BasketAnalysis
-from models.BasketAnalysisConditions import BasketAnalysisCondition
-from database import db
+import database as db
 from common.utils import DictionaryUtil
 from entities.Baskets import Basket
 import logging

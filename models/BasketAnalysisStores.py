@@ -5,7 +5,7 @@ from pprint import pprint
 import json
 from datetime import datetime
 
-from database import db
+import database as db
 from common.abstracts.AbstractModel import AbstractModel
 
 

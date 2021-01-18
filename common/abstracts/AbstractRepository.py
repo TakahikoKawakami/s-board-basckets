@@ -1,7 +1,6 @@
 from datetime import datetime
 
-import common.managers.SessionManager as sessionManager
-from database import db
+import database as db
 
 from config import AppConfig
 from lib.Smaregi.config import config as SmaregiConfig
@@ -34,3 +33,4 @@ class AbstractRepository():
         self._apiConfig.contractId = _contractId
 
         return self
+

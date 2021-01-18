@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolea
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 
-from database import db
+import database as db
 from common.abstracts.AbstractModel import AbstractModel
 
 

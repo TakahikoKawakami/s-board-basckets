@@ -4,7 +4,7 @@ from datetime import datetime
 from pprint import pprint
 import json
 
-from database import db
+import database as db
 
 import pyfpgrowth
 import logging

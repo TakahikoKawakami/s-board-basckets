@@ -19,12 +19,11 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 from config import AppConfig
-from database import Database
 from app.controllers.AuthController import route as AuthRoute
 from app.controllers.BasketController import route as BasketRoute
-from app.controllers.HomeController import route as HomeRoute
+# from app.controllers.HomeController import route as HomeRoute
 
-from webhook import route as WebhookRoute, TransactionsWebhook
+# from webhook import route as WebhookRoute, TransactionsWebhook
 
 # TODO: dictConfig、sessionからcontractId取得時に、format内にcontractIdを埋め込むこと
 dictConfig({
@@ -77,7 +76,7 @@ db.init_app(app)
 db.app = app
 
 
-@HomeRoute.route('/favicon.ico')
+# @HomeRoute.route('/favicon.ico')
 def favicon():
     return app.send_static_file("favicon.ico")
     
@@ -89,10 +88,10 @@ def setRoute(routeArray):
 
 
 setRoute([
-    HomeRoute,
+    # HomeRoute,
     AuthRoute,
     BasketRoute,
-    WebhookRoute,
+    # WebhookRoute,
 ])
 
 

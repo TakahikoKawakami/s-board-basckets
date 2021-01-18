@@ -4,23 +4,20 @@ from datetime import datetime
 from pprint import pprint
 import json
 
-from database import db
+import database as db
+from common.abstracts import AbstractModel
 
 import pyfpgrowth
 import logging
 
-class BasketAnalysisCondition(db.Model):
+class BasketAnalysisCondition(AbstractModel):
     """
     バスケット分析条件モデル
     """
     __tablename__ = "basket_analysis_condition"
-    id = Column(Integer, primary_key=True, autoincrement=True)
     contract_id = Column(Unicode(32), nullable=False)
     basket_analysis_id = Column(Unicode(32), ForeignKey('basket_analysis.id'), nullable=False)
     conditions = Column(Text, nullable=False)
-
-    created_at = Column(DateTime)
-    modified_at = Column(DateTime)
 
 
     #初期化

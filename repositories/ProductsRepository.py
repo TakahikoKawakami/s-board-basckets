@@ -1,7 +1,7 @@
 import common.managers.SessionManager as sessionManager
 from common.abstracts.AbstractRepository import AbstractRepository
 import datetime
-from database import db
+import database as db
 from models.Products import Product as ProductModel
 
 from config import AppConfig

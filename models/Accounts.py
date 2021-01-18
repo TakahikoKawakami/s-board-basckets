@@ -2,10 +2,11 @@ from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolea
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 
-from database import db
+from common.abstracts.AbstractModel import AbstractModel
+import database as db
 
 
-class Account(db.Model):
+class Account(AbstractModel):
     """
     アカウントモデル
     """
@@ -13,11 +14,10 @@ class Account(db.Model):
     STATUS_STOP = 'stop'
     
     __tablename__ = "accounts"
-    id = Column(Integer, primary_key=True, autoincrement=True)
     contract_id = Column(Unicode(32), nullable=False)
+    access_token = Column(Unicode(128), nullable=True)
+    expiration_date_time = Column(DateTime, nullable=True)
     status = Column(Unicode(32))
-    created_at = Column(DateTime)
-    modified_at = Column(DateTime)
 
     #初期化
     def __init__(self):
@@ -34,6 +34,21 @@ class Account(db.Model):
     def contractId(self, contractId):
         self.contract_id = contractId
 
+    @property
+    def accessToken(self):
+        return self.access_token
+
+    @accessToken.setter
+    def accessToken(self, accessToken):
+        self.access_token = accessToken
+
+    @property
+    def expirationDateTime(self):
+        return self.expiration_date_time
+
+    @expirationDateTime.setter
+    def expirationDateTime(self, expirationDateTime):
+        self.expiration_date_time = expirationDateTime
 
     def register(self):
         # insert into users(name, address, tel, mail) values(...)

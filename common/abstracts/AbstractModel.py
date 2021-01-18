@@ -4,12 +4,12 @@ from datetime import datetime
 from pprint import pprint
 from datetime import datetime
 import json
-from database import db
+import database as db
 
 import pyfpgrowth
 import logging
 
-class AbstractModel(db.Model):
+class AbstractModel(db.Base):
     """
     アブストラクトモデル
     """

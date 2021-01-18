@@ -1,10 +1,10 @@
 import datetime
 from flask import Blueprint, \
-                  render_template,\
-                  url_for,\
-                  request,\
-                  redirect,\
-                  session
+                render_template,\
+                url_for,\
+                request,\
+                redirect,\
+                session
 
 from logging import getLogger
 
@@ -23,10 +23,8 @@ from lib.Smaregi.API.Authorize import AuthorizeApi
 from common.managers import SessionManager
 
 from config import AppConfig
-from factories.ModelFactory import ModelFactory
 
 appConfig = AppConfig()
-modelFactory = ModelFactory(appConfig)
 
 apiConfig = SmaregiConfig(
     appConfig.ENV_DIVISION,
@@ -40,14 +38,14 @@ route = Blueprint('accounts', __name__, url_prefix='/accounts')
 logger = getLogger('flask.app')
 
 
-@route.route('/authorize', methods=['GET'])
-def authorize():
+# @route.route('/authorize', methods=['GET'])
+def authorize(req, resp):
     logger.debug('authorize')
-    return authorizeApi.authorize()
+    authorizeApi.authorize()
 
 
-@route.route('/token', methods=['GET'])
-def getToken():
+# @route.route('/token', methods=['GET'])
+def getToken(req, resp):
     if not ('contract_id' in session):
         return redirect('/')
 
@@ -89,7 +87,7 @@ def login():
     result = authorizeApi.getUserInfo(code, state)
     
     requestContractId = result.contractId
-    accountModel = modelFactory.createAccount()
+    accountModel = models()
     account = accountModel.showByContractId(requestContractId)
     if (account is None):
         accountModel.contractId = requestContractId
@@ -105,8 +103,3 @@ def logout():
     session.clear()
     return redirect('/')
 
-
-@route.route('/webhook')
-def webhook():
-    print('webhook!!!')
-    return '', 200

@@ -1,41 +1,31 @@
-from flask import Blueprint, \
-                  render_template,\
-                  url_for,\
-                  request,\
-                  redirect,\
-                  session
-
+from application_responder import api
 from logging import getLogger
 import json
 
 
-logger = getLogger('flask.app')
+logger = getLogger(__name__)
 
-route =  Blueprint('home', __name__, url_prefix='/home')
-
-@route.before_request
-def beforeRequest():
+@api.route(before_request=True)
+def beforeRequest(req, resp):
     pass
 
-
-@route.route('/')
-def index():
+@api.route('/')
+def index(req, resp):
     logger.debug('access')
 
-    if ('contract_id' in session):
+    if ('contract_id' in req.session):
         logger.debug('go to index')
         return redirect(url_for('baskets.index'))
         return render_template(
             "home/index.pug",
-            contractId = session['contract_id'],
+            contractId = resp.session['contract_id'],
             message = ''
         )
     else:
         logger.debug('go to welcome')
-        return render_template("home/welcome.pug")
+        resp.html = api.template("home/welcome.pug")
 
 
-@route.route('/component_test')
-def component_test():
-    return render_template("home/component_test.pug")
-
+@api.route('/favicon.ico')
+def favicon():
+    return app.send_static_file("favicon.ico")
