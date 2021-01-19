@@ -1,9 +1,12 @@
 from tortoise import Tortoise, run_async
+from app.config import AppConfig
 
+config = AppConfig()
 async def migrate():
-   # connect DB
+    print(config.DATABASE_URI)
+    # connect DB
     await Tortoise.init(
-        db_url="sqlite://db.sqlite3",  # DB URL
+        db_url=config.DATABASE_URI,  # DB URL
         modules={"models": ["models"]}  # Modelを書いたファイルを指定
     )
 

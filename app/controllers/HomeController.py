@@ -1,4 +1,5 @@
-from application_responder import api
+from app.application_responder import api
+from app.common.managers import SessionManager
 from logging import getLogger
 import json
 
@@ -15,12 +16,8 @@ def index(req, resp):
 
     if ('contract_id' in req.session):
         logger.debug('go to index')
-        return redirect(url_for('baskets.index'))
-        return render_template(
-            "home/index.pug",
-            contractId = resp.session['contract_id'],
-            message = ''
-        )
+        resp.redirect('/baskets/associate')
+        return
     else:
         logger.debug('go to welcome')
         resp.html = api.template("home/welcome.pug")

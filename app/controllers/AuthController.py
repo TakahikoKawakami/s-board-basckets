@@ -1,28 +1,22 @@
 import datetime
-from flask import Blueprint, \
-                render_template,\
-                url_for,\
-                request,\
-                redirect,\
-                session
-
 from logging import getLogger
 
-from models import Accounts as models
-
+from app.models import Accounts as models
 
 """TODO: lib.Smaregiをpip installでimportできるようにする"""
 # import sys
 # from pathlib import Path
 # root_path = str(Path('__file__').resolve().parent.parent.parent)
 # sys.path.append(root_path)  # ルートディレクトリを環境変数に一時的に取り込む
-from lib.Smaregi.config import config as SmaregiConfig
-from lib.Smaregi.API.Authorize import AuthorizeApi
+from app.lib.Smaregi.config import config as SmaregiConfig
+from app.lib.Smaregi.API.Authorize import AuthorizeApi
 
 
-from common.managers import SessionManager
+from app.common.managers import SessionManager
+from app.common.utils import DictionaryUtil
+from app.repositories.AccountsRepository import AccountsRepository
 
-from config import AppConfig
+from app.config import AppConfig
 
 appConfig = AppConfig()
 
@@ -33,15 +27,13 @@ apiConfig = SmaregiConfig(
 )
 authorizeApi = AuthorizeApi(apiConfig, appConfig.APP_URI + '/accounts/login')
 
-route = Blueprint('accounts', __name__, url_prefix='/accounts')
-
 logger = getLogger('flask.app')
 
 
 # @route.route('/authorize', methods=['GET'])
 def authorize(req, resp):
     logger.debug('authorize')
-    authorizeApi.authorize()
+    resp.redirect(authorizeApi.authorize())
 
 
 # @route.route('/token', methods=['GET'])
@@ -74,32 +66,26 @@ def getToken(req, resp):
         return redirect(request.args.get('next') + _queryString)
         
 
-@route.route('/login', methods=['GET'])
-def login():
+def login(req, resp):
     logger.info('login!!!')
-    code = request.args.get('code')
-    state = request.args.get('state')
+    code = DictionaryUtil.getByKey('code', req.params)
+    state = DictionaryUtil.getByKey('state', req.params)
 
     logger.info('code: {code}, state: {state}')
     if (code is None or state is None):
-        return redirect('/accounts/authorize')
+        resp.redirect('/accounts/authorize')
+        return
 
-    result = authorizeApi.getUserInfo(code, state)
+    accountsRepository = AccountsRepository(req.session).withSmaregiApi(None, None)
+    account = accountsRepository.loginByCodeAndState(code, state)
     
-    requestContractId = result.contractId
-    accountModel = models()
-    account = accountModel.showByContractId(requestContractId)
-    if (account is None):
-        accountModel.contractId = requestContractId
-        accountModel.status = 'start'
-        registeredAccount = accountModel.register()
-    
-    session['contract_id'] = requestContractId
-    return redirect(url_for('baskets.index'))
+    SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
+    resp.redirect('/baskets/associate')
+    return
 
 
-@route.route('/logout', methods=['GET'])
-def logout():
-    session.clear()
-    return redirect('/')
+def logout(req, resp):
+    resp.session.clear()
+    resp.redirect('/')
+    return
 
