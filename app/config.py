@@ -61,5 +61,5 @@ class AppConfig(object):
         DATABASE_NAME = os.environ.get('DB_NAME')
         DATABASE_FILE = BASE_DIR / DATABASE_NAME
         DATABASE_ENGINE = create_engine('sqlite:///' + str(DATABASE_FILE), convert_unicode=True)
-        DATABASE_URI = 'sqlite:///' + str(DATABASE_NAME)
+        DATABASE_URI = 'sqlite://' + str(DATABASE_NAME)
         SQLALCHEMY_DATABASE_URI = DATABASE_URI

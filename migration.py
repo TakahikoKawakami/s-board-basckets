@@ -3,10 +3,10 @@ from app.config import AppConfig
 
 config = AppConfig()
 async def migrate():
-    print(config.DATABASE_URI)
     # connect DB
     await Tortoise.init(
-        db_url=config.DATABASE_URI,  # DB URL
+        db_url = "mysql://preview:preview@mysql:8306/mysql",
+        # db_url=config.DATABASE_URI,  # DB URL
         modules={"models": ["models"]}  # Modelを書いたファイルを指定
     )
 
