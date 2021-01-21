@@ -6,7 +6,6 @@ import json
 
 import app.database as db
 
-import pyfpgrowth
 import logging
 
 

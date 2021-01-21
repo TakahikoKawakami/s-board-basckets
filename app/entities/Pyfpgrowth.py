@@ -4,7 +4,6 @@ import itertools
 from scipy.sparse import lil_matrix  # other types would convert to LIL anyway
 import ast
 import ujson
-# import pyfpgrowth as fp
 from orangecontrib.associate import fpgrowth as fp
 import logging
 

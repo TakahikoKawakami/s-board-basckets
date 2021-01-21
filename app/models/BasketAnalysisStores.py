@@ -9,7 +9,6 @@ import database as db
 from common.abstracts.AbstractModel import AbstractModel
 
 
-import pyfpgrowth
 import logging
 
 

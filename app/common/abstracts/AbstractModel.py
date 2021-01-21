@@ -6,7 +6,6 @@ from datetime import datetime
 import json
 import app.database as db
 
-import pyfpgrowth
 import logging
 
 class AbstractModel(db.Base):

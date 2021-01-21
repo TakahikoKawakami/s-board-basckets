@@ -7,7 +7,6 @@ import json
 import database as db
 from common.abstracts import AbstractModel
 
-import pyfpgrowth
 import logging
 
 class BasketAnalysisCondition(AbstractModel):
