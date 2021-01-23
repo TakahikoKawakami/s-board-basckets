@@ -52,7 +52,7 @@ class AuthorizeApi(BaseIdentificationApi):
         }
         r_post = requests.post(url, headers=headers, data=urlencode(body))
         r_post = r_post.json()
-        return AccessToken(r_post['access_token']['expires_in'])
+        return AccessToken(r_post['access_token'], r_post['expires_in'])
         # return r_post
     #    return render(request, 's_board_relations/network.html')
 

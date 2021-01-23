@@ -33,6 +33,6 @@ class AccessToken():
 
 
     @property
-    def expirationDateTime(self):
+    def expirationDatetime(self):
         return datetime.datetime.now() + datetime.timedelta(seconds=self._expiresIn)
 

@@ -63,3 +63,11 @@ class AppConfig(object):
         DATABASE_ENGINE = create_engine('sqlite:///' + str(DATABASE_FILE), convert_unicode=True)
         DATABASE_URI = 'sqlite://' + str(DATABASE_NAME)
         SQLALCHEMY_DATABASE_URI = DATABASE_URI
+
+        DATABASE_CONNECTION = os.environ.get('DB_CONNECTION') # mysql, sqlite3, etc.
+        DATABASE_USERNAME = os.environ.get('DB_USERNAME')
+        DATABASE_PASSWORD = os.environ.get('DB_PASSWORD')
+        DATABASE_HOST = os.environ.get('DB_HOST')
+        DATABASE_PORT = os.environ.get('DB_PORT')
+        DATABASE_NAME = os.environ.get('DB_NAME')
+

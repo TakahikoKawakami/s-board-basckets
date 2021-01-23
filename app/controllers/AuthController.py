@@ -14,7 +14,7 @@ from app.lib.Smaregi.API.Authorize import AuthorizeApi
 
 from app.common.managers import SessionManager
 from app.common.utils import DictionaryUtil
-from app.repositories.AccountsRepository import AccountsRepository
+from app.domains.AccountsDomainService import AccountsDomainService
 
 from app.config import AppConfig
 
@@ -66,7 +66,7 @@ def getToken(req, resp):
         return redirect(request.args.get('next') + _queryString)
         
 
-def login(req, resp):
+async def login(req, resp):
     logger.info('login!!!')
     code = DictionaryUtil.getByKey('code', req.params)
     state = DictionaryUtil.getByKey('state', req.params)
@@ -76,8 +76,8 @@ def login(req, resp):
         resp.redirect('/accounts/authorize')
         return
 
-    accountsRepository = AccountsRepository(req.session).withSmaregiApi(None, None)
-    account = accountsRepository.loginByCodeAndState(code, state)
+    accountsDomainService = AccountsDomainService(req.session).withSmaregiApi(None, None)
+    account = await accountsDomainService.loginByCodeAndState(code, state)
     
     SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
     resp.redirect('/baskets/associate')

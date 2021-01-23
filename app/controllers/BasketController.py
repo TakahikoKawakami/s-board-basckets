@@ -4,27 +4,31 @@ import datetime
 
 from app.common.managers import SessionManager
 
-from app.repositories.AccountsRepository import AccountsRepository
-from app.repositories.BasketAnalysesRepository import BasketAnalysesRepository
-from app.repositories.StoresRepository import StoresRepository
+from app.domains.AccountsDomainService import AccountsDomainService
+from app.domains.BasketAnalysesRepository import BasketAnalysesRepository
+from app.domains.StoresRepository import StoresRepository
 from app.entities.Baskets import Basket
 from app.entities.Pyfpgrowth import Pyfpgrowth
 from app.forms.BasketForms import BasketForm
 
 
 class Associate():
-    logger = logging.getLogger(__name__)
 
-    accessToken = None
-    contractId = None
+    def __init__(self) -> None:
+        self._logger = logging.getLogger(__name__)
+
+        self._accessToken = None
+        self._contractId = None
+        self._accountsDomainService = None
+
 
     async def on_request(self, req, resp):
-        self.contractId = SessionManager.getByKey(req.session, SessionManager.KEY_CONTRACT_ID)
-        if self.contractId is None:
+        self._accountsDomainService = AccountsDomainService(resp.session)
+        if not self._accountsDomainService.hasContractId():
             resp.redirect('/')
             return
-        accountsRepository = AccountsRepository(req.session)
-        self.accessToken = accountsRepository.getAccessTokenByContractId(self.contractId, req.session)
+        self._contractId, self._accessToken = await self._accountsDomainService.getContractIdAndAccessToken()
+
 
     async def on_get(self, req, resp):
         return

@@ -1,23 +1,26 @@
-from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolean, DateTime, Enum
-from sqlalchemy.orm import relationship, backref
+from tortoise.models import Model
+from tortoise import fields
 from datetime import datetime
 
-from app.common.abstracts.AbstractModel import AbstractModel
+# from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
 import app.database as db
 
 
-class Account(AbstractModel):
+class Account(Model):
     """
     アカウントモデル
     """
     STATUS_START = 'start'
     STATUS_STOP = 'stop'
-    
-    __tablename__ = "accounts"
-    contract_id = Column(Unicode(32), nullable=False)
-    access_token = Column(Unicode(128), nullable=True)
-    expiration_date_time = Column(DateTime, nullable=True)
-    status = Column(Unicode(32))
+
+    id = fields.IntField(pk=True)
+    contract_id = fields.CharField(max_length=32)
+    access_token = fields.CharField(max_length=128)
+    expiration_date_time = fields.DatetimeField()
+    status = fields.CharField(max_length=16)
+
+    created_at = fields.DatetimeField()
+    modified_at = fields.DatetimeField()
 
     #初期化
     def __init__(self):
@@ -43,23 +46,29 @@ class Account(AbstractModel):
         self.access_token = accessToken
 
     @property
-    def expirationDateTime(self):
+    def expirationDatetime(self):
         return self.expiration_date_time
 
-    @expirationDateTime.setter
-    def expirationDateTime(self, expirationDateTime):
-        self.expiration_date_time = expirationDateTime
+    @expirationDatetime.setter
+    def expirationDatetime(self, expirationDatetime):
+        self.expiration_date_time = expirationDatetime
 
-    def register(self):
-        # insert into users(name, address, tel, mail) values(...)
-        db.session.add(self)
-        db.session.commit()
-        return self
-    
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-        return self
+    @classmethod
+    def create(cls, contractId, accessToken):
+        kwargs = {
+            'contract_id': contractId,
+            'access_token': accessToken.accessToken,
+            'expiration_date_time': accessToken.expirationDatetime,
+            'status': cls.STATUS_START,
+        }
+        
+        return super().create(
+            contract_id = contractId,
+            access_token = accessToken.accessToken,
+            expiration_date_time = accessToken.expirationDatetime,
+            status = cls.STATUS_START
+        )
+
 
     def showByContractId(self, _contractId):
         account = db.session.query(Account).filter(Account.contract_id == _contractId).first()

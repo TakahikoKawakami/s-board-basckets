@@ -1,3 +1,4 @@
+aerich==0.4.4
 aiofiles==0.6.0
 aiomysql==0.0.21
 aiosqlite==0.16.0
@@ -26,6 +27,7 @@ contextlib2==0.6.0
 contextvars==2.4
 cryptography==2.1.4
 cycler==0.10.0
+ddlparse==1.9.0
 decorator==4.4.2
 dictdiffer==0.8.1
 distlib==0.3.0
@@ -93,6 +95,7 @@ promise==2.3
 psutil==5.7.3
 py==1.10.0
 pycparser==2.20
+pydantic==1.7.3
 pyjade==4.0.0
 pylint==2.6.0
 PyMySQL==0.9.3

@@ -7,7 +7,7 @@ import ujson
 from orangecontrib.associate import fpgrowth as fp
 import logging
 
-from app.repositories.ProductsRepository import ProductsRepository
+from app.domains.ProductsRepository import ProductsRepository
 from app.entities.VisJs import Node, Edge
 
 

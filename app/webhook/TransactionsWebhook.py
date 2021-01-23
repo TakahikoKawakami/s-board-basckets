@@ -1,6 +1,6 @@
-from app.repositories.AccountsRepository import AccountsRepository
-from app.repositories.TransactionsRepository import TransactionsRepository
-from app.repositories.BasketAnalysesRepository import BasketAnalysesRepository
+from app.domains.AccountsDomainService import AccountsDomainService
+from app.domains.TransactionsRepository import TransactionsRepository
+from app.domains.BasketAnalysesRepository import BasketAnalysesRepository
 
 ACTION_CREATED = 'created'
 

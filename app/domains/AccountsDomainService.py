@@ -1,4 +1,4 @@
-from app.common.abstracts.AbstractRepository import AbstractRepository
+from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.common.managers import SessionManager
 from app.common.utils import DictionaryUtil
 
@@ -11,12 +11,16 @@ import logging
 from app.lib.Smaregi.API.Authorize import AuthorizeApi
 from app.lib.Smaregi.entities.Authorize import *
 
-class AccountsRepository(AbstractRepository):
+class AccountsDomainService(AbstractDomainService):
     def __init__(self, session):
         super().__init__(session)
 
-        self._logger = logging.getLogger('flask.app')
+        self._logger = logging.getLogger(__name__)
+        self.withSmaregiApi(None, None)
 
+
+    def hasContractId(self) -> bool:
+        return SessionManager.has(self._session, SessionManager.KEY_CONTRACT_ID)
 
     def registerAccount(self, model):
         if model.contractId is None:
@@ -39,24 +43,26 @@ class AccountsRepository(AbstractRepository):
         return result
 
 
-    def getAccessTokenByContractId(self, _contractId, session = None):
+    async def getContractIdAndAccessToken(self):
         # セッション内にあればそれを返す
-        if session is not None:
-            accessTokenBySession = AccessToken(
-                SessionManager.get(session, SessionManager.KEY_ACCESS_TOKEN),
-                SessionManager.get(session, SessionManager.KEY_ACCESS_TOKEN_EXPIRES_IN)
+        _contractId = SessionManager.get(self._session, SessionManager.KEY_CONTRACT_ID)
+
+        if self._session is not None:
+            _accessTokenBySession = AccessToken(
+                SessionManager.get(self._session, SessionManager.KEY_ACCESS_TOKEN),
+                SessionManager.get(self._session, SessionManager.KEY_ACCESS_TOKEN_EXPIRES_IN)
             )
-            if (AccountsRepository._isAccessTokenAvailable(accessTokenBySession)):
-                return accessTokenBySession
+            if (AccountsDomainService._isAccessTokenAvailable(_accessTokenBySession)):
+                return _contractId, _accessTokenBySession
 
         # セッションになくDBにあれば（webhookなどの通信）それを返す
-        accountModel = AccountsRepository.getByContractId(_contractId)
-        if (accountModel is not None):
-            accessTokenByDatabase = AccessToken(
+        _accountModel = await Account.filter(contract_id=_contractId).first()
+        if (_accountModel is not None):
+            _accessTokenByDatabase = AccessToken(
                 accountModel.accessToken,
                 accountModel.expirationDateTime
             )
-            return accessTokenByDatabase
+            return _contractId, _accessTokenByDatabase
 
         # それでもなければ取得、dbとセッションに保存
         _authorizeApi = AuthorizeApi(self._apiConfig, self._appConfig.APP_URI + '/accounts/login')
@@ -68,9 +74,11 @@ class AccountsRepository(AbstractRepository):
                 'pos.stores:read',
             ]
         )
-        accountModel.accessToken = _result.accessToken
-        accountModel.expirationDatetime = _result.expirationDatetime
-        self.registerAccount(accountModel)
+        _newAccountModel = await Account.create(
+            contractId=_contractId,
+            accessToken = _result
+        )
+
         SessionManager.set(session, SessionManager.KEY_ACCESS_TOKEN, _result.accessToken)
         SessionManager.set(session, SessionManager.KEY_ACCESS_TOKEN_EXPIRES_IN, _result.expirationDatetime)
 
@@ -89,18 +97,18 @@ class AccountsRepository(AbstractRepository):
         return True
 
 
-    def loginByCodeAndState(self, _code, _state):
+    async def loginByCodeAndState(self, _code, _state):
         _authorizeApi = AuthorizeApi(self._apiConfig, self._appConfig.APP_URI + '/accounts/login')
         _userInfo = _authorizeApi.getUserInfo(_code, _state)
         
-        account = AccountsRepository.getByContractId(_userInfo.contractId)
-        if (account is None):
-            newAccount = Account()
-            newAccount.contractId = _userInfo.contractId
-            newAccount.status = Account.STATUS_START
-            newAccount.accessToken = None
-            newAccount.expirationDateTime = None
-            account = self.registerAccount(newAccount)
-            AccountsRepository.commit()
+        _account = await Account.filter(contract_id = _userInfo.contractId).first()
+        if (_account is None):
+            _newAccount = Account()
+            _newAccount.contractId = _userInfo.contractId
+            _newAccount.status = Account.STATUS_START
+            _newAccount.accessToken = None
+            _newAccount.expirationDateTime = None
+            _newAccount.save()
+            _account = _newAccount
             
-        return account
+        return _account
