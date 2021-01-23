@@ -1,5 +1,4 @@
-from tortoise.models import Model
-from tortoise import fields
+from tortoise import Model, fields
 
 from datetime import datetime
 from pprint import pprint
@@ -13,11 +12,13 @@ class AbstractTortoiseModel(Model):
     """
     アブストラクトモデル
     """
-    __abstract__ = True 
-    id = fields.IntField(pk=True)
     contract_id = fields.CharField(max_length=32)
-    created_at = fields.DatetimeField(default=datetime.now())
-    modified_at = fields.DatetimeField(default=datetime.now())
+    created_at = fields.DatetimeField()
+    modified_at = fields.DatetimeField()
+
+    class Meta:
+        abstract = True
+
 
     #初期化
     def __init__(self):

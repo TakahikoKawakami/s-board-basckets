@@ -1,5 +1,1 @@
-from app.models import Accounts
-
-__modules__=[
-    Accounts.Account,
-]
+from app.models.Accounts import Account

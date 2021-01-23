@@ -1,26 +1,27 @@
-from tortoise.models import Model
 from tortoise import fields
 from datetime import datetime
 
-# from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
+from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
 import app.database as db
 
 
-class Account(Model):
+class Account(AbstractTortoiseModel):
     """
     アカウントモデル
     """
     STATUS_START = 'start'
     STATUS_STOP = 'stop'
 
-    id = fields.IntField(pk=True)
     contract_id = fields.CharField(max_length=32)
     access_token = fields.CharField(max_length=128)
     expiration_date_time = fields.DatetimeField()
     status = fields.CharField(max_length=16)
+    test = fields.CharField(max_length=32)
 
-    created_at = fields.DatetimeField()
-    modified_at = fields.DatetimeField()
+    class Meta:
+        abstract=False
+        table="accounts"
+
 
     #初期化
     def __init__(self):
