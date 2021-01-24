@@ -30,41 +30,9 @@ authorizeApi = AuthorizeApi(apiConfig, appConfig.APP_URI + '/accounts/login')
 logger = getLogger('flask.app')
 
 
-# @route.route('/authorize', methods=['GET'])
 def authorize(req, resp):
     logger.debug('authorize')
     resp.redirect(authorizeApi.authorize())
-
-
-# @route.route('/token', methods=['GET'])
-def getToken(req, resp):
-    if not ('contract_id' in session):
-        return redirect('/')
-
-    contractId = session['contract_id']
-    result = authorizeApi.getAccessToken(
-        contractId,
-        [
-            'pos.products:read',
-            'pos.transactions:read',
-            'pos.stores:read',
-        ]
-    )
-
-    SessionManager.set(SessionManager.KEY_ACCESS_TOKEN, result.accessToken)
-    SessionManager.set(SessionManager.KEY_ACCESS_TOKEN_EXPIRES_IN, result.expirationDateTime)
-    
-    if request.args.get('next') is not None:
-        _queryParams = SessionManager.get(SessionManager.KEY_QUERY_PARAMS_FOR_REDIRECT)
-        _queryString = '?'
-        for _query, _value in _queryParams.items():
-            _queryString += _query + "=" + _value + "&"
-        _queryString = _queryString.rstrip("&")
-
-        SessionManager.remove(SessionManager.KEY_QUERY_PARAMS_FOR_REDIRECT)
-
-        return redirect(request.args.get('next') + _queryString)
-        
 
 async def login(req, resp):
     logger.info('login!!!')
@@ -73,19 +41,19 @@ async def login(req, resp):
 
     logger.info('code: {code}, state: {state}')
     if (code is None or state is None):
-        resp.redirect('/accounts/authorize')
+        resp.redirect('/accounts/authorize', status_code=303)
         return
 
     accountsDomainService = AccountsDomainService(req.session).withSmaregiApi(None, None)
     account = await accountsDomainService.loginByCodeAndState(code, state)
     
     SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
-    resp.redirect('/baskets/associate')
+    resp.redirect('/baskets/associate', status_code=303)
     return
 
-
-def logout(req, resp):
+async def logout(req, resp):
+    print('logout')
     resp.session.clear()
-    resp.redirect('/')
+    resp.redirect('/', status_code=303)
     return
 

@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
     `modified_at` DATETIME(6) NOT NULL,
     `access_token` VARCHAR(128) NOT NULL,
     `expiration_date_time` DATETIME(6) NOT NULL,
-    `status` VARCHAR(16) NOT NULL,
-    `test` VARCHAR(32) NOT NULL
+    `status` VARCHAR(16) NOT NULL
 ) CHARACTER SET utf8mb4 COMMENT='アカウントモデル';
 -- downgrade --
 DROP TABLE IF EXISTS `accounts`;

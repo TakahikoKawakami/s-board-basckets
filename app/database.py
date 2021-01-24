@@ -17,10 +17,14 @@ session = scoped_session(sessionmaker(
     ))
 # session = Session()
 
-db_url = config.DATABASE_CONNECTION + "://" + \
-    config.DATABASE_USERNAME + ":" + config.DATABASE_PASSWORD + \
-    "@" + config.DATABASE_HOST + ":" + config.DATABASE_PORT + "/" + config.DATABASE_NAME
-
+db_url = "{}://{}:{}@{}:{}/{}".format(
+    config.DATABASE_CONNECTION,
+    config.DATABASE_USERNAME,
+    config.DATABASE_PASSWORD,
+    config.DATABASE_HOST,
+    config.DATABASE_PORT,
+    config.DATABASE_NAME
+)
 
 TORTOISE_ORM = {
     "connections": {"default":db_url},
@@ -33,21 +37,12 @@ TORTOISE_ORM = {
             "default_connection": "default",
         },
     },
+    'use_tz': False,
+    'timezone': 'Asia/Tokyo',
 }
 
-
 async def init():
-    await Tortoise.init(
-        # {DB_TYPE}://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}?{PARAM1}=values&{PARAM2}=values
-        db_url = config.DATABASE_CONNECTION + "://" + \
-            config.DATABASE_USERNAME + ":" + config.DATABASE_PASSWORD + \
-            "@" + config.DATABASE_HOST + ":" + config.DATABASE_PORT + "/" + config.DATABASE_NAME,
-        # db_url = "mysql://preview:preview@mysql:3306/local",
-        # db_url=config.DATABASE_URI,  # DB URL
-        modules={"models": [
-            "app.models.Accounts"
-        ]}  # Modelを書いたファイルを指定
-    )
+    await Tortoise.init(TORTOISE_ORM)
 
 async def close():
     await Tortoise.close_connections()

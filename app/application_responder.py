@@ -2,16 +2,18 @@ import responder
 from app.config import AppConfig
 
 from app.controllers import AuthController, BasketController
+from app.webhook import WebhookRouter
 from app import database
 
 import datetime
-# from router import add_routers
+from app.router import add_routers
 
 api = responder.API(
     secret_key=AppConfig.SECRET_KEY,
     templates_dir="app/templates",
     static_dir="app/static"
 )
+
 
 # 立ち上げのタイミングでDBへのコネクションを確立
 @api.on_event("startup")
@@ -32,10 +34,16 @@ def static_filter(path):
 api.templates._env.filters.update(
     css=static_filter
 )
-# api.add_route('/baskets/associate', BasketController.BeforeRequest, before_request=True)
-api.add_route('/accounts/login', AuthController.login)
-api.add_route('/accounts/logout', AuthController.logout)
-api.add_route('/accounts/authorize', AuthController.authorize)
-api.add_route('/baskets/associate', BasketController.Associate)
-api.templates._env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
-# add_routers(api)
+add_routers(api)
+
+
+@api.route('/webhook')
+async def webhook(req, resp):
+    @api.background.task
+    def receivedWebhook(_header, _body):
+        WebhookRouter.recieved(_header, _body)
+    _header = req.headers
+    _body = await req.media()
+    receivedWebhook(_header, _body)
+    resp.status_code = 200
+

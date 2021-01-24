@@ -1,10 +1,26 @@
+import responder
 import os
+import datetime
 from os.path import join, dirname
 from pathlib import Path
 from dotenv import load_dotenv
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+
+templates = responder.templates.Templates(
+    directory="app/templates"
+)
+# staticをjinja2で解決するためにstaticフィルタを定義
+def static_filter(path):
+    # directoryで指定したtemplatesと同階層ががroot扱い？
+    return '/static/' + path + '?v=' + datetime.datetime.today().strftime('%y%m%d%H%M%S%F')
+# staticをフィルタに追加
+# v1系ではjinja_envだったが、v2からからtemplates._envに変更された
+templates._env.filters.update(
+    css=static_filter
+)
+templates._env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
 
 
 """original"""
@@ -14,7 +30,7 @@ BASE_DIR = APP_DIR.parent.parent
 dotenv_path = join(str(BASE_DIR), '.env')
 load_dotenv(dotenv_path)
 
-   
+
 class AppConfig(object):
     """base config"""
 

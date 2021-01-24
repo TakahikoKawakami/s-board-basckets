@@ -25,11 +25,6 @@ authorizeApi = AuthorizeApi(apiConfig, appConfig.APP_URI + '/accounts/login')
 route = Blueprint('accounts', __name__, url_prefix='/accounts')
 
 
-@route.before_request
-def beforeRequest():
-    if not ('contract_id' in session):
-        if ()
-    self.getToken()
 
 class ProductController():
     __init__(self, api):

@@ -13,16 +13,11 @@ class AbstractTortoiseModel(Model):
     アブストラクトモデル
     """
     contract_id = fields.CharField(max_length=32)
-    created_at = fields.DatetimeField()
-    modified_at = fields.DatetimeField()
+    created_at = fields.DatetimeField(auto_now_add=True)
+    modified_at = fields.DatetimeField(auto_now=True)
 
     class Meta:
         abstract = True
-
-
-    #初期化
-    def __init__(self):
-        pass
 
 
     def __repr__(self):

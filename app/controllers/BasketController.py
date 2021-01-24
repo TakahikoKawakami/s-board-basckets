@@ -1,4 +1,6 @@
 from responder import routes
+from app.config import templates
+
 import logging
 import datetime
 
@@ -17,20 +19,27 @@ class Associate():
     def __init__(self) -> None:
         self._logger = logging.getLogger(__name__)
 
-        self._accessToken = None
-        self._contractId = None
+        self._loginAccount = None
         self._accountsDomainService = None
-
 
     async def on_request(self, req, resp):
         self._accountsDomainService = AccountsDomainService(resp.session)
         if not self._accountsDomainService.hasContractId():
-            resp.redirect('/')
+            resp.redirect('/', status_code=303)
             return
-        self._contractId, self._accessToken = await self._accountsDomainService.getContractIdAndAccessToken()
+        await self._accountsDomainService.prepareForAccessProcessing()
+        self._loginAccount = self._accountsDomainService.loginAccount
 
 
     async def on_get(self, req, resp):
+        # if (resp.redirect is not None):
+        #     return
+        resp.html = templates.render(
+            'baskets/index.pug',
+            contractId = "",
+            message = "",
+            stores = []
+        )
         return
         form = BasketForm(request.args, meta={'csrf': False, 'locales':['ja']})
         storesRepository = StoresRepository().withSmaregiApi(accessToken, contractId)

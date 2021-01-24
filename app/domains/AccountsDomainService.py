@@ -18,6 +18,7 @@ class AccountsDomainService(AbstractDomainService):
         self._logger = logging.getLogger(__name__)
         self.withSmaregiApi(None, None)
 
+        self.loginAccount = None # [Account]
 
     def hasContractId(self) -> bool:
         return SessionManager.has(self._session, SessionManager.KEY_CONTRACT_ID)
@@ -42,60 +43,45 @@ class AccountsDomainService(AbstractDomainService):
             .filter(Account.contract_id == contractId).first()
         return result
 
+    async def prepareForAccessProcessing(self):
+        if self._session is None:
+            raise Exception("not set session")
 
-    async def getContractIdAndAccessToken(self):
         # セッション内にあればそれを返す
         _contractId = SessionManager.get(self._session, SessionManager.KEY_CONTRACT_ID)
-
-        if self._session is not None:
-            _accessTokenBySession = AccessToken(
-                SessionManager.get(self._session, SessionManager.KEY_ACCESS_TOKEN),
-                SessionManager.get(self._session, SessionManager.KEY_ACCESS_TOKEN_EXPIRES_IN)
+        _accessTokenBySession = AccessToken(
+            SessionManager.get(self._session, SessionManager.KEY_ACCESS_TOKEN),
+            SessionManager.get(self._session, SessionManager.KEY_ACCESS_TOKEN_EXPIRATION_DATETIME)
+        )
+        if (_accessTokenBySession.isAccessTokenAvailable()):
+            self.loginAccount = Account(
+                contract_id = _contractId, 
+                accessToken = _accessTokenBySession
             )
-            if (AccountsDomainService._isAccessTokenAvailable(_accessTokenBySession)):
-                return _contractId, _accessTokenBySession
+            return
 
         # セッションになくDBにあれば（webhookなどの通信）それを返す
         _accountModel = await Account.filter(contract_id=_contractId).first()
-        if (_accountModel is not None):
-            _accessTokenByDatabase = AccessToken(
-                accountModel.accessToken,
-                accountModel.expirationDateTime
-            )
-            return _contractId, _accessTokenByDatabase
+        if _accountModel is not None: 
+            if not _accountModel.accessToken.isAccessTokenAvailable():
+                _accessTokenForUpdate = self.getAccessTokenByContractId(_contractId)
+                _accountModel.accessToken = _accessTokenForUpdate
+                await _accountModel.save()
+            else:
+                _accessTokenForUpdate = _accountModel.accessToken
+            self._setAccessTokenDataToSession(_accessTokenForUpdate)
+            self.loginAccount = _accountModel
+            return
 
         # それでもなければ取得、dbとセッションに保存
         _authorizeApi = AuthorizeApi(self._apiConfig, self._appConfig.APP_URI + '/accounts/login')
-        _result = _authorizeApi.getAccessToken(
-            _contractId,
-            [
-                'pos.products:read',
-                'pos.transactions:read',
-                'pos.stores:read',
-            ]
-        )
-        _newAccountModel = await Account.create(
+        _accessTokenByCreation = self.getAccessTokenByContractId(_contractId)
+        self.loginAccount = await Account.create(
             contractId=_contractId,
-            accessToken = _result
+            accessToken = _accessTokenByCreation
         )
-
-        SessionManager.set(session, SessionManager.KEY_ACCESS_TOKEN, _result.accessToken)
-        SessionManager.set(session, SessionManager.KEY_ACCESS_TOKEN_EXPIRES_IN, _result.expirationDatetime)
-
-        return _result
-
-        # どちらもなければ、更新する
-        
-
-    def _isAccessTokenAvailable(accessTokenEntity):
-        if accessTokenEntity.accessToken is None:
-            return False
-        if accessTokenEntity.expirationDatetime is not None:
-            now = datetime.datetime.now()
-            if (accessTokenEntity.expirationDatetime < now):
-                return False
-        return True
-
+        self._setAccessTokenDataToSession(_accessTokenByCreation)
+        return
 
     async def loginByCodeAndState(self, _code, _state):
         _authorizeApi = AuthorizeApi(self._apiConfig, self._appConfig.APP_URI + '/accounts/login')
@@ -103,12 +89,32 @@ class AccountsDomainService(AbstractDomainService):
         
         _account = await Account.filter(contract_id = _userInfo.contractId).first()
         if (_account is None):
-            _newAccount = Account()
-            _newAccount.contractId = _userInfo.contractId
-            _newAccount.status = Account.STATUS_START
-            _newAccount.accessToken = None
-            _newAccount.expirationDateTime = None
-            _newAccount.save()
-            _account = _newAccount
+            SessionManager.set(self._session, SessionManager.KEY_CONTRACT_ID, _userInfo.contractId)
+            await self.prepareForAccessProcessing()
+            _account = self.loginAccount
             
         return _account
+
+    def getAccessTokenByContractId(self, contractId):
+        _authorizeApi = AuthorizeApi(self._apiConfig, self._appConfig.APP_URI + '/accounts/login')
+        _accessTokenByCreation = _authorizeApi.getAccessToken(
+            contractId,
+            [
+                'pos.products:read',
+                'pos.transactions:read',
+                'pos.stores:read',
+            ]
+        )
+        return _accessTokenByCreation
+    
+    def _setAccessTokenDataToSession(self, accessToken):
+        SessionManager.set(
+            self._session, 
+            SessionManager.KEY_ACCESS_TOKEN, 
+            accessToken.accessToken
+        )
+        SessionManager.set(
+            self._session, 
+            SessionManager.KEY_ACCESS_TOKEN_EXPIRATION_DATETIME, 
+            datetime.datetime.strftime(accessToken.expirationDatetime, '%Y-%m-%d %H:%M:%S %z')
+        )

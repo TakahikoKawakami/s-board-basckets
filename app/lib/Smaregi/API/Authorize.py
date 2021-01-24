@@ -1,5 +1,6 @@
 from urllib.parse import urlencode
 import datetime
+import pytz
 
 import requests
 import json
@@ -41,7 +42,6 @@ class AuthorizeApi(BaseIdentificationApi):
         r_post = requests.post(self.uriInfo, headers=infoHeader).json()
         return UserInfo(r_post)
 
-
     def getAccessToken(self, contractId, scopeList):
         url = self.config.uriAccess + '/app/' + contractId + '/token'
         headers = self._getHeader()
@@ -52,10 +52,10 @@ class AuthorizeApi(BaseIdentificationApi):
         }
         r_post = requests.post(url, headers=headers, data=urlencode(body))
         r_post = r_post.json()
-        return AccessToken(r_post['access_token'], r_post['expires_in'])
-        # return r_post
-    #    return render(request, 's_board_relations/network.html')
-
+        
+        accessToken = r_post['access_token']
+        expirationDatetime = datetime.datetime.now(pytz.timezone('Asia/Tokyo')) + datetime.timedelta(seconds=r_post['expires_in'])
+        return AccessToken(accessToken, expirationDatetime)
 
     def _getUserAccessToken(self, code):
         headers = self._getHeader()
