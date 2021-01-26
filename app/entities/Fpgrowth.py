@@ -7,6 +7,7 @@ import ujson
 from orangecontrib.associate import fpgrowth as fp
 import logging
 
+from app.entities.Baskets import Basket
 from app.domains.ProductsRepository import ProductsRepository
 from app.entities.VisJs import VisJs
 
@@ -31,10 +32,11 @@ class Fpgrowth():
     def createByDataList(_list, _count):
         # 店舗情報をlistから取り除く
         # TODO 今後、店舗情報も分析対象に加えたい
-        _list = Pyfpgrowth._removeStoreData(_list)
-        _list = Pyfpgrowth._removeMemberData(_list)
-        _list = Pyfpgrowth._removeSexData(_list)
-        _list = Pyfpgrowth._removeStoreData(_list)
+        _list = Fpgrowth._removeStoreData(_list)
+        _list = Fpgrowth._removeMemberData(_list)
+        _list = Fpgrowth._removeSexData(_list)
+        _list = Fpgrowth._removeStoreData(_list)
+        _list = Fpgrowth._removeTransactionHeadData(_list)
 
         pyfpgrowth = Fpgrowth()
         _numberKeyDict, _columnKeyDict = pyfpgrowth._getKeyDictionaries(_list)
@@ -107,29 +109,37 @@ class Fpgrowth():
         _result = []
         for number in _X:
             _idStrings = _numberKeyDict[number]
-            _convertedDataDict = Pyfpgrowth._converteDictFromIdString(_idStrings)
+            _convertedDataDict = Fpgrowth._converteDictFromIdString(_idStrings)
             _result.append(_convertedDataDict)
 
         return _result
-
 
     @staticmethod
     def _removeStoreData(_list) -> list:
         result = []
         for _eachBasket in _list:
             for _each in _eachBasket:
-                if (_each.startswith('store__')): # store__{"id": xxx}
+                if (_each.startswith(Basket.PREFIXES_STORE)): # store__{"id": xxx}
                     _eachBasket.remove(_each)
             result.append(_eachBasket)
         return result
 
+    @staticmethod
+    def _removeTransactionHeadData(_list) -> list:
+        result = []
+        for _eachBasket in _list:
+            for _each in _eachBasket:
+                if (_each.startswith(Basket.PREFIXES_TRANSACTION_HEAD)): # store__{"id": xxx}
+                    _eachBasket.remove(_each)
+            result.append(_eachBasket)
+        return result
 
     @staticmethod
     def _removeMemberData(_list) -> list:
         result = []
         for _eachBasket in _list:
             for _each in _eachBasket:
-                if (_each.startswith('member__')): # store__{"id": xxx}
+                if (_each.startswith(Basket.PREFIXES_MEMBER)): # store__{"id": xxx}
                     _eachBasket.remove(_each)
             result.append(_eachBasket)
         return result
@@ -140,7 +150,7 @@ class Fpgrowth():
         for _eachBasket in _list:
             _eachResult = []
             for _each in _eachBasket:
-                if not (_each.startswith('customerSex__')): # store__{"id": xxx}
+                if not (_each.startswith(Basket.PREFIXES_SEX)): # store__{"id": xxx}
                     _eachResult.append(_each)
             result.append(_eachResult)
         return result
@@ -200,7 +210,6 @@ class Fpgrowth():
 
     def convertToVisJs(self):
         # rule作成の前にあらかじめ確認しないデータを省く必要がある？
-
         vis = VisJs()
 
         if len(self._result) <= 0:
@@ -209,13 +218,13 @@ class Fpgrowth():
         _maxLift = max([nodeGroup['lift'] for nodeGroup in self._result])
         for nodeGroup in self._result:
             # edgesがlimitを超えたら了
-            if (len(edges) > self.MAX_EDGE_COUNT): break
+            if (len(vis.edgeList) > self.MAX_EDGE_COUNT): break
 
             # edgeから見ていく（キーの要素数が1、要素の要素数が1の場合）
             # edgeのfrom, toで、まだnodeにない場合はnodeに格納
             for node in nodeGroup['from']:
                 nodeFrom = node
-                if (nodeFrom["id"] not in [node["id"] for node in nodes]):
+                if (nodeFrom["id"] not in [node.id for node in vis.nodeList]):
                     vis.nodeList.append(vis.Node(
                         id = nodeFrom["id"],
                         label = nodeFrom["label"],
@@ -223,7 +232,7 @@ class Fpgrowth():
                     ))
             for node in nodeGroup['to']:
                 nodeTo = node
-                if (nodeTo["id"] not in [node["id"] for node in nodes]):
+                if (nodeTo["id"] not in [node.id for node in vis.nodeList]):
                     vis.nodeList.append(vis.Node(
                         id = nodeTo["id"],
                         label = nodeTo["label"],
@@ -240,8 +249,8 @@ class Fpgrowth():
 
 
     def _getDictForVis(self, data):
-        if (data.startswith('product__')):
-            dataJson = data.split('product__')[1]
+        if (data.startswith(Basket.PREFIXES_PRODUCT)):
+            dataJson = data.split(Basket.PREFIXES_PRODUCT)[1]
             dataDict = ujson.loads(dataJson)
             return {
                 "id":dataDict["id"],
@@ -283,16 +292,17 @@ class Fpgrowth():
 
     @staticmethod
     def _converteDictFromIdString(data) -> dict:
-        _productsRepository = ProductsRepository()
-        if (data.startswith('product__')):
-            dataJson = data.split('product__')[1]
+        # _productsRepository = ProductsRepository()
+        if (data.startswith(Basket.PREFIXES_PRODUCT)):
+            dataJson = data.split(Basket.PREFIXES_PRODUCT)[1]
             dataDict = ujson.loads(dataJson)
             return {
                 "id":dataDict["id"],
-                "label": _productsRepository.getProductById(dataDict["id"]).name
+                # "label": _productsRepository.getProductById(dataDict["id"]).name
+                "label": dataDict['id']
             }
-        elif (data.startswith('customerSex__')): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
-            customerSexJson = data.split('customerSex__')[1]
+        elif (data.startswith(Basket.PREFIXES_SEX)): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
+            customerSexJson = data.split(Basket.PREFIXES_SEX)[1]
             customerSexDict = ujson.loads(customerSexJson)
             nodeId = customerSexDict['sex']
             nodeLabel = customerSexDict['sex']
@@ -301,8 +311,8 @@ class Fpgrowth():
                 "id"   : nodeId,
                 "label": nodeLabel,
             }
-        elif (data.startswith('store__')): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
-            storeJson = data.split('store__')[1]
+        elif (data.startswith(Basket.PREFIXES_STORE)): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
+            storeJson = data.split(Basket.PREFIXES_STORE)[1]
             storeDict = ujson.loads(storeJson)
             nodeId = storeDict["id"]
             nodeLabel = storeDict["id"]
@@ -311,8 +321,8 @@ class Fpgrowth():
                 "id"   : nodeId,
                 "label": nodeLabel,
             }
-        elif (data.startswith('member__')): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
-            memberJson = data.split('member__')[1]
+        elif (data.startswith(Basket.PREFIXES_MEMBER)): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
+            memberJson = data.split(Basket.PREFIXES_MEMBER)[1]
             memberDict = ujson.loads(memberJson)
             nodeId = memberDict["id"]
             nodeLabel = memberDict["id"]

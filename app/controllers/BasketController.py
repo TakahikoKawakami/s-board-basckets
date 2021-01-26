@@ -8,7 +8,6 @@ from app.common.managers import SessionManager, HttpManager
 from app.common.abstracts.AbstractController import AbstractController
 from app.domains.AccountsDomainService import AccountsDomainService
 from app.domains.BasketAssociationDomainService import BasketAssociationDomainService
-from app.entities.Baskets import Basket
 from app.validators import BasketValidators
 
 
@@ -52,11 +51,13 @@ class AssociateResult(AbstractController):
 
         self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
         targetStore = self._basketAssociationDomainService.getStoreById(query['store_id'])
-        vis = await self._basketAssociationDomainService.associate(
+        associatedResult = await self._basketAssociationDomainService.associate(
             query['store_id'],
             query['date_from'],
             query['date_to']
         )
+
+        visDict = vis.toDict()
 
         resp.html = templates.render(
             "baskets/summary.pug",
@@ -64,8 +65,7 @@ class AssociateResult(AbstractController):
             store = targetStore,
             search_from = query['date_from'],
             search_to = query['date_to'],
-            nodes = vis.nodeList,
-            edges = vis.edgeList,
+            vis = visDict,
             pickUpMessage = ""
         )
         return

@@ -16,7 +16,7 @@ class AccosiationCondition(Schema):
         if type(value) is datetime.datetime:
             value = value.date()
         _today = datetime.date.today()
-        if (value >= _today):
+        if (value > _today):
             raise ValidationError("[開始日] 指定できる日付は昨日までです")
 
     @validates('date_to')
@@ -24,7 +24,7 @@ class AccosiationCondition(Schema):
         if type(value) is datetime.datetime:
             value = value.date()
         _today = datetime.date.today()
-        if (value >= _today):
+        if (value > _today):
             raise ValidationError("[終了日] 指定できる日付は昨日までです")
 
     @validates_schema

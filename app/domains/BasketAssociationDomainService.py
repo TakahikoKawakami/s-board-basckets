@@ -5,11 +5,13 @@ from app.common.utils import DictionaryUtil
 from app.models.DailyBasketList import DailyBasketList
 
 from app.entities.Fpgrowth import Fpgrowth
+from app.entities.VisJs import VisJs
 
 import datetime
 import logging
 
 from app.lib.Smaregi.API.POS.StoresApi import StoresApi
+from app.lib.Smaregi.API.POS.ProductsApi import ProductsApi
 
 class BasketAssociationDomainService(AbstractDomainService):
     def __init__(self, loginAccount):
@@ -49,15 +51,26 @@ class BasketAssociationDomainService(AbstractDomainService):
 
         vis = None
         if mergedPyfpgrowthEntity is not None:
-            logger.debug("-----merged fpgrowth-----")
+            # logger.debug("-----merged fpgrowth-----")
             # logger.debug(mergedPyfpgrowthEntity.patterns)
 
             vis = mergedPyfpgrowthEntity.convertToVisJs()
+            vis = self._setVisNodeLabel(vis)
             # vis = mergedPyfpgrowthEntity.result
         
-        logger.debug("-----analyzed result list-----")
+        # logger.debug("-----analyzed result list-----")
         # logger.debug(vis)
         #basket.relationRanking("8000002")
         
     #    rules = pyfpgrowth.generate_association_rules(patterns, 0.7)
         return vis
+
+    def _setVisNodeLabel(self, vis):
+        productsApi = ProductsApi(self._apiConfig)
+        result = VisJs()
+        for node in vis.nodeList:
+            productName = productsApi.getProductById(node.id)['productName']
+            node.label = productName
+            result.nodeList.append(node)
+        result.edgeList = vis.edgeList
+        return result
