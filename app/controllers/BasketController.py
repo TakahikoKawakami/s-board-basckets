@@ -1,155 +1,71 @@
-from responder import routes
-from app.config import templates
+from marshmallow import ValidationError
 
 import logging
 import datetime
 
-from app.common.managers import SessionManager
-
+from app.config import templates
+from app.common.managers import SessionManager, HttpManager
+from app.common.abstracts.AbstractController import AbstractController
 from app.domains.AccountsDomainService import AccountsDomainService
-from app.domains.BasketAnalysesRepository import BasketAnalysesRepository
-from app.domains.StoresRepository import StoresRepository
+from app.domains.BasketAssociationDomainService import BasketAssociationDomainService
 from app.entities.Baskets import Basket
-from app.entities.Pyfpgrowth import Pyfpgrowth
-from app.forms.BasketForms import BasketForm
+from app.validators import BasketValidators
 
 
-class Associate():
-
+class Associate(AbstractController):
     def __init__(self) -> None:
-        self._logger = logging.getLogger(__name__)
-
-        self._loginAccount = None
-        self._accountsDomainService = None
-
-    async def on_request(self, req, resp):
-        self._accountsDomainService = AccountsDomainService(resp.session)
-        if not self._accountsDomainService.hasContractId():
-            resp.redirect('/', status_code=303)
-            return
-        await self._accountsDomainService.prepareForAccessProcessing()
-        self._loginAccount = self._accountsDomainService.loginAccount
-
+        super().__init__()
+        self._basketAssociationDomainService = None
 
     async def on_get(self, req, resp):
-        # if (resp.redirect is not None):
-        #     return
-        resp.html = templates.render(
+        if HttpManager.bookRedirect(resp):
+            return
+        if SessionManager.has(req.session, SessionManager.KEY_ERROR_MESSAGES):
+            messages = SessionManager.get(req.session, SessionManager.KEY_ERROR_MESSAGES)
+        else:
+            messages = ""
+
+        self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
+        storeList = self._basketAssociationDomainService.getStoreList()
+        resp.html =  templates.render(
             'baskets/index.pug',
-            contractId = "",
-            message = "",
-            stores = []
-        )
-        return
-        form = BasketForm(request.args, meta={'csrf': False, 'locales':['ja']})
-        storesRepository = StoresRepository().withSmaregiApi(accessToken, contractId)
-        storeList = storesRepository.getStoreList()
-        form.setStoreList(storeList)
-        logger.info(storeList)
-        resp.html =  api.template(
-            'baskets/index.pug',
-            contractId = contractId,
-            form = form,
-            message = "",
+            contractId = self._loginAccount.contractId,
+            message = messages,
             stores = storeList
         )
 
+class AssociateResult(AbstractController):
+    def __init__(self) -> None:
+        super().__init__()
+        self._basketAssociationDomainService = None
 
-# @route.route('/summary', methods=['GET'])
-# def summary():
-#     global accessToken
-#     global contractId
+    async def on_get(self, req, resp):
+        if HttpManager.bookRedirect(resp):
+            return
+        try:
+            schema = BasketValidators.AccosiationCondition()
+            query = schema.load(req.params)
+        except ValidationError as e:
+            SessionManager.set(resp.session, SessionManager.KEY_ERROR_MESSAGES, e.messages)
+            resp.redirect('/baskets/associate', status_code=302)
+            return
 
-#     form = BasketForm(request.args, meta={'csrf': False, 'locales':['ja']})
-#     storesRepository = StoresRepository().withSmaregiApi(accessToken, contractId)
-#     storeList = storesRepository.getStoreList()
-    
-#     form.setStoreList(storeList)
-#     if not form.validate():
-#         message = "validation error"
-#         return render_template(
-#             'baskets/index.pug',
-#             form = form,
-#             message = message,
-#             stores = storeList
-#         )
+        self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
+        targetStore = self._basketAssociationDomainService.getStoreById(query['store_id'])
+        vis = await self._basketAssociationDomainService.associate(
+            query['store_id'],
+            query['date_from'],
+            query['date_to']
+        )
 
-#     targetStoreId = form.storeField.data
-#     targetDateFrom = form.dateFromField.data
-#     targetDateTo = form.dateToField.data
-
-#     logger.info("-----search condition-----")
-#     logger.info("storeId     : " + targetStoreId)
-#     logger.info("search_from : " + targetDateFrom.strftime("%Y-%m-%d"))
-#     logger.info("search_to   : " + targetDateTo.strftime("%Y-%m-%d"))
-
-#     # 分析期間の日別バスケットリストを取得
-#     basketAnalysesRepository = BasketAnalysesRepository().withSmaregiApi(accessToken, contractId)
-#     try:
-#         dailyBasketListModelList = basketAnalysesRepository.getDailyBasketListByStoreIdAndAnalysisDateRange(
-#             targetStoreId,
-#             targetDateFrom,
-#             targetDateTo
-#         )
-#     except Exception as e:
-#         logger.error(e.args[0])
-#         return redirect(url_for('baskets.index'))
-
-#     # 全データをマージ
-#     mergedBasketList = []
-#     for dailyBasketListModel in dailyBasketListModelList:
-#         mergedBasketList += dailyBasketListModel.basketList
-#     mergedPyfpgrowthEntity = Pyfpgrowth.createByDataList(mergedBasketList, 0.1)
-
-#     vis = None
-#     if mergedPyfpgrowthEntity is not None:
-#         logger.debug("-----merged fpgrowth-----")
-#         # logger.debug(mergedPyfpgrowthEntity.patterns)
-
-#         vis = mergedPyfpgrowthEntity.convertToVisJs()
-#         # vis = mergedPyfpgrowthEntity.result
-    
-#     logger.debug("-----analyzed result list-----")
-#     logger.debug(vis)
-#     #basket.relationRanking("8000002")
-    
-# #    rules = pyfpgrowth.generate_association_rules(patterns, 0.7)
-#     targetStore = storesRepository.getStoreById(targetStoreId) 
-
-#     pickUpProductFrom = None
-#     pickUpProductTo = None
-#     if (len(mergedPyfpgrowthEntity.result) > 0):
-#         pickUpProductFrom = mergedPyfpgrowthEntity.result[0]['from']
-#         pickUpProductTo = mergedPyfpgrowthEntity.result[0]['to']
-#     pickUpMessage = {
-#             'store': targetStore,
-#             'from': targetDateFrom,
-#             'to': targetDateTo,
-#             'productFrom': pickUpProductFrom,
-#             'productTo': pickUpProductTo,
-#     }
-
-#     return render_template("baskets/summary.pug",
-#         contractId = contractId,
-#         store = targetStore,
-#         search_from = targetDateFrom,
-#         search_to = targetDateTo,
-#         nodes = vis['nodes'],
-#         edges = vis['edges'],
-#         pickUpMessage = pickUpMessage
-#     )
-    
-
-# class BasketScheduler():
-#     @staticmethod
-#     def syncTodaysBasket():
-#         _accountsRepository = AccountsRepository().withSmaregiApi(None, None)
-#         _accountList = _accountsRepository.getActiveAccountList()
-
-#         for _account in _accountList:
-#             _contractId = _account.contractId
-#             result = _accountsRepository.getAccessTokenByContractId(contractId)
-
-#             session['access_token'] = result['access_token']
-#             session['access_token_expires_in'] = datetime.datetime.now() + datetime.timedelta(seconds=result['expires_in'])
-#         return "hello"
+        resp.html = templates.render(
+            "baskets/summary.pug",
+            contractId = self._loginAccount.contractId,
+            store = targetStore,
+            search_from = query['date_from'],
+            search_to = query['date_to'],
+            nodes = vis.nodeList,
+            edges = vis.edgeList,
+            pickUpMessage = ""
+        )
+        return

@@ -10,8 +10,7 @@ from .BaseApi import BaseApi
 class BaseServiceApi(BaseApi):
     def _showAuthorizationString(self):
         return self.config.accessToken
-           
-         
+
     def _getSmaregiAuth(self):
         string = self._showAuthorizationString()
         return "Bearer " + string

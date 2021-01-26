@@ -1,11 +1,8 @@
 import responder
-from app.config import AppConfig
-
-from app.controllers import AuthController, BasketController
-from app.webhook import WebhookRouter
-from app import database
-
 import datetime
+
+from app.config import AppConfig
+from app import database
 from app.router import add_routers
 
 api = responder.API(
@@ -13,7 +10,6 @@ api = responder.API(
     templates_dir="app/templates",
     static_dir="app/static"
 )
-
 
 # 立ち上げのタイミングでDBへのコネクションを確立
 @api.on_event("startup")
@@ -37,13 +33,13 @@ api.templates._env.filters.update(
 add_routers(api)
 
 
-@api.route('/webhook')
-async def webhook(req, resp):
-    @api.background.task
-    def receivedWebhook(_header, _body):
-        WebhookRouter.recieved(_header, _body)
-    _header = req.headers
-    _body = await req.media()
-    receivedWebhook(_header, _body)
-    resp.status_code = 200
+# @api.route('/webhook')
+# async def webhook(req, resp):
+#     @api.background.task
+#     def receivedWebhook(_header, _body):
+#         WebhookRouter.recieved(_header, _body)
+#     _header = req.headers
+#     _body = await req.media()
+#     receivedWebhook(_header, _body)
+#     resp.status_code = 200
 

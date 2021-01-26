@@ -3,7 +3,6 @@ from datetime import datetime
 
 from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
 from app.entities.AccessToken import AccessToken
-import app.database as db
 
 
 class Account(AbstractTortoiseModel):
@@ -13,7 +12,6 @@ class Account(AbstractTortoiseModel):
     STATUS_START = 'start'
     STATUS_STOP = 'stop'
 
-    contract_id = fields.CharField(max_length=32)
     access_token = fields.CharField(max_length=1024)
     expiration_date_time = fields.DatetimeField()
     status = fields.CharField(max_length=16)
@@ -52,8 +50,3 @@ class Account(AbstractTortoiseModel):
             expiration_date_time = accessToken.expirationDatetime,
             status = cls.STATUS_START
         )
-
-    def showByContractId(self, _contractId):
-        account = db.session.query(Account).filter(Account.contract_id == _contractId).first()
-        return account
-#    return Account(account.contract_id, account.status)

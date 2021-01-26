@@ -8,10 +8,10 @@ from orangecontrib.associate import fpgrowth as fp
 import logging
 
 from app.domains.ProductsRepository import ProductsRepository
-from app.entities.VisJs import Node, Edge
+from app.entities.VisJs import VisJs
 
 
-class Pyfpgrowth():
+class Fpgrowth():
     MAX_EDGE_COUNT = 300
     ASSOCIATION_RATE = 0.01
     """pyfpgrowth entity
@@ -24,7 +24,7 @@ class Pyfpgrowth():
         self._stats = []
         self._result = []
         
-        self._logger = logging.getLogger("flask.app")
+        self._logger = logging.getLogger(__name__)
 
 
     @staticmethod
@@ -36,7 +36,7 @@ class Pyfpgrowth():
         _list = Pyfpgrowth._removeSexData(_list)
         _list = Pyfpgrowth._removeStoreData(_list)
 
-        pyfpgrowth = Pyfpgrowth()
+        pyfpgrowth = Fpgrowth()
         _numberKeyDict, _columnKeyDict = pyfpgrowth._getKeyDictionaries(_list)
 
         _encodedList = pyfpgrowth._encode(_list, _columnKeyDict)
@@ -201,11 +201,10 @@ class Pyfpgrowth():
     def convertToVisJs(self):
         # rule作成の前にあらかじめ確認しないデータを省く必要がある？
 
-        edges = []
-        nodes = []
+        vis = VisJs()
 
         if len(self._result) <= 0:
-            return {"nodes": nodes, "edges": edges}
+            return vis
 
         _maxLift = max([nodeGroup['lift'] for nodeGroup in self._result])
         for nodeGroup in self._result:
@@ -217,36 +216,27 @@ class Pyfpgrowth():
             for node in nodeGroup['from']:
                 nodeFrom = node
                 if (nodeFrom["id"] not in [node["id"] for node in nodes]):
-                    node = {
-                        "id": nodeFrom["id"],
-                        "label": nodeFrom["label"],
-                        "value": 1,
-                        "uri": "/",
-                        "color": "#B69E86",
-                    }
-                    nodes.append(node)
+                    vis.nodeList.append(vis.Node(
+                        id = nodeFrom["id"],
+                        label = nodeFrom["label"],
+                        uri = "/"
+                    ))
             for node in nodeGroup['to']:
                 nodeTo = node
                 if (nodeTo["id"] not in [node["id"] for node in nodes]):
-                    node = {
-                        "id": nodeTo["id"],
-                        "label": nodeTo["label"],
-                        "value": 1,
-                        "color": "#B69E86",
-                    }
-                    nodes.append(node)
+                    vis.nodeList.append(vis.Node(
+                        id = nodeTo["id"],
+                        label = nodeTo["label"],
+                        uri = "/"
+                    ))
             
             if (len(nodeGroup['from']) == 1) and (len(nodeGroup['to']) == 1):
-                edge = {
-                    "from": nodeGroup['from'][0]["id"],
-                    "to": nodeGroup['to'][0]["id"],
-                    "width": nodeGroup['lift'] / _maxLift * 5,
-                    # "width": nodeGroup['confidence'],
-                    "arrows": "to",
-                }
-                edges.append(edge)
-
-        return {"nodes": nodes, "edges": edges}
+                vis.edgeList.append(vis.Edge(
+                    fromNode = nodeGroup['from'][0]["id"],
+                    toNode = nodeGroup['to'][0]["id"],
+                    width = nodeGroup['lift'] / _maxLift * 5
+                ))
+        return vis
 
 
     def _getDictForVis(self, data):

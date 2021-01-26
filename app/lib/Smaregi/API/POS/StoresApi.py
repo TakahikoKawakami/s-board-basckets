@@ -24,7 +24,7 @@ class StoresApi(BaseServiceApi):
         
         result = self._api(self.uri, header, body)
 
-        self.logger.info(result)
+        # self.logger.info(result)
         return result
 
 
