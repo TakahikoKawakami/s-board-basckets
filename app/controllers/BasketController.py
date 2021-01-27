@@ -51,7 +51,7 @@ class AssociateResult(AbstractController):
 
         self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
         targetStore = self._basketAssociationDomainService.getStoreById(query['store_id'])
-        associatedResult = await self._basketAssociationDomainService.associate(
+        vis = await self._basketAssociationDomainService.associate(
             query['store_id'],
             query['date_from'],
             query['date_to']
