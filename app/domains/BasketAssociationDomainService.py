@@ -3,6 +3,7 @@ from app.common.managers import SessionManager
 from app.common.utils import DictionaryUtil
 
 from app.models.DailyBasketList import DailyBasketList
+from app.models.Products import Product
 
 from app.entities.Fpgrowth import Fpgrowth
 from app.entities.VisJs import VisJs
@@ -48,29 +49,60 @@ class BasketAssociationDomainService(AbstractDomainService):
         for dailyBasketListModel in dailyBasketListModelList:
             mergedBasketList += dailyBasketListModel.basketList
         mergedPyfpgrowthEntity = Fpgrowth.createByDataList(mergedBasketList, 0.1)
+        return mergedPyfpgrowthEntity
 
+    async def convertAssociationResultToVisJs(self, fpgrowth):
         vis = None
-        if mergedPyfpgrowthEntity is not None:
+        if fpgrowth is not None:
             # logger.debug("-----merged fpgrowth-----")
             # logger.debug(mergedPyfpgrowthEntity.patterns)
-
-            vis = mergedPyfpgrowthEntity.convertToVisJs()
-            vis = self._setVisNodeLabel(vis)
-            # vis = mergedPyfpgrowthEntity.result
+            vis = fpgrowth.convertToVisJs()
+            vis = await self._setVisNodeLabel(vis)
         
-        # logger.debug("-----analyzed result list-----")
-        # logger.debug(vis)
-        #basket.relationRanking("8000002")
-        
-    #    rules = pyfpgrowth.generate_association_rules(patterns, 0.7)
         return vis
 
-    def _setVisNodeLabel(self, vis):
+    async def _setVisNodeLabel(self, vis):
         productsApi = ProductsApi(self._apiConfig)
         result = VisJs()
         for node in vis.nodeList:
-            productName = productsApi.getProductById(node.id)['productName']
-            node.label = productName
+            product = await Product.filter(
+                contract_id = self.loginAccount.contractId,
+                product_id = node.id
+            ).first()
+            if product is None:
+                productByApi = productsApi.getProductById(node.id)
+                product = await Product.create(
+                    contract_id = self.loginAccount.contractId,
+                    product_id = productByApi['productId'],
+                    name = productByApi['productName']
+                    # color = productByApi['color'],
+                    # size = productByApi['size'],
+                    # price = productByApi['price']
+                )
+            node.label = product.name
             result.nodeList.append(node)
         result.edgeList = vis.edgeList
         return result
+    
+    async def convertAssociationResultToPickUpMessage(self, fpgrowth, storeId, dateFrom, dateTo):
+        storesApi = StoresApi(self._apiConfig)
+        store = storesApi.getStoreById(storeId)
+
+        productFromIdList = [result['id'] for result in fpgrowth.result[0]['from']]
+        productToIdList = [result['id'] for result in fpgrowth.result[0]['to']]
+        productFrom = await Product.filter(
+            contract_id = self.loginAccount.contractId,
+            product_id__in = productFromIdList
+        ).all()
+        productTo = await Product.filter(
+            contract_id = self.loginAccount.contractId,
+            product_id__in = productToIdList
+        ).all()
+        message = {
+            'store': store,
+            'from': dateFrom,
+            'to': dateTo,
+            'productFrom': productFrom,
+            'productTo': productTo,
+        }
+        return message

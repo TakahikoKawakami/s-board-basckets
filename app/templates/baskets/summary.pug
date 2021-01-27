@@ -6,35 +6,35 @@
     hr
     #basket-container
         h2 Pick Up!
-        //- .summary
-        //-     div.
-        //-         {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、<br>
-        //-         {% if pickUpMessage.productFrom == None %}
-        //-         取引が存在しないか、関係性を見つけられませんでした。<br>
-        //-         分析期間を変更して、再度分析してみてください。
+        .summary
+            div.
+                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、<br>
+                {% if pickUpMessage.productFrom == None %}
+                取引が存在しないか、関係性を見つけられませんでした。<br>
+                分析期間を変更して、再度分析してみてください。
             
-        //-         {% else %}
-        //-         <br>
-        //-     .summary__productFrom.
-        //-         (
-        //-         {% for product in pickUpMessage.productFrom %}
-        //-         {{product.label}}, 
-        //-         {% endfor %}
-        //-         )
-        //-     div.
-        //-         の組み合わせを購入したお客様は、<br>
-        //-     .summary__productTo.
-        //-         (
-        //-         {% for product in pickUpMessage.productTo %}
-        //-         {{product.label}}, 
-        //-         {% endfor %}
-        //-         )
-        //-     div.
-        //-         の組み合わせも一緒に購入されることが多いようです。<br><br>
-        //-         この結果から考えられる人物像に向け、
-        //-         <br>
-        //-         新たな商品や商品配置を考えてみましょう！
-        //-     {% endif %}
+                {% else %}
+                <br>
+            .summary__productFrom.
+                (
+                {% for product in pickUpMessage.productFrom %}
+                {{product.name}}, 
+                {% endfor %}
+                )
+            div.
+                の組み合わせを購入したお客様は、<br>
+            .summary__productTo.
+                (
+                {% for product in pickUpMessage.productTo %}
+                {{product.name}}, 
+                {% endfor %}
+                )
+            div.
+                の組み合わせも一緒に購入されることが多いようです。<br><br>
+                この結果から考えられる人物像に向け、
+                <br>
+                新たな商品や商品配置を考えてみましょう！
+            {% endif %}
 
         hr
         .basket-network 

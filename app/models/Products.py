@@ -1,36 +1,24 @@
-from sqlalchemy import Column, Integer, Unicode, UnicodeText, ForeignKey, Boolean, DateTime, Enum
-from sqlalchemy.orm import relationship, backref
+from tortoise import fields
+from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
 from datetime import datetime
 
-import app.database as db
-from app.common.abstracts.AbstractModel import AbstractModel
-
-
-class Product(AbstractModel):
+class Product(AbstractTortoiseModel):
     """
     商品モデル
     """
-    __tablename__ = "products"
-    product_id = Column(Integer)
-    name = Column(Unicode(255), nullable=False)
-    color = Column(Unicode(64))
-    size = Column(Unicode(64))
-    image = Column(Unicode(511))
-    price = Column(Integer)
-    category_id = Column(Integer)
-    group_code_id = Column(Unicode(255))
-
-    created_at = Column(DateTime)
-    modified_at = Column(DateTime)
-
-    #初期化
-    def __init__(self):
-        pass
+    product_id = fields.IntField(null=False)
+    name = fields.CharField(max_length=255, null=False)
+    color = fields.CharField(max_length=64, null=True)
+    size = fields.CharField(max_length=64, null=True)
+    image = fields.CharField(max_length=511, null=True)
+    price = fields.IntField(null=True)
+    category_id = fields.IntField(null=True)
+    group_code_id = fields.CharField(max_length=255, null=True)
 
 
-    def __repr__(self):
-        return "Product<{}, {}>".format(self.product_id, self.productName)
-
+    class Meta:
+        abstract=False
+        table="products"
 
     @property
     def productId(self) ->int:
