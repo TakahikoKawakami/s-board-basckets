@@ -6,10 +6,6 @@
     .container
         form(action="associate/result", method="get")
             //- {{ form.hidden_tag() }}
-            //- div(style="margin: 10px;")
-            //-     {% for error in form.storeField.errors %}
-            //-     span(style="color: var(--color__danger);") {{error}}<br>
-            //-     {% endfor %}
             //-     {% for error in form.dateFromField.errors %}
             //-     span(style="color: var(--color__danger);") {{error}}<br>
             //-     {% endfor %}
@@ -17,6 +13,10 @@
             //-     span(style="color: var(--color__danger);") {{error}}<br>
             //-     {% endfor %}
 
+            div(style="margin: 10px;")
+                {% for error in message._schema %}
+                span(style="color: var(--color__danger);") {{error}}<br>
+                {% endfor %}
             .form__group
                 div 分析する店舗は？
                 select#select-store(name='store_id')
@@ -25,13 +25,19 @@
                     option(value=store.storeId) {{ store.storeId }} - {{ store.storeName }}
                     {% endfor %}
             .from__group
-                dev いつから分析する？
-                label(for="search-from") 分析開始日
+                label(for="search-from") いつから分析する？
                 input#search-from.datepicker(name="date_from", placeholder="")
+                div(style="margin: 10px;")
+                    {% for error in message.date_from %}
+                    span(style="color: var(--color__danger);") {{error}}<br>
+                    {% endfor %}
             .from__group
-                dev いつまで分析する？
-                label(for="search-to") 分析終了日
+                label(for="search-to") いつまで分析する？
                 input#search-to.datepicker(name="date_to", placeholder="")
+                div(style="margin: 10px;")
+                    {% for error in message.date_to %}
+                    span(style="color: var(--color__danger);") {{error}}<br>
+                    {% endfor %}
 
             button(type="submit") 分析開始
 

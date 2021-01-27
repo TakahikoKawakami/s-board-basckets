@@ -21,13 +21,15 @@ class Associate(AbstractController):
             return
         if SessionManager.has(req.session, SessionManager.KEY_ERROR_MESSAGES):
             messages = SessionManager.get(req.session, SessionManager.KEY_ERROR_MESSAGES)
+            SessionManager.remove(resp.session, SessionManager.KEY_ERROR_MESSAGES)
+            messages = messages
         else:
             messages = ""
 
         self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
         storeList = self._basketAssociationDomainService.getStoreList()
         resp.html =  templates.render(
-            'baskets/index.pug',
+            'baskets/association/index.pug',
             contractId = self._loginAccount.contractId,
             message = messages,
             stores = storeList
@@ -68,7 +70,7 @@ class AssociateResult(AbstractController):
         visDict = vis.toDict()
 
         resp.html = templates.render(
-            "baskets/summary.pug",
+            "baskets/association/result.pug",
             contractId = self._loginAccount.contractId,
             store = targetStore,
             search_from = query['date_from'],

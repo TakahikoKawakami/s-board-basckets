@@ -88,16 +88,19 @@ class BasketAssociationDomainService(AbstractDomainService):
         storesApi = StoresApi(self._apiConfig)
         store = storesApi.getStoreById(storeId)
 
-        productFromIdList = [result['id'] for result in fpgrowth.result[0]['from']]
-        productToIdList = [result['id'] for result in fpgrowth.result[0]['to']]
-        productFrom = await Product.filter(
-            contract_id = self.loginAccount.contractId,
-            product_id__in = productFromIdList
-        ).all()
-        productTo = await Product.filter(
-            contract_id = self.loginAccount.contractId,
-            product_id__in = productToIdList
-        ).all()
+        productFrom = None
+        productTo = None
+        if len(fpgrowth.result) > 0:
+            productFromIdList = [result['id'] for result in fpgrowth.result[0]['from']]
+            productToIdList = [result['id'] for result in fpgrowth.result[0]['to']]
+            productFrom = await Product.filter(
+                contract_id = self.loginAccount.contractId,
+                product_id__in = productFromIdList
+            ).all()
+            productTo = await Product.filter(
+                contract_id = self.loginAccount.contractId,
+                product_id__in = productToIdList
+            ).all()
         message = {
             'store': store,
             'from': dateFrom,
