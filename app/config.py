@@ -5,10 +5,10 @@ from os.path import join, dirname
 from pathlib import Path
 from dotenv import load_dotenv
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-
+# background
 backgroundQueue = responder.background.BackgroundQueue()
+
+# template
 templates = responder.templates.Templates(
     directory="app/templates"
 )
@@ -22,7 +22,6 @@ templates._env.filters.update(
     css=static_filter
 )
 templates._env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
-
 
 """original"""
 BASE_DIR2 = os.path.dirname(os.path.abspath(__file__))
@@ -65,6 +64,13 @@ class AppConfig(object):
     ENV_DIVISION_STAGING = 'STAGING'
     ENV_DIVISION_PRODUCTION = 'PROD'
     
+    DATABASE_CONNECTION = os.environ.get('DB_CONNECTION') # mysql, sqlite3, etc.
+    DATABASE_USERNAME = os.environ.get('DB_USERNAME')
+    DATABASE_PASSWORD = os.environ.get('DB_PASSWORD')
+    DATABASE_HOST = os.environ.get('DB_HOST')
+    DATABASE_PORT = os.environ.get('DB_PORT')
+    DATABASE_NAME = os.environ.get('DB_NAME')
+
     if (ENV_DIVISION == ENV_DIVISION_PRODUCTION):
         DEBUG = False
         TESTING = False
@@ -75,16 +81,4 @@ class AppConfig(object):
         DEBUG = True
         TESTING = True
     
-        DATABASE_NAME = os.environ.get('DB_NAME')
-        DATABASE_FILE = BASE_DIR / DATABASE_NAME
-        DATABASE_ENGINE = create_engine('sqlite:///' + str(DATABASE_FILE), convert_unicode=True)
-        DATABASE_URI = 'sqlite://' + str(DATABASE_NAME)
-        SQLALCHEMY_DATABASE_URI = DATABASE_URI
-
-        DATABASE_CONNECTION = os.environ.get('DB_CONNECTION') # mysql, sqlite3, etc.
-        DATABASE_USERNAME = os.environ.get('DB_USERNAME')
-        DATABASE_PASSWORD = os.environ.get('DB_PASSWORD')
-        DATABASE_HOST = os.environ.get('DB_HOST')
-        DATABASE_PORT = os.environ.get('DB_PORT')
-        DATABASE_NAME = os.environ.get('DB_NAME')
 

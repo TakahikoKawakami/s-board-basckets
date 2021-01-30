@@ -9,17 +9,14 @@ from app.entities.Fpgrowth import Fpgrowth
 from app.entities.VisJs import VisJs
 
 import datetime
-import logging
 
 from app.lib.Smaregi.API.POS.StoresApi import StoresApi
 from app.lib.Smaregi.API.POS.ProductsApi import ProductsApi
 
 class BasketAssociationDomainService(AbstractDomainService):
     def __init__(self, loginAccount):
-        self._logger = logging.getLogger(__name__)
-        self.withSmaregiApi(loginAccount.accessToken.accessToken, loginAccount.contractId)
-
-        self.loginAccount = loginAccount
+        super().__init__(loginAccount)
+        self.withSmaregiApi(self._loginAccount.accessToken.accessToken, self._loginAccount.contractId)
 
     def getStoreById(self, storeId):
         _storesApi = StoresApi(self._apiConfig)
@@ -39,7 +36,7 @@ class BasketAssociationDomainService(AbstractDomainService):
 
         # 分析期間の日別バスケットリストを取得
         dailyBasketListModelList = await DailyBasketList.filter(
-            contract_id = self.loginAccount.contractId,
+            contract_id = self._loginAccount.contractId,
             store_id = targetStoreId,
             target_date__range = (targetDateFrom, targetDateTo)
         )
@@ -66,13 +63,13 @@ class BasketAssociationDomainService(AbstractDomainService):
         result = VisJs()
         for node in vis.nodeList:
             product = await Product.filter(
-                contract_id = self.loginAccount.contractId,
+                contract_id = self._loginAccount.contractId,
                 product_id = node.id
             ).first()
             if product is None:
                 productByApi = productsApi.getProductById(node.id)
                 product = await Product.create(
-                    contract_id = self.loginAccount.contractId,
+                    contract_id = self._loginAccount.contractId,
                     product_id = productByApi['productId'],
                     name = productByApi['productName']
                     # color = productByApi['color'],
@@ -94,11 +91,11 @@ class BasketAssociationDomainService(AbstractDomainService):
             productFromIdList = [result['id'] for result in fpgrowth.result[0]['from']]
             productToIdList = [result['id'] for result in fpgrowth.result[0]['to']]
             productFrom = await Product.filter(
-                contract_id = self.loginAccount.contractId,
+                contract_id = self._loginAccount.contractId,
                 product_id__in = productFromIdList
             ).all()
             productTo = await Product.filter(
-                contract_id = self.loginAccount.contractId,
+                contract_id = self._loginAccount.contractId,
                 product_id__in = productToIdList
             ).all()
         message = {

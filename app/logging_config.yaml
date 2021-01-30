@@ -1,0 +1,27 @@
+version: 1
+formatters:
+    default:
+        format: "[%(asctime)s] %(levelname)s in %(module)s(%(lineno)d): %(message)s"
+    application:
+        format: "[%(asctime)s][%(contractId)s][%(levelname)-5s] in %(module)s::%(funcName)s(%(lineno)d): %(message)s"
+handlers: 
+    console:
+        class: logging.StreamHandler
+        stream: ext://sys.stdout
+        formatter: default
+    application:
+        class: logging.handlers.TimedRotatingFileHandler
+        formatter: application
+        filename: log/application.log
+        when: MIDNIGHT
+        backupCount: 31
+        encoding: "utf-8"
+loggers:
+    appLogger:
+        level: DEBUG
+        handlers: [console,application]
+        propagate: no
+root:
+    level: DEBUG
+    handlers: [console]
+disable_existing_loggers": false

@@ -25,6 +25,8 @@ html(lang="en")
                             img(src="{{ 'image/logo.jpg' | css }}", alt="logo", style="height:32px;")
                         .menu-container 
                             {{ contractId }}
+                            a.menu-item(href="https://from-garage.work/privacy_policy.html") プライバシーポリシー
+                            a.menu-item(href="https://from-garage.work/contact_us.html") お問い合わせ
                             a.menu-item(href="/accounts/logout") ログアウト
             main
                 {% block body %}

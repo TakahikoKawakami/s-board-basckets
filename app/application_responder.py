@@ -31,15 +31,3 @@ api.templates._env.filters.update(
     css=static_filter
 )
 add_routers(api)
-
-
-# @api.route('/webhook')
-# async def webhook(req, resp):
-#     @api.background.task
-#     def receivedWebhook(_header, _body):
-#         WebhookRouter.recieved(_header, _body)
-#     _header = req.headers
-#     _body = await req.media()
-#     receivedWebhook(_header, _body)
-#     resp.status_code = 200
-

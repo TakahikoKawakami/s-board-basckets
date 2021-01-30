@@ -9,10 +9,8 @@ from app.models.DailyBasketList import DailyBasketList
 
 class BasketDomainService(AbstractDomainService):
     def __init__(self, loginAccount):
-        self._logger = logging.getLogger(__name__)
+        super().__init__(loginAccount)
         self.withSmaregiApi(loginAccount.accessToken.accessToken, loginAccount.contractId)
-
-        self.loginAccount = loginAccount
 
     async def registerBasketByTransactionHeadId(self, transactionHeadId):
         _transactionsApi = TransactionsApi(self._apiConfig)

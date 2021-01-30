@@ -1,7 +1,6 @@
-from marshmallow import ValidationError
-
-import logging
 import datetime
+
+from marshmallow import ValidationError
 
 from app.config import templates
 from app.common.managers import SessionManager, HttpManager
@@ -17,6 +16,7 @@ class Associate(AbstractController):
         self._basketAssociationDomainService = None
 
     async def on_get(self, req, resp):
+        self._logger.info('access associate')
         if HttpManager.bookRedirect(resp):
             return
         if SessionManager.has(req.session, SessionManager.KEY_ERROR_MESSAGES):
@@ -42,6 +42,7 @@ class AssociateResult(AbstractController):
 
     async def on_get(self, req, resp):
         if HttpManager.bookRedirect(resp):
+            self._logger.info('redirect')
             return
         try:
             schema = BasketValidators.AccosiationCondition()

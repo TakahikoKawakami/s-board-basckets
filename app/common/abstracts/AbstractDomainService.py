@@ -2,25 +2,16 @@ from datetime import datetime
 
 import app.database as db
 
+from app.logger import ApplicationLogger
 from app.config import AppConfig
 from app.lib.Smaregi.config import config as SmaregiConfig
 
 class AbstractDomainService():
-    def __init__(self, session):
+    def __init__(self, account):
         self._appConfig = None
         self._apiConfig = None
-        self._session = session
-
-
-    @staticmethod
-    def commit():
-        db.session.commit()
-        
-
-    @staticmethod
-    def rollback():
-        db.session.rollback()
-    
+        self._loginAccount = account
+        self._logger = ApplicationLogger(self._loginAccount)
 
     def withSmaregiApi(self, _accessToken, _contractId):
         self._appConfig = AppConfig()

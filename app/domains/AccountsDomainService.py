@@ -13,12 +13,10 @@ from app.lib.Smaregi.entities.Authorize import *
 
 class AccountsDomainService(AbstractDomainService):
     def __init__(self, session):
-        super().__init__(session)
-
-        self._logger = logging.getLogger(__name__)
-        self.withSmaregiApi(None, None)
-
         self.loginAccount = None # [Account]
+        super().__init__(self.loginAccount)
+        self._session = session
+        self.withSmaregiApi(None, None)
 
     def hasContractId(self) -> bool:
         return SessionManager.has(self._session, SessionManager.KEY_CONTRACT_ID)
@@ -29,7 +27,6 @@ class AccountsDomainService(AbstractDomainService):
         model.createdAt = datetime.datetime.now()
         model.modifiedAt = datetime.datetime.now()
         return model.register()
-
 
     @staticmethod
     def getActiveAccountList():
