@@ -17,13 +17,6 @@
                 {% for error in message._schema %}
                 span(style="color: var(--color__danger);") {{error}}<br>
                 {% endfor %}
-            .form__group
-                div 分析する店舗は？
-                select#select-store(name='store_id')
-                    option(value='', disabled) 店舗選択
-                    {% for store in stores %}
-                    option(value=store.storeId) {{ store.storeId }} - {{ store.storeName }}
-                    {% endfor %}
             .from__group
                 label(for="search-from") いつから分析する？
                 input#search-from.datepicker(name="date_from", placeholder="")

@@ -54,9 +54,9 @@
         .modal__background.modal__close
             .modal__content
                 .modal__content__inner
-                    img(src="{{ 'image/explain/network_1.PNG' | css }}", alt="", style="width:80%;")
+                    img(src="{{ 'image/explain/network_1.PNG' | css }}", alt="", style="width:100%;")
                     hr
-                    img(src="{{ 'image/explain/network_2.PNG' | css }}", alt="", style="width:80%;")
+                    img(src="{{ 'image/explain/network_2.PNG' | css }}", alt="", style="width:100%;")
                     hr
                     button.modal__close とじる
 
@@ -70,11 +70,15 @@ link(rel="stypesheet", href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/v
 script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js")
 script.
     $(function() {
-        $('.modal__open').click(function(i) {
-            $('.modal').fadeIn(200);
+        $('.modal__open').click(function(event) {
+            event.stopPropagation()
+            $('#network-modal').fadeIn(200);
         });
-        $('.modal__close').click(function(i) {
-            $('.modal').fadeOut(200);
+        $('.modal__content__inner').click(function(event) {
+            event.stopPropagation()
+        });
+        $('.modal__close').click(function(event) {
+            $('#network-modal').fadeOut(200);
         });
     })
 script.

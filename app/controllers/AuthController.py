@@ -4,17 +4,13 @@ from logging import getLogger
 from app.models import Accounts as models
 
 """TODO: lib.Smaregiをpip installでimportできるようにする"""
-# import sys
-# from pathlib import Path
-# root_path = str(Path('__file__').resolve().parent.parent.parent)
-# sys.path.append(root_path)  # ルートディレクトリを環境変数に一時的に取り込む
 from app.lib.Smaregi.config import config as SmaregiConfig
 from app.lib.Smaregi.API.Authorize import AuthorizeApi
 
 
 from app.common.managers import SessionManager
 from app.common.utils import DictionaryUtil
-from app.domains.AccountsDomainService import AccountsDomainService
+from app.domains.AccountDomainService import AccountDomainService
 
 from app.config import AppConfig
 
@@ -44,8 +40,8 @@ async def login(req, resp):
         resp.redirect('/accounts/authorize', status_code=303)
         return
 
-    accountsDomainService = AccountsDomainService(req.session).withSmaregiApi(None, None)
-    account = await accountsDomainService.loginByCodeAndState(code, state)
+    accountDomainService = AccountDomainService(req.session).withSmaregiApi(None, None)
+    account = await accountDomainService.loginByCodeAndState(code, state)
     
     SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
     resp.redirect('/baskets/associate', status_code=303)

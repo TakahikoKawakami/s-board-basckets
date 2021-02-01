@@ -6,6 +6,7 @@ from app.lib.Smaregi.API.POS.TransactionsApi import TransactionsApi
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.entities.Baskets import Basket
 from app.models.DailyBasketList import DailyBasketList
+from app.models.Accounts import AccountSetting
 
 class BasketDomainService(AbstractDomainService):
     def __init__(self, loginAccount):
@@ -24,7 +25,7 @@ class BasketDomainService(AbstractDomainService):
 
         _dailyBasketListTuple = await DailyBasketList.get_or_create(
             {
-                "contract_id": self.loginAccount.contractId,
+                "contract_id": self._loginAccount.contractId,
                 "store_id": _basket.storeId,
                 "target_date": _basket.targetDate
             }
@@ -34,3 +35,10 @@ class BasketDomainService(AbstractDomainService):
         _dailyBasketList.appendBasket(_basket)
         await _dailyBasketList.save()
 
+    async def getDailyBasketListByMonth(self, month: int):
+        accountSetting = await AccountSetting.filter(contract_id = self._loginAccount.contractId).first()
+        storeId = accountSetting.display_store_id
+        _dailyBasketList = await DailyBasketList.filter(
+            contract_id = self._loginAccount.contractId,
+            target_date__range = (targetDateFrom, targetDateTo)
+        )

@@ -1,4 +1,4 @@
-from app.domains.AccountsDomainService import AccountsDomainService
+from app.domains.AccountDomainService import AccountDomainService
 from app.domains.BasketDomainService import BasketDomainService
 # from app.domains.TransactionsRepository import TransactionsRepository
 # from app.domains.BasketAnalysesRepository import BasketAnalysesRepository
@@ -12,9 +12,9 @@ class TransactionsWebhook():
 
     async def received(self, contractId, event, body):
         print('transaction webhook received')
-        _accountsDomainService = AccountsDomainService(None)
-        await _accountsDomainService.loginByContractId(contractId)
-        self._accessAccount = _accountsDomainService.loginAccount
+        _accountDomainService = AccountDomainService(None)
+        await _accountDomainService.loginByContractId(contractId)
+        self._accessAccount = _accountDomainService.loginAccount
         print(self._accessAccount)
         if body['action'] == self.ACTION_CREATED:
             _targetTransactionHeadList = body['transactionHeadIds']

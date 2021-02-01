@@ -5,6 +5,27 @@ from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
 from app.entities.AccessToken import AccessToken
 
 
+class AccountSetting(AbstractTortoiseModel):
+    """
+    アカウント設定モデル
+    """
+    display_store_id = fields.IntField(null=True)
+
+    account: fields.ReverseRelation["Account"]
+
+    class Meta:
+        abstract=False
+        table="account_setting"
+
+    @property
+    def displayStoreId(self):
+        return self.display_store_id
+
+    @displayStoreId.setter
+    def displayStoreId(self, val):
+        self.display_store_id = val
+
+
 class Account(AbstractTortoiseModel):
     """
     アカウントモデル
@@ -15,6 +36,11 @@ class Account(AbstractTortoiseModel):
     access_token = fields.CharField(max_length=1024)
     expiration_date_time = fields.DatetimeField()
     status = fields.CharField(max_length=16)
+    
+    account_setting: fields.OneToOneRelation[AccountSetting] = fields.OneToOneField(
+        "models.AccountSetting",
+        related_name="account"
+    )
 
     class Meta:
         abstract=False
@@ -43,10 +69,17 @@ class Account(AbstractTortoiseModel):
         return self.expiration_date_time
 
     @classmethod
-    def create(cls, contractId, accessToken):
-        return super().create(
+    async def create(cls, contractId, accessToken):
+        newAccountSetting = await AccountSetting.create(
+            contract_id = contractId
+        )
+
+        newAccount = await super().create(
             contract_id = contractId,
             access_token = accessToken.accessToken,
             expiration_date_time = accessToken.expirationDatetime,
-            status = cls.STATUS_START
+            status = cls.STATUS_START,
+            account_setting = newAccountSetting
         )
+        return newAccount
+

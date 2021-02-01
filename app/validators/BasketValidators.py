@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 from marshmallow import Schema, fields, validates, validates_schema, ValidationError
 
 class AccosiationCondition(Schema):
-    store_id = fields.String(required=True)
+    # store_id = fields.String(required=True)
     date_from = fields.Date(required=True)
     date_to = fields.Date(required=True)
 

@@ -29,7 +29,7 @@ db_url = "{}://{}:{}@{}:{}/{}".format(
 TORTOISE_ORM = {
     "connections": {"default":db_url},
     "apps": {
-        "models": {
+        "models": { # app名. relationのrelated_nameでは、{この名称}.{modelクラス名}
             "models": [
                 "app.models",
                 "aerich.models" # 最後に必要
@@ -43,6 +43,7 @@ TORTOISE_ORM = {
 
 async def init():
     await Tortoise.init(TORTOISE_ORM)
+    Tortoise.init_models(['app.models'], 'models') # necessary for relations
 
 async def close():
     await Tortoise.close_connections()

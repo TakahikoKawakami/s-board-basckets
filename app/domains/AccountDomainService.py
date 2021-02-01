@@ -3,15 +3,16 @@ from app.common.managers import SessionManager
 from app.common.utils import DictionaryUtil
 
 import app.database as db
-from app.models import Account
+from app.models import Account, AccountSetting, Store
 
 import datetime
 import logging
 
 from app.lib.Smaregi.API.Authorize import AuthorizeApi
+from app.lib.Smaregi.API.POS.StoresApi import StoresApi
 from app.lib.Smaregi.entities.Authorize import *
 
-class AccountsDomainService(AbstractDomainService):
+class AccountDomainService(AbstractDomainService):
     def __init__(self, session):
         self.loginAccount = None # [Account]
         super().__init__(self.loginAccount)
@@ -20,25 +21,6 @@ class AccountsDomainService(AbstractDomainService):
 
     def hasContractId(self) -> bool:
         return SessionManager.has(self._session, SessionManager.KEY_CONTRACT_ID)
-
-    def registerAccount(self, model):
-        if model.contractId is None:
-            model.contractId = SessionManager.get(self._session, SessionManager.KEY_CONTRACT_ID)
-        model.createdAt = datetime.datetime.now()
-        model.modifiedAt = datetime.datetime.now()
-        return model.register()
-
-    @staticmethod
-    def getActiveAccountList():
-        result = db.session.query(Account)\
-            .filter(Account.status == Account.STATUS_START).all()
-        return result
-
-    @staticmethod
-    def getByContractId(contractId):
-        result = db.session.query(Account)\
-            .filter(Account.contract_id == contractId).first()
-        return result
 
     async def prepareForAccessProcessing(self):
         if self._session is None:
@@ -97,15 +79,28 @@ class AccountsDomainService(AbstractDomainService):
             self._setAccessTokenDataToSession(_accessTokenForUpdate)
             self.loginAccount = _accountModel
             return
-
+        
         # それでもなければ取得、dbとセッションに保存
+        await self.signUpAccount(_contractId)
+        return
+    
+    async def signUpAccount(self, _contractId):
         _accessTokenByCreation = self.getAccessTokenByContractId(_contractId)
         self.loginAccount = await Account.create(
             contractId=_contractId,
             accessToken = _accessTokenByCreation
         )
+        self.withSmaregiApi(self.loginAccount.accessToken.accessToken, self.loginAccount.contractId)
+        storesApi = StoresApi(self._apiConfig)
+        storeList = storesApi.getStoreList()
+        for store in storeList:
+            newStore = await Store.create(
+                contract_id = self.loginAccount.contractId,
+                store_id = store["storeId"],
+                name = store["storeName"]
+            )
+        
         self._setAccessTokenDataToSession(_accessTokenByCreation)
-        return
     
     def _setAccessTokenDataToSession(self, accessToken):
         if self._session is not None:
@@ -119,3 +114,8 @@ class AccountsDomainService(AbstractDomainService):
                 SessionManager.KEY_ACCESS_TOKEN_EXPIRATION_DATETIME, 
                 datetime.datetime.strftime(accessToken.expirationDatetime, '%Y-%m-%d %H:%M:%S %z')
             )
+
+    async def saveAccountSetting(self, request):
+        accountSetting = await AccountSetting.filter(contract_id = self.loginAccount.contractId).first()
+        accountSetting.displayStoreId = request['display_store_id']
+        await accountSetting.save()

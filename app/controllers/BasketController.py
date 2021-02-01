@@ -5,11 +5,23 @@ from marshmallow import ValidationError
 from app.config import templates
 from app.common.managers import SessionManager, HttpManager
 from app.common.abstracts.AbstractController import AbstractController
-from app.domains.AccountsDomainService import AccountsDomainService
+from app.domains.AccountDomainService import AccountDomainService
 from app.domains.BasketAssociationDomainService import BasketAssociationDomainService
+from app.domains.BasketDomainService import BasketDomainService
 from app.validators import BasketValidators
 
 
+class DailyBasket(AbstractController):
+    def __init__(self) ->None:
+        super().__init__()
+        self._basketDomainService = None
+
+    async def on_get(self, req, resp):
+        self._logger.info('access DailyBasket')
+        self._basketDomainService = BasketDomainService(self._loginAccount)
+        nowMonth = datetime.datetime.now().month
+        dailyBasketList = self._basketDomainService.getDailyBasketListByMonth(nowMonth)
+        
 class Associate(AbstractController):
     def __init__(self) -> None:
         super().__init__()
@@ -17,6 +29,7 @@ class Associate(AbstractController):
 
     async def on_get(self, req, resp):
         self._logger.info('access associate')
+        self._logger.info(await self._loginAccount.account_setting)
         if HttpManager.bookRedirect(resp):
             return
         if SessionManager.has(req.session, SessionManager.KEY_ERROR_MESSAGES):
@@ -27,12 +40,11 @@ class Associate(AbstractController):
             messages = ""
 
         self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
-        storeList = self._basketAssociationDomainService.getStoreList()
         resp.html =  templates.render(
             'baskets/association/index.pug',
             contractId = self._loginAccount.contractId,
             message = messages,
-            stores = storeList
+            stores = self._storeList
         )
 
 class AssociateResult(AbstractController):
@@ -77,6 +89,7 @@ class AssociateResult(AbstractController):
             search_from = query['date_from'],
             search_to = query['date_to'],
             vis = visDict,
-            pickUpMessage = pickUpMessage
+            pickUpMessage = pickUpMessage,
+            stores = self._storeList
         )
         return
