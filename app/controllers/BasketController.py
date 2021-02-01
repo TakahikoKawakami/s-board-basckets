@@ -42,7 +42,7 @@ class Associate(AbstractController):
         self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
         resp.html =  templates.render(
             'baskets/association/index.pug',
-            contractId = self._loginAccount.contractId,
+            displayStoreId = self._loginAccount.account_setting.displayStoreId,
             message = messages,
             stores = self._storeList
         )

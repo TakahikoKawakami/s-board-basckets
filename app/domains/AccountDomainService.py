@@ -32,10 +32,16 @@ class AccountDomainService(AbstractDomainService):
             SessionManager.get(self._session, SessionManager.KEY_ACCESS_TOKEN),
             SessionManager.get(self._session, SessionManager.KEY_ACCESS_TOKEN_EXPIRATION_DATETIME)
         )
+        _targetStoreId = SessionManager.get(self._session, SessionManager.KEY_TARGET_STORE)
         if (_accessTokenBySession.isAccessTokenAvailable()):
             self.loginAccount = Account()
             self.loginAccount.contractId = _contractId
             self.loginAccount.accessToken = _accessTokenBySession
+
+            setting = AccountSetting()
+            setting.displayStoreId = _targetStoreId
+            self.loginAccount.account_setting = setting
+            
             return
         # セッションになくDBにあれば（webhookなどの通信）それを返す
         # それでもなければ取得、dbとセッションに保存
@@ -119,3 +125,6 @@ class AccountDomainService(AbstractDomainService):
         accountSetting = await AccountSetting.filter(contract_id = self.loginAccount.contractId).first()
         accountSetting.displayStoreId = request['display_store_id']
         await accountSetting.save()
+        SessionManager.set(self._session, SessionManager.KEY_TARGET_STORE, accountSetting.displayStoreId)
+        # json = await accountSetting.serialize
+        return

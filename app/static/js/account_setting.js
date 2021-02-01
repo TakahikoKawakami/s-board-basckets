@@ -6,8 +6,8 @@ $('.saved').click(function() {
         display_store_id: storeId,
     })
     .then(function (response) {
-        alert(response.hello)
-        console.log(response);
+        alert(response.status);
+        location.reload();
     })
     .catch(function (error) {
         console.log(error);

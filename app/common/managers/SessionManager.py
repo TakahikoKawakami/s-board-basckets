@@ -1,6 +1,8 @@
+KEY_ACCOUNT = "account"
 KEY_CONTRACT_ID = "contract_id"
 KEY_ACCESS_TOKEN = "access_token"
 KEY_ACCESS_TOKEN_EXPIRATION_DATETIME = "access_token_expiration_datetime"
+KEY_TARGET_STORE = "target_store_id"
 KEY_QUERY_PARAMS_FOR_REDIRECT = "query_params_for_redirect"
 KEY_ERROR_MESSAGES = "error_message_for_redirect"
 

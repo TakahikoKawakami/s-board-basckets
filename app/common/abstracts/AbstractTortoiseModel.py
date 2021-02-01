@@ -1,4 +1,5 @@
 from tortoise import Model, fields
+from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
 
 from datetime import datetime
 from pprint import pprint
@@ -23,6 +24,11 @@ class AbstractTortoiseModel(Model):
     def __repr__(self):
         pass
 
+    @property
+    async def serialize(self):
+        selfPydantic = pydantic_model_creator(self.__class__)
+        p = await selfPydantic.from_tortoise_orm(self)
+        return p.json(indent=4)
 
     @property
     def contractId(self):

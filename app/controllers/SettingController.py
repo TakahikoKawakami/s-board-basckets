@@ -15,6 +15,9 @@ class AccountSetting(AbstractController):
         self._logger.info('post AccountSetting')
         request = await req.media()
         await self._accountDomainService.saveAccountSetting(request)
+        resp.media = {
+            "status": 200
+        }
         return
         # self._basketDomainService = BasketDomainService(self._loginAccount)
         # nowMonth = datetime.datetime.now().month
