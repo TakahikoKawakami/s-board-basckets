@@ -16,3 +16,10 @@ class StoreDomainService(AbstractDomainService):
         return await Store.filter(
             contract_id = self._loginAccount.contractId
         ).all()
+
+    async def getDisplayStore(self):
+        accountSetting = await self._loginAccount.accountSetting
+        return await Store.filter(
+            contract_id = self._loginAccount.contractId,
+            store_id = accountSetting.displayStoreId
+        ).first()

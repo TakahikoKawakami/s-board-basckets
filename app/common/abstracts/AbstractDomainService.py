@@ -12,6 +12,13 @@ class AbstractDomainService():
         self._apiConfig = None
         self._loginAccount = account
         self._logger = None
+    
+    @classmethod
+    async def createInstance(cls, account):
+        domainService = cls(account)
+        domainService._logger = await logger.getLogger(account)
+        return domainService
+
 
     def withSmaregiApi(self, _accessToken, _contractId):
         self._appConfig = AppConfig()

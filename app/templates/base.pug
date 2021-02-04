@@ -25,7 +25,7 @@ html(lang="ja")
                         div
                             img(src="{{ 'image/logo.jpg' | css }}", alt="logo", style="height:32px;")
                         .menu-container 
-                            {{ displayStoreId }}
+                            {{ displayStore.name }}
                             a#for-setting-modal.menu-item.setting_modal__open(style="cursor:pointer") 設定
                             a.menu-item(href="https://from-garage.work/privacy_policy.html") プライバシーポリシー
                             a.menu-item(href="https://from-garage.work/contact_us.html") お問い合わせ
@@ -43,7 +43,7 @@ html(lang="ja")
                             select#select-store(name='display_store_id')
                                 option(value='', disabled) 店舗選択
                                 {% for store in stores %}
-                                {% if (store.storeId == displayStoreId) %}
+                                {% if (store.storeId == displayStore.storeId) %}
                                 option(value=store.storeId, selected) {{ store.storeId }} - {{ store.name }}
                                 {% else %}
                                 option(value=store.storeId) {{ store.storeId }} - {{ store.name }}

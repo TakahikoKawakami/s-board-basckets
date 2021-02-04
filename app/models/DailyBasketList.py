@@ -35,7 +35,7 @@ class DailyBasketList(AbstractTortoiseModel):
 
     @property
     def basketList(self) -> list:
-        if self.basket_list is None:
+        if self.basket_list is None or self.basket_list == []:
             return []
         _result = ujson.loads(self.basket_list)
         return _result

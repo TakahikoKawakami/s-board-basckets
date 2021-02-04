@@ -30,7 +30,7 @@ class Associate(AbstractController):
     async def on_get(self, req, resp):
         self._logger.info('access associate')
         self._logger.info(await self._loginAccount.accountSetting)
-        if HttpManager.bookRedirect(resp):
+        if HttpManager.isBookingRedirect(resp):
             return
         if SessionManager.has(req.session, SessionManager.KEY_ERROR_MESSAGES):
             messages = SessionManager.get(req.session, SessionManager.KEY_ERROR_MESSAGES)
@@ -39,15 +39,11 @@ class Associate(AbstractController):
         else:
             messages = ""
 
-        self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
-        accountSetting = await self._loginAccount.accountSetting
-        displayStoreId = accountSetting.displayStoreId
-
-        resp.html =  templates.render(
+        await HttpManager.render(
+            resp,
+            self._loginAccount, 
             'baskets/association/index.pug',
-            displayStoreId = int(displayStoreId),
-            message = messages,
-            stores = self._storeList
+            messages = messages
         )
 
 class AssociateResult(AbstractController):
@@ -56,7 +52,7 @@ class AssociateResult(AbstractController):
         self._basketAssociationDomainService = None
 
     async def on_get(self, req, resp):
-        if HttpManager.bookRedirect(resp):
+        if HttpManager.isBookingRedirect(resp):
             self._logger.info('redirect')
             return
         try:
@@ -67,10 +63,9 @@ class AssociateResult(AbstractController):
             resp.redirect('/baskets/associate', status_code=302)
             return
 
-        self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
-        targetStore = self._basketAssociationDomainService.targetStore
+        self._basketAssociationDomainService = await BasketAssociationDomainService.createInstance(self._loginAccount)
+        targetStore = await self._basketAssociationDomainService.targetStore
         fpgrowth = await self._basketAssociationDomainService.associate(
-            targetStore["storeId"],
             query['date_from'],
             query['date_to']
         )
@@ -85,15 +80,13 @@ class AssociateResult(AbstractController):
 
         visDict = vis.toDict()
 
-        resp.html = templates.render(
-            "baskets/association/result.pug",
-            contractId = self._loginAccount.contractId,
-            displayStoreId = self._loginAccount.account_setting.displayStoreId,
-            store = targetStore,
+        await HttpManager.render(
+            resp = resp,
+            account = self._loginAccount,
+            path = "baskets/association/result.pug",
             search_from = query['date_from'],
             search_to = query['date_to'],
             vis = visDict,
             pickUpMessage = pickUpMessage,
-            stores = self._storeList
         )
         return

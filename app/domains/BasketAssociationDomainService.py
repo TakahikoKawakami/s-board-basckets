@@ -19,9 +19,10 @@ class BasketAssociationDomainService(AbstractDomainService):
         self.withSmaregiApi(self._loginAccount.accessToken.accessToken, self._loginAccount.contractId)
 
     @property
-    def targetStore(self):
+    async def targetStore(self):
         _storesApi = StoresApi(self._apiConfig)
-        _apiResponse = _storesApi.getStoreById(self._loginAccount.account_setting.displayStoreId)
+        accountSetting = await self._loginAccount.accountSetting
+        _apiResponse = _storesApi.getStoreById(accountSetting.displayStoreId)
         return _apiResponse
 
     def getStoreList(self):
@@ -29,7 +30,9 @@ class BasketAssociationDomainService(AbstractDomainService):
         _apiResponse = _storesApi.getStoreList()
         return _apiResponse
 
-    async def associate(self, targetStoreId: int, targetDateFrom, targetDateTo):
+    async def associate(self, targetDateFrom, targetDateTo):
+        accountSetting = await self._loginAccount.accountSetting
+        targetStoreId = accountSetting.displayStoreId
         self._logger.info("-----search condition-----")
         self._logger.info("storeId     : " + targetStoreId)
         self._logger.info("search_from : " + targetDateFrom.strftime("%Y-%m-%d"))

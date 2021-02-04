@@ -69,7 +69,7 @@ class Account(AbstractTortoiseModel):
         return self.expiration_date_time
 
     @property
-    async def accountSetting(self):
+    async def accountSetting(self) -> AccountSetting:
         print (type(self.account_setting))
         if type(self.account_setting) == AccountSetting:
             return self.account_setting 
