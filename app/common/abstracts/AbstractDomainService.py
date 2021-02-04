@@ -2,7 +2,7 @@ from datetime import datetime
 
 import app.database as db
 
-from app.logger import ApplicationLogger
+from app import logger
 from app.config import AppConfig
 from app.lib.Smaregi.config import config as SmaregiConfig
 
@@ -11,7 +11,7 @@ class AbstractDomainService():
         self._appConfig = None
         self._apiConfig = None
         self._loginAccount = account
-        self._logger = ApplicationLogger(self._loginAccount)
+        self._logger = None
 
     def withSmaregiApi(self, _accessToken, _contractId):
         self._appConfig = AppConfig()

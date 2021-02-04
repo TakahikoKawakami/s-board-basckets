@@ -18,9 +18,10 @@ class BasketAssociationDomainService(AbstractDomainService):
         super().__init__(loginAccount)
         self.withSmaregiApi(self._loginAccount.accessToken.accessToken, self._loginAccount.contractId)
 
-    def getStoreById(self, storeId):
+    @property
+    def targetStore(self):
         _storesApi = StoresApi(self._apiConfig)
-        _apiResponse = _storesApi.getStoreById(storeId)
+        _apiResponse = _storesApi.getStoreById(self._loginAccount.account_setting.displayStoreId)
         return _apiResponse
 
     def getStoreList(self):

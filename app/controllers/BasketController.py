@@ -65,9 +65,9 @@ class AssociateResult(AbstractController):
             return
 
         self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
-        targetStore = self._basketAssociationDomainService.getStoreById(query['store_id'])
+        targetStore = self._basketAssociationDomainService.targetStore
         fpgrowth = await self._basketAssociationDomainService.associate(
-            query['store_id'],
+            targetStore["storeId"],
             query['date_from'],
             query['date_to']
         )
@@ -75,7 +75,7 @@ class AssociateResult(AbstractController):
         vis = await self._basketAssociationDomainService.convertAssociationResultToVisJs(fpgrowth)
         pickUpMessage = await self._basketAssociationDomainService.convertAssociationResultToPickUpMessage(
             fpgrowth,
-            query['store_id'],
+            targetStore["storeId"],
             query['date_from'],
             query['date_to']
         )
@@ -85,6 +85,7 @@ class AssociateResult(AbstractController):
         resp.html = templates.render(
             "baskets/association/result.pug",
             contractId = self._loginAccount.contractId,
+            displayStoreId = self._loginAccount.account_setting.displayStoreId,
             store = targetStore,
             search_from = query['date_from'],
             search_to = query['date_to'],

@@ -1,6 +1,7 @@
 */node_modules/*
 /.vscode
 .env
+log/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

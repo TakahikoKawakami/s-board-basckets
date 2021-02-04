@@ -3,7 +3,9 @@ formatters:
     default:
         format: "[%(asctime)s] %(levelname)s in %(module)s(%(lineno)d): %(message)s"
     application:
-        format: "[%(asctime)s][%(contractId)s][%(levelname)-5s] in %(module)s::%(funcName)s(%(lineno)d): %(message)s"
+        '()': app.logger.CsvFormatter
+        format: "%(asctime)s,%(contractId)s,%(levelname)-5s,%(module)s,%(funcName)s,(%(lineno)d),%(message)s"
+        datefmt: "%Y-%m-%d %H:%M:%S"
 handlers: 
     console:
         class: logging.StreamHandler
@@ -12,7 +14,7 @@ handlers:
     application:
         class: logging.handlers.TimedRotatingFileHandler
         formatter: application
-        filename: log/application.log
+        filename: log/application.csv
         when: MIDNIGHT
         backupCount: 31
         encoding: "utf-8"

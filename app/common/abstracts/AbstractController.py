@@ -1,4 +1,4 @@
-from app.logger import ApplicationLogger
+from app import logger
 from app.domains.AccountDomainService import AccountDomainService
 from app.domains.StoreDomainService import StoreDomainService
 
@@ -17,7 +17,7 @@ class AbstractController():
             return
         await self._accountDomainService.prepareForAccessProcessing()
         self._loginAccount = self._accountDomainService.loginAccount
-        self._logger = ApplicationLogger(self._loginAccount)
+        self._logger = await logger.getLogger(self._loginAccount)
 
         storeDomainService = StoreDomainService(self._loginAccount)
         self._storeList = await storeDomainService.getStoreList()
