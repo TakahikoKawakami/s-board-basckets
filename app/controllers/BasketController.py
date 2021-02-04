@@ -29,7 +29,7 @@ class Associate(AbstractController):
 
     async def on_get(self, req, resp):
         self._logger.info('access associate')
-        self._logger.info(await self._loginAccount.account_setting)
+        self._logger.info(await self._loginAccount.accountSetting)
         if HttpManager.bookRedirect(resp):
             return
         if SessionManager.has(req.session, SessionManager.KEY_ERROR_MESSAGES):
@@ -40,9 +40,12 @@ class Associate(AbstractController):
             messages = ""
 
         self._basketAssociationDomainService = BasketAssociationDomainService(self._loginAccount)
+        accountSetting = await self._loginAccount.accountSetting
+        displayStoreId = accountSetting.displayStoreId
+
         resp.html =  templates.render(
             'baskets/association/index.pug',
-            displayStoreId = self._loginAccount.account_setting.displayStoreId,
+            displayStoreId = int(displayStoreId),
             message = messages,
             stores = self._storeList
         )

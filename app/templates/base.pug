@@ -44,7 +44,7 @@ html(lang="ja")
                                 option(value='', disabled) 店舗選択
                                 {% for store in stores %}
                                 {% if (store.storeId == displayStoreId) %}
-                                option(value=store.storeId selected) {{ store.storeId }} - {{ store.name }}
+                                option(value=store.storeId, selected) {{ store.storeId }} - {{ store.name }}
                                 {% else %}
                                 option(value=store.storeId) {{ store.storeId }} - {{ store.name }}
                                 {% endif %}

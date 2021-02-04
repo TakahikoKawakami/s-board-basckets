@@ -68,6 +68,13 @@ class Account(AbstractTortoiseModel):
     def expirationDatetime(self):
         return self.expiration_date_time
 
+    @property
+    async def accountSetting(self):
+        print (type(self.account_setting))
+        if type(self.account_setting) == AccountSetting:
+            return self.account_setting 
+        return await self.account_setting.all()
+
     @classmethod
     async def create(cls, contractId, accessToken):
         newAccountSetting = await AccountSetting.create(

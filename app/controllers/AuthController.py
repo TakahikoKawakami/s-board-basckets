@@ -48,7 +48,6 @@ async def login(req, resp):
     return
 
 async def logout(req, resp):
-    print('logout')
     resp.session.clear()
     resp.redirect('/', status_code=303)
     return
