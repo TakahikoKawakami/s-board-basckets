@@ -2,7 +2,6 @@ import datetime
 
 from marshmallow import ValidationError
 
-from app.config import templates
 from app.common.managers import SessionManager, HttpManager
 from app.common.abstracts.AbstractController import AbstractController
 from app.domains.AccountDomainService import AccountDomainService
@@ -11,7 +10,7 @@ from app.domains.BasketDomainService import BasketDomainService
 from app.validators import BasketValidators
 
 
-class DailyBasket(AbstractController):
+class Basket(AbstractController):
     def __init__(self) ->None:
         super().__init__()
         self._basketDomainService = None
@@ -19,8 +18,16 @@ class DailyBasket(AbstractController):
     async def on_get(self, req, resp):
         self._logger.info('access DailyBasket')
         self._basketDomainService = BasketDomainService(self._loginAccount)
+        nowYear = datetime.datetime.now().year
         nowMonth = datetime.datetime.now().month
-        dailyBasketList = self._basketDomainService.getDailyBasketListByMonth(nowMonth)
+        dailyBasketList = await self._basketDomainService.getDailyBasketListByMonth(nowYear, nowMonth)
+
+        jsonDailyBasketList = [await model.serialize for model in dailyBasketList]
+
+        await self.render(
+            'baskets/index.pug',
+            dailyBasketList = jsonDailyBasketList
+        )
         
 class Associate(AbstractController):
     def __init__(self) -> None:
@@ -32,18 +39,11 @@ class Associate(AbstractController):
         self._logger.info(await self._loginAccount.accountSetting)
         if HttpManager.isBookingRedirect(resp):
             return
-        if SessionManager.has(req.session, SessionManager.KEY_ERROR_MESSAGES):
-            messages = SessionManager.get(req.session, SessionManager.KEY_ERROR_MESSAGES)
-            SessionManager.remove(resp.session, SessionManager.KEY_ERROR_MESSAGES)
-            messages = messages
-        else:
-            messages = ""
 
         await HttpManager.render(
             resp,
             self._loginAccount, 
-            'baskets/association/index.pug',
-            messages = messages
+            'baskets/association/index.pug'
         )
 
 class AssociateResult(AbstractController):

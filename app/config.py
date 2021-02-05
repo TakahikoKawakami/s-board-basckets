@@ -16,11 +16,14 @@ templates = responder.templates.Templates(
 def static_filter(path):
     # directoryで指定したtemplatesと同階層ががroot扱い？
     return '/static/' + path + '?v=' + datetime.datetime.today().strftime('%y%m%d%H%M%S%F')
+def node_modules_filter(path):
+    return '/static/node_modules/' + path
 # staticをフィルタに追加
 # v1系ではjinja_envだったが、v2からからtemplates._envに変更された
-templates._env.filters.update(
-    css=static_filter
-)
+templates._env.filters['css'] = static_filter
+templates._env.filters['static'] = static_filter
+templates._env.filters['node_modules'] = node_modules_filter
+# pug extention追加
 templates._env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
 
 """original"""

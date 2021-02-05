@@ -21,9 +21,6 @@ class AbstractTortoiseModel(Model):
         abstract = True
 
 
-    def __repr__(self):
-        pass
-
     @property
     async def serialize(self):
         selfPydantic = pydantic_model_creator(self.__class__)

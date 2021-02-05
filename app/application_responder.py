@@ -21,13 +21,4 @@ async def start_db_connection():
 async def close_db_connection():
     await database.close()
 
-
-# staticをjinja2で解決するためにstaticフィルタを定義
-def static_filter(path):
-    return 'static/' + path + '?v=' + datetime.datetime.today().strftime('%y%m%d%H%M%S%F')
-# staticをフィルタに追加
-# v1系ではjinja_envだったが、v2からからtemplates._envに変更された
-api.templates._env.filters.update(
-    css=static_filter
-)
 add_routers(api)

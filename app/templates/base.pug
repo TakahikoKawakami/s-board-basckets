@@ -25,11 +25,16 @@ html(lang="ja")
                         div
                             img(src="{{ 'image/logo.jpg' | css }}", alt="logo", style="height:32px;")
                         .menu-container 
-                            {{ displayStore.name }}
-                            a#for-setting-modal.menu-item.setting_modal__open(style="cursor:pointer") 設定
-                            a.menu-item(href="https://from-garage.work/privacy_policy.html") プライバシーポリシー
-                            a.menu-item(href="https://from-garage.work/contact_us.html") お問い合わせ
-                            a.menu-item(href="/accounts/logout") ログアウト
+                            ion-icon(name="storefront-outline") 
+                            div {{ displayStore.name }}
+                            a#for-setting-modal.menu-item.setting_modal__open(style="cursor:pointer")
+                                ion-icon(name="settings-outline")
+                            a.menu-item(href="https://from-garage.work/privacy_policy.html")
+                                ion-icon(name="lock-open-outline")
+                            a.menu-item(href="https://from-garage.work/contact_us.html")
+                                ion-icon(name="mail-outline")
+                            a.menu-item(href="/accounts/logout") 
+                                ion-icon(name="log-out-outline")
             main
                 {% block body %}
                 {% endblock %}
@@ -53,6 +58,7 @@ html(lang="ja")
                             button.saved 保存
                             button.setting_modal__close とじる
 
+        script(src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js")
         script(src="https://unpkg.com/axios/dist/axios.min.js")
         //- select option
         script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js")

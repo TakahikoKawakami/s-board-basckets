@@ -1,4 +1,6 @@
 import logging
+import datetime
+import calendar
 
 import app.common.managers.SessionManager as sessionManager
 from app.lib.Smaregi.API.POS.TransactionsApi import TransactionsApi
@@ -24,21 +26,23 @@ class BasketDomainService(AbstractDomainService):
         _basket.setByTransactionDetailList(_apiResponse['details'])
 
         _dailyBasketListTuple = await DailyBasketList.get_or_create(
-            {
-                "contract_id": self._loginAccount.contractId,
-                "store_id": _basket.storeId,
-                "target_date": _basket.targetDate
-            }
+            contract_id = self._loginAccount.contractId,
+            store_id = _basket.storeId,
+            target_date = _basket.targetDate
         )
 
         _dailyBasketList = _dailyBasketListTuple[0] # [1]は取得したか、作成したかのboolean true: create
         _dailyBasketList.appendBasket(_basket)
         await _dailyBasketList.save()
 
-    async def getDailyBasketListByMonth(self, month: int):
-        accountSetting = await AccountSetting.filter(contract_id = self._loginAccount.contractId).first()
-        storeId = accountSetting.display_store_id
+    async def getDailyBasketListByMonth(self, year: int, month: int):
+        accountSetting = await self._loginAccount.accountSetting
+        storeId = accountSetting.displayStoreId
+        targetDateFrom = datetime.date(year, month, 1)
+        targetDateTo = datetime.date(year, month, calendar.monthrange(year, month)[1])
+
         _dailyBasketList = await DailyBasketList.filter(
             contract_id = self._loginAccount.contractId,
             target_date__range = (targetDateFrom, targetDateTo)
-        )
+        ).all()
+        return _dailyBasketList

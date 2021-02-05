@@ -1,4 +1,4 @@
-*/node_modules/*
+app/static/node_modules
 /.vscode
 .env
 log/*

@@ -4,6 +4,10 @@
   margin: 0;
 }
 
+ion-icon {
+  font-size: var(--fontsize__base)
+}
+
 html {
   font-size: var(--fontsize__base);
   color: var(--color__text);
@@ -132,7 +136,9 @@ nav {
 #basket-main {
   display: grid;
   grid-template-columns: 1fr;
+  place-items: center;
   width: 100%;
+  height: 100%;
 }
 
 .container {
@@ -187,7 +193,7 @@ nav {
 }
 
 .menu-item {
-	margin-left: 5px;
+  margin-left: 15px;
 }
 
 .test1 {
@@ -206,9 +212,12 @@ nav {
   } */
 
 .basket-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  /* justify-content: center; */
+  width: 80%;
+  height: 100%;
 }
 
 .summary {

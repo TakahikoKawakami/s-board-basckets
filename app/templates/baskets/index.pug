@@ -1,0 +1,51 @@
+{% extends "base.pug" %}
+{% block body %}
+link(rel="stylesheet", href="{{ 'fullcalendar/main.css' | node_modules }}")
+link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
+
+#basket-main
+    h1 日別バスケット
+    div.basket-container.test1
+        div.calendar-container.test3
+            div#calendar.test2
+        div testtesttest
+
+    #date-modal.modal
+        .modal__background.date_modal__close
+            .modal__content
+                .modal__content__inner
+                    .date
+                    input(type="hidden", name="target_date")
+                    button.saved 同期する
+                    button.saved 削除する
+                    button.saved 開始日に指定する
+                    button.saved 終了日に指定する
+
+script(src="{{ 'fullcalendar/main.js' | node_modules }}")
+script.
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            contentHeight:"auto",
+            dateClick: function(info) {
+                $('#date-modal').find('.date').text(info.dateStr);
+                $('#date-modal').find('input:hidden[name="target_date"]').val(info.dateStr);
+                $('#date-modal').fadeIn(200);
+            },
+        });
+        calendar.render();
+        var dailyBasketList = {{ dailyBasketList | tojson }};
+        dailyBasketList.forEach(function(element, index) {
+            var el = JSON.parse(element);
+            $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+        })
+        $('.modal__content__inner').click(function(event) {
+            event.stopPropagation()
+        });
+        $('.date_modal__close').click(function(event) {
+            $('#date-modal').fadeOut(200);
+        });
+    });
+
+{% endblock %}
