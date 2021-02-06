@@ -17,7 +17,7 @@ class AccosiationCondition(Schema):
             value = value.date()
         _today = datetime.date.today()
         if (value > _today):
-            raise ValidationError("[開始日] 指定できる日付は昨日までです")
+            raise ValidationError("[開始日] 指定できる日付は今日までです")
 
     @validates('date_to')
     def validate_dateTo(self, value):
@@ -25,7 +25,7 @@ class AccosiationCondition(Schema):
             value = value.date()
         _today = datetime.date.today()
         if (value > _today):
-            raise ValidationError("[終了日] 指定できる日付は昨日までです")
+            raise ValidationError("[終了日] 指定できる日付は今日までです")
 
     @validates_schema
     def validate_dateFromTo(self, data, **kwargs):
@@ -39,4 +39,3 @@ class AccosiationCondition(Schema):
         if (data['date_from'] - data['date_to']).days > 90:
             raise ValidationError("[開始日][終了日] 分析できる期間は90日です")
         
-

@@ -5,21 +5,46 @@ link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
 
 #basket-main
     h1 日別バスケット
-    div.basket-container.test1
-        div.calendar-container.test3
-            div#calendar.test2
-        div testtesttest
+    //- .container
+    form(action="baskets/associate/result", method="get")
+        div(style="margin: 10px;")
+            {% for error in message._schema %}
+            span(style="color: var(--color__danger);") {{error}}<br>
+            {% endfor %}
+        .date-range_group
+            input#analyze-from(name="date_from", placeholder="")
+            p ~ 
+            input#analyze-to(name="date_to", placeholder="")
+            button(type="submit") 分析開始
+        .from__group
+            div(style="margin: 10px;")
+                {% for error in message.date_to %}
+                span(style="color: var(--color__danger);") {{error}}<br>
+                {% endfor %}
+            div(style="margin: 10px;")
+                {% for error in message.date_from %}
+                span(style="color: var(--color__danger);") {{error}}<br>
+                {% endfor %}
+    div.basket-container
+        div.calendar-container
+            div#calendar
+        //- div testtesttest
+
 
     #date-modal.modal
         .modal__background.date_modal__close
             .modal__content
                 .modal__content__inner
                     .date
+                    .message
                     input(type="hidden", name="target_date")
-                    button.saved 同期する
-                    button.saved 削除する
-                    button.saved 開始日に指定する
-                    button.saved 終了日に指定する
+                    #button__for__data.button__group
+                        button.sync(stile="display:none;") 同期する
+                        button.resync(stile="display:none;") 再同期する
+                        button.delete(stile="display:none;") 削除する
+                    #button__for__analyze.button__group
+                        button#select_start_date 開始日に指定する
+                        button#select_end_date 終了日に指定する
 
 script(src="{{ 'fullcalendar/main.js' | node_modules }}")
 script.
@@ -28,24 +53,97 @@ script.
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             contentHeight:"auto",
+            editable: true, 
+            slotEventOverlap: true, 
+            selectable: true, 
+            selectMinDistance: 1, 
+            views: {
+                dayGridMonth: {
+                    titleFormat: { year: 'numeric', month: 'numeric' },
+                },
+            },
+            customButtons: {
+                //- analysis: {
+                //-     text: '分析する',
+                //-     click: function() {
+                //-         alert('analysis');
+                //-     }
+                //- }
+            },
+            headerToolbar: {
+                right: 'prev,next',
+                center: 'title',
+                left: 'today'
+            },
+            events: function(fetchInfo) {
+                // ***** ここでカレンダーデータ取得JSを呼ぶ *****
+                getDateListHavingBaskets(fetchInfo.startStr, fetchInfo.endStr);
+                //- setCalendarList(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'), callback);
+            },
             dateClick: function(info) {
                 $('#date-modal').find('.date').text(info.dateStr);
+                if ($("td[data-date = " + info.dateStr + " ]").find(".fc-daygrid-day-number").hasClass('hasBaskets')) {
+                    $('#date-modal').find('.message').text("データあり");
+                    $('#date-modal').find('.sync').hide()
+                    $('#date-modal').find('.resync').show()
+                    $('#date-modal').find('.delete').show()
+                } else {
+                    $('#date-modal').find('.message').text("データなし");
+                    $('#date-modal').find('.sync').show()
+                    $('#date-modal').find('.resync').hide()
+                    $('#date-modal').find('.delete').hide()
+                }
                 $('#date-modal').find('input:hidden[name="target_date"]').val(info.dateStr);
                 $('#date-modal').fadeIn(200);
             },
+            eventClick: function(calEvent, jsEvent, view) {
+            // カレンダーに設定したイベントクリック時のイベント
+            },
+            select: function(start, end) {
+            // カレンダー空白部分をドラッグして範囲指定した時のイベント
+            },
+            eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
+            // イベントをドラッグして別日に移動させた時のイベント
+            }
         });
         calendar.render();
-        var dailyBasketList = {{ dailyBasketList | tojson }};
-        dailyBasketList.forEach(function(element, index) {
-            var el = JSON.parse(element);
-            $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
-        })
+
         $('.modal__content__inner').click(function(event) {
             event.stopPropagation()
         });
         $('.date_modal__close').click(function(event) {
             $('#date-modal').fadeOut(200);
         });
+        $('#select_start_date').click(function() {
+            let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
+            $('#analyze-from').val(targetDate);
+            $('#date-modal').fadeOut(200);
+        })
+        $('#select_end_date').click(function() {
+            let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
+            $('#analyze-to').val(targetDate);
+            $('#date-modal').fadeOut(200);
+        })
+        
+        function getDateListHavingBaskets(startStr, endStr) {
+            let storeId = $('#select-store').val()
+            axios.get('/baskets', {
+                params: {
+                    startDate: startStr,
+                    endDate: endStr,
+                },
+            })
+            .then(function (response) {
+                resp = response.data
+                resp.forEach(function(element, index) {
+                    var el = JSON.parse(element);
+                    $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                });
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        };
     });
 
 {% endblock %}

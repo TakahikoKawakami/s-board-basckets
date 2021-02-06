@@ -35,14 +35,13 @@ class BasketDomainService(AbstractDomainService):
         _dailyBasketList.appendBasket(_basket)
         await _dailyBasketList.save()
 
-    async def getDailyBasketListByMonth(self, year: int, month: int):
+    async def getDailyBasketListByMonth(self, startDate: datetime.date, endDate: datetime.date):
         accountSetting = await self._loginAccount.accountSetting
         storeId = accountSetting.displayStoreId
-        targetDateFrom = datetime.date(year, month, 1)
-        targetDateTo = datetime.date(year, month, calendar.monthrange(year, month)[1])
 
         _dailyBasketList = await DailyBasketList.filter(
             contract_id = self._loginAccount.contractId,
-            target_date__range = (targetDateFrom, targetDateTo)
+            store_id = storeId,
+            target_date__range = (startDate, endDate)
         ).all()
         return _dailyBasketList

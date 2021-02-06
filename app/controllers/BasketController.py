@@ -18,16 +18,16 @@ class Basket(AbstractController):
     async def on_get(self, req, resp):
         self._logger.info('access DailyBasket')
         self._basketDomainService = BasketDomainService(self._loginAccount)
-        nowYear = datetime.datetime.now().year
-        nowMonth = datetime.datetime.now().month
-        dailyBasketList = await self._basketDomainService.getDailyBasketListByMonth(nowYear, nowMonth)
+        if req.params != {}:
+            startDate = datetime.datetime.strptime(req.params['startDate'], "%Y-%m-%dT%H:%M:%S%z").date()
+            endDate = datetime.datetime.strptime(req.params['endDate'], "%Y-%m-%dT%H:%M:%S%z").date()
+            dailyBasketList = await self._basketDomainService.getDailyBasketListByMonth(startDate, endDate)
 
-        jsonDailyBasketList = [await model.serialize for model in dailyBasketList]
-
-        await self.render(
-            'baskets/index.pug',
-            dailyBasketList = jsonDailyBasketList
-        )
+            jsonDailyBasketList = [await model.serialize for model in dailyBasketList]
+            resp.media = jsonDailyBasketList
+            return
+        else:
+            await self.render('baskets/index.pug')
         
 class Associate(AbstractController):
     def __init__(self) -> None:
@@ -60,7 +60,7 @@ class AssociateResult(AbstractController):
             query = schema.load(req.params)
         except ValidationError as e:
             SessionManager.set(resp.session, SessionManager.KEY_ERROR_MESSAGES, e.messages)
-            resp.redirect('/baskets/associate', status_code=302)
+            resp.redirect('/baskets', status_code=302)
             return
 
         self._basketAssociationDomainService = await BasketAssociationDomainService.createInstance(self._loginAccount)
