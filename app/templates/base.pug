@@ -58,7 +58,10 @@ html(lang="ja")
                                     {% endfor %}
                             .form__group
                                 p リアルタイム同期
-                                check check
+                                input#use-webhook(type="radio", name="use_webhook", value=true, checked=true)
+                                    label(for="use-webhook") 使用する
+                                input#unuse-webhook(type="radio", name="use_webhook", value=false)
+                                    label(for="unuse-webhook") 使用しない
 
                             {% if (signUp) %}
                             hr
