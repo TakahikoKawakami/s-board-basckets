@@ -64,12 +64,10 @@ class Associate(AbstractController):
     async def on_get(self, req, resp):
         self._logger.info('access associate')
         self._logger.info(await self._loginAccount.accountSetting)
-        if self.isBookingRedirect(resp):
+        if self.isBookingRedirect():
             return
 
-        await HttpManager.render(
-            resp,
-            self._loginAccount, 
+        await self.render(
             'baskets/association/index.pug'
         )
 

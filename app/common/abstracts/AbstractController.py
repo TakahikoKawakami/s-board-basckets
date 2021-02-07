@@ -46,7 +46,11 @@ class AbstractController():
         storeDomainService = StoreDomainService(self._loginAccount)
         kwargs['displayStore'] = await storeDomainService.getDisplayStore()
         kwargs['stores'] = await storeDomainService.getStoreList()
-        kwargs['loginStatus'] = self._loginAccount.loginStatus
+
+        kwargs['signUp'] = SessionManager.has(self._resp.session, SessionManager.KEY_SIGN_UP)
+        kwargs['signIn'] = self._loginAccount.loginStatus == self._loginAccount.LoginStatusEnum.SIGN_IN
+        kwargs['signOn'] = self._loginAccount.loginStatus == self._loginAccount.LoginStatusEnum.SIGN_ON
+        SessionManager.remove(self._resp.session, SessionManager.KEY_SIGN_UP)
 
         self.createCsrfToken()
         kwargs['csrf_hidden_input'] = self._inputCsrfToken()

@@ -44,6 +44,8 @@ async def login(req, resp):
     account = await accountDomainService.loginByCodeAndState(code, state)
     
     SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
+    if account.loginStatus == account.LoginStatusEnum.SIGN_UP:
+        SessionManager.set(resp.session, SessionManager.KEY_SIGN_UP, True)
     resp.redirect('/baskets/associate', status_code=303)
     return
 

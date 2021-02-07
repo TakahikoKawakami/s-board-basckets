@@ -60,12 +60,10 @@ html(lang="ja")
                                 p リアルタイム同期
                                 check check
 
-                            {% if (loginStatus != 0) %}
+                            {% if (signUp) %}
                             hr
                             .section__group
-                                p この設定は、右上の
-                                ion-icon(name="settings-outline")
-                                p マークからいつでも変更することができます
+                                p この設定は、右上の 歯車マーク からいつでも変更することができます
                             {% endif %}
                             hr
                             button.saved 保存
@@ -81,6 +79,13 @@ html(lang="ja")
         script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js")
 
         script(type="module" src="{{ 'js/account_setting.js' | static }}")
+        {% if (signUp) %}
+        script(type="text/javascript").
+            $(function() {
+                $('#setting-modal').fadeIn(200);
+            });
+        {% endif %}
+
         script(type="text/javascript").
             $(function() {
                 $('.setting_modal__open').click(function(event) {
