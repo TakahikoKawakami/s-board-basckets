@@ -44,16 +44,29 @@ html(lang="ja")
                 .modal__background.setting_modal__close
                     .modal__content
                         .modal__content__inner
-                            div 対象店舗
-                            select#select-store(name='display_store_id')
-                                option(value='', disabled) 店舗選択
-                                {% for store in stores %}
-                                {% if (store.storeId == displayStore.storeId) %}
-                                option(value=store.storeId, selected) {{ store.storeId }} - {{ store.name }}
-                                {% else %}
-                                option(value=store.storeId) {{ store.storeId }} - {{ store.name }}
-                                {% endif %}
-                                {% endfor %}
+                            {{csrf_hidden_input | safe}}
+                            .form__group
+                                p 対象店舗
+                                select#select-store(name='display_store_id')
+                                    option(value='', disabled) 店舗選択
+                                    {% for store in stores %}
+                                    {% if (store.storeId == displayStore.storeId) %}
+                                    option(value=store.storeId, selected) {{ store.storeId }} - {{ store.name }}
+                                    {% else %}
+                                    option(value=store.storeId) {{ store.storeId }} - {{ store.name }}
+                                    {% endif %}
+                                    {% endfor %}
+                            .form__group
+                                p リアルタイム同期
+                                check check
+
+                            {% if (loginStatus != 0) %}
+                            hr
+                            .section__group
+                                p この設定は、右上の
+                                ion-icon(name="settings-outline")
+                                p マークからいつでも変更することができます
+                            {% endif %}
                             hr
                             button.saved 保存
                             button.setting_modal__close とじる
@@ -62,12 +75,12 @@ html(lang="ja")
         script(src="https://unpkg.com/axios/dist/axios.min.js")
         //- select option
         script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js")
-        script(src="{{ 'js/components/buttons/select.js' | css }}")
+        script(src="{{ 'js/components/buttons/select.js' | static }}")
 
         //- vis.js	
         script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js")
 
-        script(type="module" src="{{ 'js/account_setting.js' | css }}")
+        script(type="module" src="{{ 'js/account_setting.js' | static }}")
         script(type="text/javascript").
             $(function() {
                 $('.setting_modal__open').click(function(event) {
@@ -79,4 +92,19 @@ html(lang="ja")
                 $('.setting_modal__close').click(function(event) {
                     $('#setting-modal').fadeOut(200);
                 });
-            })
+
+                $('.saved').click(function() {
+                    let csrf = "{{ csrf_token }}"
+                    let storeId = $('#select-store').val()
+                    axios.post('/accounts/setting', {
+                        csrf_token: csrf,
+                        display_store_id: storeId,
+                    })
+                    .then(function (response) {
+                        location.reload();
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                });
+            });

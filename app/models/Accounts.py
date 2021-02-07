@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from tortoise import fields
 from datetime import datetime
 
@@ -45,6 +46,15 @@ class Account(AbstractTortoiseModel):
     class Meta:
         abstract=False
         table="accounts"
+
+    class LoginStatusEnum(Enum):
+        SIGN_UP = 0
+        SIGN_IN = auto()
+        SIGN_ON = auto()
+        SIGN_OUT = auto()
+
+    loginStatus = LoginStatusEnum.SIGN_ON
+    
 
     @property
     def contractId(self):

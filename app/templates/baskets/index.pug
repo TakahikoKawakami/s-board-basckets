@@ -4,7 +4,9 @@ link(rel="stylesheet", href="{{ 'fullcalendar/main.css' | node_modules }}")
 link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
 
 #basket-main
-    h1 日別バスケット
+    h1 分析ページ
+    p カレンダーをクリックして、分析する期間を指定しましょう
+    p データがない日はまず同期をして下さい
     //- .container
     form(action="baskets/associate/result", method="get")
         div(style="margin: 10px;")
@@ -126,7 +128,6 @@ script.
         })
         
         function getDateListHavingBaskets(startStr, endStr) {
-            let storeId = $('#select-store').val()
             axios.get('/baskets', {
                 params: {
                     startDate: startStr,
@@ -144,6 +145,88 @@ script.
                 console.log(error);
             });
         };
+
+        $('#date-modal').find('.sync').click(function() {
+            let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
+            syncBaskets(targetDate)
+                .then(function (response) {
+                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('syncingBaskets');
+                    if (response.data.length > 0) {
+                        $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                    } else {
+                        alert('同期できる取引データがありませんでした。')
+                    }
+                    closeDateModal();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            
+            $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
+            $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('syncingBaskets');
+            closeDateModal();
+        });
+        
+        $('#date-modal').find('.resync').click(function() {
+            let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
+            resyncBaskets(targetDate)
+                .then(function (response) {
+                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('syncingBaskets');
+                    if (response.data.length > 0) {
+                        $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                    } else {
+                        alert('同期できる取引データがありませんでした。')
+                    }
+                    closeDateModal();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            
+            $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
+            $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('syncingBaskets');
+            closeDateModal();
+        });
+
+        $('#date-modal').find('.delete').click(function() {
+            let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
+            deleteBaskets(targetDate)
+                .then(function (response) {
+                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
+                    closeDateModal();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        });
+
+        async function deleteBaskets(dateStr) {
+            return axios.delete('/baskets', {
+                params: {
+                    startDate: dateStr,
+                    endDate: dateStr,
+                }
+            })
+        };
+
+        async function syncBaskets(dateStr) {
+            let csrf = "{{ csrf_token }}"
+            return axios.put('/baskets', {
+                csrf_token: csrf,
+                startDate: dateStr,
+                endDate: dateStr,
+            })
+        };
+
+        async function resyncBaskets(dateStr) {
+            await deleteBaskets(dateStr);
+            let result = await syncBaskets(dateStr);
+            return result;
+        }
+
+        function closeDateModal() {
+            $('#date-modal').fadeOut(200);
+        }
     });
 
 {% endblock %}

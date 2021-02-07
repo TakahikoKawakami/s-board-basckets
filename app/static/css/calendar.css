@@ -6,5 +6,12 @@
   
 }
 
+.syncingBaskets {
+  background: var(--color__selected);
+  border: 8px solid var(--color__selected);
+  border-radius: 50%;
+  color: #00aa00;
+}
+
 /* .fc-daygrid-day-number {
 } */

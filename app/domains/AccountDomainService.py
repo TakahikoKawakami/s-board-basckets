@@ -42,6 +42,7 @@ class AccountDomainService(AbstractDomainService):
             setting.displayStoreId = _targetStoreId
             self.loginAccount.account_setting = setting
             
+            self.loginAccount.loginStatus = Account.LoginStatusEnum.SIGN_ON
             return
         # セッションになくDBにあれば（webhookなどの通信）それを返す
         # それでもなければ取得、dbとセッションに保存
@@ -84,6 +85,8 @@ class AccountDomainService(AbstractDomainService):
                 _accessTokenForUpdate = _accountModel.accessToken
             self._setAccessTokenDataToSession(_accessTokenForUpdate)
             self.loginAccount = _accountModel
+
+            self.loginAccount.loginStatus = Account.LoginStatusEnum.SIGN_IN
             return
         
         # それでもなければ取得、dbとセッションに保存
@@ -96,6 +99,8 @@ class AccountDomainService(AbstractDomainService):
             contractId=_contractId,
             accessToken = _accessTokenByCreation
         )
+        self.loginAccount.loginStatus = Account.LoginStatusEnum.SIGN_UP
+
         self.withSmaregiApi(self.loginAccount.accessToken.accessToken, self.loginAccount.contractId)
         storesApi = StoresApi(self._apiConfig)
         storeList = storesApi.getStoreList()

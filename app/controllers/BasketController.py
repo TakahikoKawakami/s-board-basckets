@@ -21,13 +21,40 @@ class Basket(AbstractController):
         if req.params != {}:
             startDate = datetime.datetime.strptime(req.params['startDate'], "%Y-%m-%dT%H:%M:%S%z").date()
             endDate = datetime.datetime.strptime(req.params['endDate'], "%Y-%m-%dT%H:%M:%S%z").date()
-            dailyBasketList = await self._basketDomainService.getDailyBasketListByMonth(startDate, endDate)
+            dailyBasketList = await self._basketDomainService.getDailyBasketListByDateRange(startDate, endDate)
 
             jsonDailyBasketList = [await model.serialize for model in dailyBasketList]
             resp.media = jsonDailyBasketList
             return
         else:
             await self.render('baskets/index.pug')
+
+    async def on_put(self, req, resp):
+        if self.isAccessDenied():
+            return
+        self._logger.info('sync DailyBasket')
+        self._basketDomainService = BasketDomainService(self._loginAccount)
+        request = await req.media(format='json')
+        dateFrom = request['startDate']
+        dateTo = request['endDate']
+        try:
+            syncedDailyBasketList = await self._basketDomainService.syncDailyBasketListByDateRange(dateFrom ,dateTo)
+            jsonDailyBasketList = [await model.serialize for model in syncedDailyBasketList]
+            resp.media = jsonDailyBasketList
+        except Exception:
+            resp.status_code = 400
+
+    async def on_delete(self, req, resp):
+        self._logger.info('delete DailyBasket')
+        self._basketDomainService = BasketDomainService(self._loginAccount)
+        request = req.params
+        dateFrom = request['startDate']
+        dateTo = request['endDate']
+        try:
+            await self._basketDomainService.deleteDailyBasketListByDateRange(dateFrom ,dateTo)
+        except Exception:
+            resp.status_code = 400
+        
         
 class Associate(AbstractController):
     def __init__(self) -> None:
@@ -37,7 +64,7 @@ class Associate(AbstractController):
     async def on_get(self, req, resp):
         self._logger.info('access associate')
         self._logger.info(await self._loginAccount.accountSetting)
-        if HttpManager.isBookingRedirect(resp):
+        if self.isBookingRedirect(resp):
             return
 
         await HttpManager.render(
@@ -80,9 +107,7 @@ class AssociateResult(AbstractController):
 
         visDict = vis.toDict()
 
-        await HttpManager.render(
-            resp = resp,
-            account = self._loginAccount,
+        await self.render(
             path = "baskets/association/result.pug",
             search_from = query['date_from'],
             search_to = query['date_to'],
