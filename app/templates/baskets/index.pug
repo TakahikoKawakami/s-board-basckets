@@ -150,7 +150,7 @@ script.
             let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
             syncBaskets(targetDate)
                 .then(function (response) {
-                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('syncingBaskets');
+                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").removeClass('loader');
                     if (response.data.length > 0) {
                         $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
                     } else {
@@ -163,7 +163,7 @@ script.
                 });
             
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
-            $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('syncingBaskets');
+            $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").addClass('loader');
             closeDateModal();
         });
         
@@ -171,7 +171,7 @@ script.
             let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
             resyncBaskets(targetDate)
                 .then(function (response) {
-                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('syncingBaskets');
+                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").removeClass('loader');
                     if (response.data.length > 0) {
                         $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
                     } else {
@@ -184,7 +184,7 @@ script.
                 });
             
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
-            $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('syncingBaskets');
+            $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").addClass('loader');
             closeDateModal();
         });
 

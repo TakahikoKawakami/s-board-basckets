@@ -30,6 +30,17 @@ body {
 
 h1 {
   margin-bottom: 10px;
+  font-size: 1.8rem;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
 }
 
 hr {
@@ -155,15 +166,6 @@ nav {
 
   width: 90%;
   height: 100%;
-}
-
-.form__group {
-  display: grid;
-  grid-template-columns: 1fr;
-  place-items: center;
-  text-align: center;
-  width: 100%;
-  margin: 5px 0px 50px 0px;
 }
 
 .body-container{

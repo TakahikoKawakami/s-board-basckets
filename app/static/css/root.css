@@ -9,5 +9,7 @@
   
     --font__base: "FontAwesome";
     --fontsize__base: 1.5em;
+    
+    --fontsize__tip: 0.8rem;
     --fontsize__navbar: 16px;
   }

@@ -228,5 +228,17 @@
     position: relative;
     width: 75px;
     height: 42px;
-    margin: auto;
+    /* margin: auto; */
+}
+
+.button__group {
+    display: flex;
+}
+
+.button__action {
+    background-color: var(--color__selected);
+}
+
+.button__non-action {
+    background-color: var(--color__unselected);
 }

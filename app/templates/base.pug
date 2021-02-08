@@ -11,6 +11,8 @@ html(lang="ja")
         link(rel="stylesheet", href="{{ 'css/style.css' | css }}")
         link(rel="stylesheet", href="{{ 'css/button.css' | css }}")
         link(rel="stylesheet", href="{{ 'css/modal.css' | css }}")
+        link(rel="stylesheet", href="{{ 'css/form.css' | css }}")
+        link(rel="stylesheet", href="{{ 'css/loader.css' | css }}")
         link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato|Quicksand")
         link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css")
 
@@ -44,11 +46,13 @@ html(lang="ja")
                 .modal__background.setting_modal__close
                     .modal__content
                         .modal__content__inner
+                            h2 設定
                             {{csrf_hidden_input | safe}}
                             .form__group
-                                p 対象店舗
-                                button#sync-store 店舗同期する
-                                select#select-store(name='display_store_id')
+                                .form__label 
+                                    h3 対象店舗
+                                    button#sync-store 店舗同期する
+                                select#select-store.form__input(name='display_store_id')
                                     option(value='', disabled) 店舗選択
                                     {% for store in stores %}
                                     {% if (store.storeId == displayStore.storeId) %}
@@ -58,23 +62,26 @@ html(lang="ja")
                                     {% endif %}
                                     {% endfor %}
                             .form__group
-                                p リアルタイム同期
-                                p ※ リアルタイム同期は、スダンダードプランをご購入の方のみ利用できます
-                                .toggle__switch
-                                    .toggle_val {{useSmaregiWebhook}}
-                                    {% if useSmaregiWebhook %}
-                                    input#use-webhook.toggle-input(type="checkbox" name="use_webhook" value='1' checked)
-                                    {% else %}
-                                    input#use-webhook.toggle-input(type="checkbox" name="use_webhook" value='1')
-                                    {% endif %}
-                                    label.toggle-label(for="use-webhook")
+                                .form__label 
+                                    h3 リアルタイム同期
+                                .form__input
+                                    .toggle__switch
+                                        {% if useSmaregiWebhook %}
+                                        input#use-webhook.toggle-input(type="checkbox" name="use_webhook" value='1' checked)
+                                        {% else %}
+                                        input#use-webhook.toggle-input(type="checkbox" name="use_webhook" value='1')
+                                        {% endif %}
+                                        label.toggle-label(for="use-webhook")
+                                .form__label 
+                                    p.tip ※ スダンダードプラン以上のみ有効
 
                             {% if (signUp) %}
                             .section__group
                                 p この設定は、右上の 歯車マーク からいつでも変更することができます
                             {% endif %}
-                            button.saved 保存
-                            button.setting_modal__close とじる
+                            .button__group
+                                button.saved.button__action 保存
+                                button.setting_modal__close.button__non-action とじる
 
         script(src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js")
         script(src="https://unpkg.com/axios/dist/axios.min.js")
