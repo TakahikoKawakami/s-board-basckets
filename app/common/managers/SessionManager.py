@@ -1,4 +1,5 @@
 KEY_ACCOUNT = "account"
+KEY_ACCOUNT_SETTING = "account"
 KEY_CONTRACT_ID = "contract_id"
 KEY_ACCESS_TOKEN = "access_token"
 KEY_ACCESS_TOKEN_EXPIRATION_DATETIME = "access_token_expiration_datetime"

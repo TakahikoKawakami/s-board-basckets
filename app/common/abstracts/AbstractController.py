@@ -43,6 +43,8 @@ class AbstractController():
         else:
             kwargs['message'] = ""
 
+        accountSetting = await self._loginAccount.accountSetting
+        kwargs['useSmaregiWebhook'] = accountSetting.use_smaregi_webhook
         storeDomainService = StoreDomainService(self._loginAccount)
         kwargs['displayStore'] = await storeDomainService.getDisplayStore()
         kwargs['stores'] = await storeDomainService.getStoreList()
@@ -77,7 +79,6 @@ class AbstractController():
             self._resp.status_code = 401
         if request['csrf_token'] != SessionManager.get(self._resp.session, SessionManager.KEY_CSRF_TOKEN):
             print(request['csrf_token'])
-            print(hex(request['csrf_token']))
             print(SessionManager.get(self._resp.session, SessionManager.KEY_CSRF_TOKEN))
             self._logger.warning('invalid csrf_token')
             self._resp.status_code = 401

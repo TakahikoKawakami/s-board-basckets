@@ -4,6 +4,8 @@ import asyncio
 from app.config import backgroundQueue
 from app import webhook
 from app.common.abstracts.AbstractController import AbstractController
+from app.domains.AccountDomainService import AccountDomainService
+
 class Webhook(AbstractController):
     EVENT_TRANSACTIONS = 'pos:transactions'
 
@@ -24,6 +26,14 @@ class Webhook(AbstractController):
     async def router(cls, header, body):
         _contractId = header['smaregi-contract-id']
         _event = header['smaregi-event']
+        
+        _accountDomainService = AccountDomainService(None)
+        await _accountDomainService.loginByContractId(_contractId)
+        _accessAccount = _accountDomainService.loginAccount
+        _accountSetting = await _accessAccount.accountSetting
+        if not _accountSetting.use_smaregi_webhook:
+            return
+
         if (_event == cls.EVENT_TRANSACTIONS):
-            await webhook.TransactionsWebhook().received(_contractId, _event, body)
+            await webhook.TransactionsWebhook().received(_accessAccount, _event, body)
 

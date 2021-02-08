@@ -10,12 +10,11 @@ class TransactionsWebhook():
         self._accessAccount = None
         print('transaction webhook init')
 
-    async def received(self, contractId, event, body):
+    async def received(self, accessAccount, event, body):
+        self._accessAccount = accessAccount
         print('transaction webhook received')
-        _accountDomainService = AccountDomainService(None)
-        await _accountDomainService.loginByContractId(contractId)
-        self._accessAccount = _accountDomainService.loginAccount
         print(self._accessAccount)
+        
         if body['action'] == self.ACTION_CREATED:
             _targetTransactionHeadList = body['transactionHeadIds']
             await self.created(_targetTransactionHeadList)

@@ -13,6 +13,8 @@ import datetime
 from app.lib.Smaregi.API.POS.StoresApi import StoresApi
 from app.lib.Smaregi.API.POS.ProductsApi import ProductsApi
 
+from app.models import Store
+
 class BasketAssociationDomainService(AbstractDomainService):
     def __init__(self, loginAccount):
         super().__init__(loginAccount)
@@ -22,8 +24,10 @@ class BasketAssociationDomainService(AbstractDomainService):
     async def targetStore(self):
         _storesApi = StoresApi(self._apiConfig)
         accountSetting = await self._loginAccount.accountSetting
-        _apiResponse = _storesApi.getStoreById(accountSetting.displayStoreId)
-        return _apiResponse
+        return await Store.filter(
+            contract_id = self._loginAccount.contractId,
+            store_id = accountSetting.displayStoreId
+        ).first()
 
     def getStoreList(self):
         _storesApi = StoresApi(self._apiConfig)
@@ -32,7 +36,7 @@ class BasketAssociationDomainService(AbstractDomainService):
 
     async def associate(self, targetDateFrom, targetDateTo):
         accountSetting = await self._loginAccount.accountSetting
-        targetStoreId = accountSetting.displayStoreId
+        targetStoreId = str(accountSetting.displayStoreId)
         self._logger.info("-----search condition-----")
         self._logger.info("storeId     : " + targetStoreId)
         self._logger.info("search_from : " + targetDateFrom.strftime("%Y-%m-%d"))
@@ -86,8 +90,7 @@ class BasketAssociationDomainService(AbstractDomainService):
         return result
     
     async def convertAssociationResultToPickUpMessage(self, fpgrowth, storeId, dateFrom, dateTo):
-        storesApi = StoresApi(self._apiConfig)
-        store = storesApi.getStoreById(storeId)
+        store = await self.targetStore
 
         productFrom = None
         productTo = None

@@ -11,6 +11,7 @@ class AccountSetting(AbstractTortoiseModel):
     アカウント設定モデル
     """
     display_store_id = fields.IntField(null=True)
+    use_smaregi_webhook = fields.BooleanField(default=False)
 
     account: fields.ReverseRelation["Account"]
 
@@ -25,6 +26,14 @@ class AccountSetting(AbstractTortoiseModel):
     @displayStoreId.setter
     def displayStoreId(self, val):
         self.display_store_id = val
+
+    @property
+    def useSmaregiWebhook(self):
+        return self.use_smaregi_webhook
+
+    @useSmaregiWebhook.setter
+    def useSmaregiWebhook(self, val):
+        self.use_smaregi_webhook = val
 
 
 class Account(AbstractTortoiseModel):

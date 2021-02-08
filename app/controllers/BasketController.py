@@ -98,7 +98,7 @@ class AssociateResult(AbstractController):
         vis = await self._basketAssociationDomainService.convertAssociationResultToVisJs(fpgrowth)
         pickUpMessage = await self._basketAssociationDomainService.convertAssociationResultToPickUpMessage(
             fpgrowth,
-            targetStore["storeId"],
+            targetStore.storeId,
             query['date_from'],
             query['date_to']
         )

@@ -47,6 +47,7 @@ html(lang="ja")
                             {{csrf_hidden_input | safe}}
                             .form__group
                                 p 対象店舗
+                                button#sync-store 店舗同期する
                                 select#select-store(name='display_store_id')
                                     option(value='', disabled) 店舗選択
                                     {% for store in stores %}
@@ -58,17 +59,20 @@ html(lang="ja")
                                     {% endfor %}
                             .form__group
                                 p リアルタイム同期
-                                input#use-webhook(type="radio", name="use_webhook", value=true, checked=true)
-                                    label(for="use-webhook") 使用する
-                                input#unuse-webhook(type="radio", name="use_webhook", value=false)
-                                    label(for="unuse-webhook") 使用しない
+                                p ※ リアルタイム同期は、スダンダードプランをご購入の方のみ利用できます
+                                .toggle__switch
+                                    .toggle_val {{useSmaregiWebhook}}
+                                    {% if useSmaregiWebhook %}
+                                    input#use-webhook.toggle-input(type="checkbox" name="use_webhook" value='1' checked)
+                                    {% else %}
+                                    input#use-webhook.toggle-input(type="checkbox" name="use_webhook" value='1')
+                                    {% endif %}
+                                    label.toggle-label(for="use-webhook")
 
                             {% if (signUp) %}
-                            hr
                             .section__group
                                 p この設定は、右上の 歯車マーク からいつでも変更することができます
                             {% endif %}
-                            hr
                             button.saved 保存
                             button.setting_modal__close とじる
 
@@ -92,6 +96,18 @@ html(lang="ja")
         script(type="text/javascript").
             $(function() {
                 $('.setting_modal__open').click(function(event) {
+                    axios.get('/accounts/setting')
+                        .then(function (response) {
+                            console.log(response)
+                            let resp = JSON.parse(response.data)
+                            console.log(resp)
+                            let displayStore = resp.display_store_id
+                            let useSmaregiWebhook = resp.use_smaregi_webhook
+                            $('#select-store option[value=' + displayStore + ']').prop('selected', true)
+                            $('input[name=use_webhook]').prop('checked', useSmaregiWebhook);
+                            console.log(displayStore);
+                            console.log(useSmaregiWebhook);
+                        })
                     $('#setting-modal').fadeIn(200);
                 });
                 $('.modal__content__inner').click(function(event) {
@@ -104,9 +120,12 @@ html(lang="ja")
                 $('.saved').click(function() {
                     let csrf = "{{ csrf_token }}"
                     let storeId = $('#select-store').val()
+                    let useWebhook = $('input[name=use_webhook]').prop('checked');
+
                     axios.post('/accounts/setting', {
                         csrf_token: csrf,
                         display_store_id: storeId,
+                        use_smaregi_webhook: useWebhook,
                     })
                     .then(function (response) {
                         location.reload();
@@ -115,4 +134,34 @@ html(lang="ja")
                         console.log(error);
                     });
                 });
+                $('#use-webhook').click(function() {
+                    let useWebhook = $('input[name=use_webhook]').prop('checked');
+                    console.log($('input[name=use_webhook]').prop('checked'))
+                    console.log(useWebhook)
+                    $('.toggle_val').text(useWebhook)
+                })
+                $('#sync-store').click(function() {
+                    let csrf = "{{ csrf_token }}"
+                    axios.put('/accounts/setting/stores', {
+                        csrf_token: csrf,
+                    })
+                    .then(function (response) {
+                        console.log('sync success')
+                        axios.get('/accounts/setting/stores').then(function (response) {
+                            console.log(response.data);
+                            
+                            $('#select-store > option').remove();
+                            let select = $('#select-store');
+                            response.data.forEach(function(element, index) {
+                                let store = JSON.parse(element);
+                                select.append(
+                                    $('<option>').html(store.store_id + store.name).val(store.store_id)
+                                );
+                            });
+                        });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                })
             });
