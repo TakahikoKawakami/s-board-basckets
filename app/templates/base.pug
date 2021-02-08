@@ -27,8 +27,9 @@ html(lang="ja")
                         div
                             img(src="{{ 'image/logo.jpg' | css }}", alt="logo", style="height:32px;")
                         .menu-container 
-                            ion-icon(name="storefront-outline") 
-                            div {{ displayStore.name }}
+                            .menu-item
+                                ion-icon(name="storefront-outline") 
+                                div {{ displayStore.name }}
                             a#for-setting-modal.menu-item.setting_modal__open(style="cursor:pointer")
                                 ion-icon(name="settings-outline")
                             a.menu-item(href="https://from-garage.work/privacy_policy.html")

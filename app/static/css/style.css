@@ -199,6 +199,7 @@ nav {
 
 .menu-item {
   margin-left: 15px;
+  display: flex;
 }
 
 .test1 {
