@@ -121,7 +121,7 @@ class AccountDomainService(AbstractDomainService):
                 name = store["storeName"]
             )
         
-        self._setAccessTokenDataToSession(_accessTokenByCreation)
+        self._setAccessTokenDataToSession()
     
     def _setAccessTokenDataToSession(self):
         accessToken = self.loginAccount.accessToken

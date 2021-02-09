@@ -13,10 +13,19 @@ html(lang="ja")
     body
         .container
             .title
-                img(src="{{ 'image/logo.jpg' | css }}", alt="title-logo", style="height:100%;")
-            session.content.
-                スマレジでたてた取引から、売上に色々な傾向が分ります。<br />
-                このアプリでは、分析、見える化し、その分析の手助けを致します。
+                img(src="{{ 'image/logo.jpg' | css }}", alt="title-logo", style="object-fit:contain; width:auto; height:100%;")
+            session.content
+                p.
+                    スマレジでたてた取引から、売上に色々な傾向が分ります。<br />
+                    このアプリでは、クリックするだけの簡単操作で、<br />
+                    取引データを分析、見える化し、店舗売上UPのお手伝いします。
+
+                p.
+                    キャンペーン前後で分析して、その効果を確認したり
+                p.
+                    売上が伸び悩んだ時の突破口を探してみたり
+                p.
+                    さまざまな目的でのご利用をお待ちしております。
 
             #button-section
                 a(href="/accounts/login")
@@ -24,10 +33,15 @@ html(lang="ja")
                     //- a.btn.secondary(href="/login_demo") デモを体験してみる
 
     style.
+        p {
+            margin: 30px;
+        }
         .title {
             background: var(--color__base);
             width:100vw;
             height: 10%;
+            display: flex;
+            justify-content: center;
         }
 
         .content {
