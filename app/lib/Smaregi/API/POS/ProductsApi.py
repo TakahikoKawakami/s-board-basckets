@@ -1,5 +1,4 @@
 from urllib.parse import urlencode
-from flask import redirect
 
 
 from ..BaseServiceApi import BaseServiceApi

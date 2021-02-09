@@ -1,4 +1,3 @@
-from flask import session
 import numpy as np
 import itertools
 from scipy.sparse import lil_matrix  # other types would convert to LIL anyway
