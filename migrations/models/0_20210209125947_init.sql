@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS `account_setting` (
     `contract_id` VARCHAR(32) NOT NULL,
     `created_at` DATETIME(6) NOT NULL  DEFAULT CURRENT_TIMESTAMP(6),
     `modified_at` DATETIME(6) NOT NULL  DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    `display_store_id` INT
+    `display_store_id` INT,
+    `use_smaregi_webhook` BOOL NOT NULL  DEFAULT 0
 ) CHARACTER SET utf8mb4 COMMENT='アカウント設定モデル';
 CREATE TABLE IF NOT EXISTS `accounts` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -52,5 +53,5 @@ CREATE TABLE IF NOT EXISTS `aerich` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `version` VARCHAR(255) NOT NULL,
     `app` VARCHAR(20) NOT NULL,
-    `content` LONGTEXT NOT NULL
+    `content` TEXT NOT NULL
 ) CHARACTER SET utf8mb4;

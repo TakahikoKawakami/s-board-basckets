@@ -1,3 +1,4 @@
+Pipfile
 app/static/node_modules
 /.vscode
 .env
