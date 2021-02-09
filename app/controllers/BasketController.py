@@ -16,6 +16,8 @@ class Basket(AbstractController):
         self._basketDomainService = None
 
     async def on_get(self, req, resp):
+        if self.isBookingRedirect():
+            return
         self._logger.info('access DailyBasket')
         self._basketDomainService = BasketDomainService(self._loginAccount)
         if req.params != {}:
@@ -62,6 +64,8 @@ class Associate(AbstractController):
         self._basketAssociationDomainService = None
 
     async def on_get(self, req, resp):
+        if self.isBookingRedirect():
+            return
         self._logger.info('access associate')
         self._logger.info(await self._loginAccount.accountSetting)
         if self.isBookingRedirect():
@@ -77,8 +81,7 @@ class AssociateResult(AbstractController):
         self._basketAssociationDomainService = None
 
     async def on_get(self, req, resp):
-        if HttpManager.isBookingRedirect(resp):
-            self._logger.info('redirect')
+        if self.isBookingRedirect():
             return
         try:
             schema = BasketValidators.AccosiationCondition()
