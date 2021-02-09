@@ -3,6 +3,7 @@ app/static/node_modules
 .env
 log/*
 
+migrations/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
