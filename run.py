@@ -5,7 +5,7 @@ from app.application_responder import api
 
 """Webサーバを立ち上げる際に実行するファイル"""
 if __name__ == "__main__":
-    if AppConfig.ENV_DIVISION == AppConfig.ENV_DIVISION_PRODUCTION:
+    if AppConfig.ENV_DIVISION in (AppConfig.ENV_DIVISION_PRODUCTION, AppConfig.ENV_DIVISION_STAGING):
         api.run(port=1000, debug=False)
     else:
         # uvicorn.run("run:api", host='0.0.0.0', log_config="logging_config.json", port=5500, debug=True, reload=True)
