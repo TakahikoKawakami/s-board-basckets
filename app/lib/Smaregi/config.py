@@ -8,7 +8,7 @@ class config():
     
     def __init__(self, env_division, clientId, clientSecret, logger=None):
         if (env_division in (self.ENV_DIVISION_MOCK, self.ENV_DIVISION_LOCAL, self.ENV_DIVISION_STAGING)):
-            self.uriAccess = 'https://id.smaregi.dev' # app/sb_skc130x6/token'            
+            self.uriAccess = 'https://id.smaregi.dev'
             self.uriApi = 'https://api.smaregi.dev'
         else:
             self.uriAccess = 'https://id.smaregi.jp'
