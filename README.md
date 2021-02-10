@@ -12,8 +12,14 @@ this app is to analyze transactions in your store with SMAREGI services.
 - jinja2 (pug extensions)
 
 # usage
-`git clone`
-`pip install -R requirements.txt`
-`python3 run.py`
-or if you use vs-code, you can run for debug named "Python: Responder".
+`git clone`  
+`pip install -r requirements.txt`  
+if you use pipenv, 
+`pipenv install -r requirements.txt`
+`python3 run.py`  
+or if you use vs-code, you can run for debug named "Python: Responder".  
+
+`cd app/static && npm install`
+
+
 ``
