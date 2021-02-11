@@ -63,7 +63,10 @@ class AccountDomainService(AbstractDomainService):
 
     async def loginByCodeAndState(self, _code, _state):
         _authorizeApi = AuthorizeApi(self._apiConfig, self._appConfig.APP_URI + '/accounts/login')
-        _userInfo = _authorizeApi.getUserInfo(_code, _state)
+        try:
+            _userInfo = _authorizeApi.getUserInfo(_code, _state)
+        except Exception as e:
+            raise e
         
         _account = await Account.filter(contract_id = _userInfo.contractId).first()
         if (_account is None):

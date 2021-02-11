@@ -67,5 +67,6 @@ class AuthorizeApi(BaseIdentificationApi):
         encodedBody = urlencode(body)
         result = requests.post(self.uriAuth + '/token', headers=headers, data=urlencode(body))
         result = result.json()
+        
         return UserAccessToken(result['access_token'])
 

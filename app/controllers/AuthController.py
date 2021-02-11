@@ -41,7 +41,11 @@ async def login(req, resp):
         return
 
     accountDomainService = AccountDomainService(req.session).withSmaregiApi(None, None)
-    account = await accountDomainService.loginByCodeAndState(code, state)
+    try:
+        account = await accountDomainService.loginByCodeAndState(code, state)
+    except Exception as e:
+        resp.redirect('/', status_code=302)
+        return
     
     SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
     if account.loginStatus == account.LoginStatusEnum.SIGN_UP:
