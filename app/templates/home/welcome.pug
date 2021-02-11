@@ -13,7 +13,7 @@ html(lang="ja")
     body
         .container
             .title
-                img(src="{{ 'image/logo.jpg' | css }}", alt="title-logo", style="object-fit:contain; width:auto; height:100%;")
+                img(src="{{ 'image/logo.jpg' | css }}", alt="title-logo", style="object-fit:contain; max-width:100%; height:auto;")
             session.content
                 p.
                     スマレジでたてた取引から、売上に色々な傾向が分ります。<br />
@@ -30,6 +30,8 @@ html(lang="ja")
             #button-section
                 a(href="/accounts/login")
                     button はじめる
+            session.content
+                a.menu-item(href="https://from-garage.work/privacy_policy.html" style=" font-size: var(--fontsize__tip); ") プライバシーポリシーはこちら
                     //- a.btn.secondary(href="/login_demo") デモを体験してみる
 
     style.
@@ -39,7 +41,7 @@ html(lang="ja")
         .title {
             background: var(--color__base);
             width:100vw;
-            height: 10%;
+            height: 10vh;
             display: flex;
             justify-content: center;
         }
@@ -67,14 +69,4 @@ html(lang="ja")
 
             border: 1px solid;
             border-radius: 5px;
-        }
-
-        .btn.primary {
-            color: white;
-            background-color:#6633ff;
-        }
-
-        .btn.secondary {
-            color: white;
-            background-color:#777777;
         }
