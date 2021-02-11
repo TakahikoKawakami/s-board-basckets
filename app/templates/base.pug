@@ -24,16 +24,14 @@ html(lang="ja")
             header
                 nav
                     .nav-container
-                        div
-                            img(src="{{ 'image/logo.jpg' | css }}", alt="logo", style="height:32px;")
+                        div(style="width: minmax(20%, 40%); height: 100%;")
+                            img(src="{{ 'image/logo.jpg' | css }}", alt="logo", style="object-fit:contain; object-position:0% 0%; width:100%; height:100%;")
                         .menu-container 
                             .menu-item
                                 ion-icon(name="storefront-outline") 
                                 div {{ displayStore.name }}
                             a#for-setting-modal.menu-item.setting_modal__open(style="cursor:pointer")
                                 ion-icon(name="settings-outline")
-                            a.menu-item(href="https://from-garage.work/privacy_policy.html")
-                                ion-icon(name="lock-open-outline")
                             a.menu-item(href="https://from-garage.work/contact_us.html")
                                 ion-icon(name="mail-outline")
                             a.menu-item(href="/accounts/logout") 
