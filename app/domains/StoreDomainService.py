@@ -32,9 +32,11 @@ class StoreDomainService(AbstractDomainService):
     async def syncAllStores(self):
         storesApi = StoresApi(self._apiConfig)
         allStoreList = storesApi.getStoreList()
+        print(allStoreList)
         for store in allStoreList:
+            print(store['storeId'])
             await Store.create(
                 contract_id = self._loginAccount.contractId,
-                store_id = store['storeId'],
-                name = store['storeName']
+                store_id = store["storeId"],
+                name = store["storeName"]
             )
