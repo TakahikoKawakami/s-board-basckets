@@ -6,6 +6,7 @@ import ujson
 from orangecontrib.associate import fpgrowth as fp
 import logging
 
+from app import logger
 from app.entities.Baskets import Basket
 from app.domains.ProductsRepository import ProductsRepository
 from app.entities.VisJs import VisJs
@@ -24,20 +25,30 @@ class Fpgrowth():
         self._stats = []
         self._result = []
         
-        self._logger = logging.getLogger(__name__)
+        self._logger = None
 
+    def __str__(self):
+	    return """
+            patterns: {}件
+            rules: {}
+            stats: {}
+            result: {}件
+        """.format(len(self._patterns), self._rules, self._stats, len(self._result))
 
     @staticmethod
-    def createByDataList(_list, _count):
+    def createByDataList(_list, _count, _logger):
+        pyfpgrowth = Fpgrowth()
+        if _logger is not None:
+            pyfpgrowth._logger = _logger
+
         # 店舗情報をlistから取り除く
         # TODO 今後、店舗情報も分析対象に加えたい
         _list = Fpgrowth._removeStoreData(_list)
         _list = Fpgrowth._removeMemberData(_list)
         _list = Fpgrowth._removeSexData(_list)
-        _list = Fpgrowth._removeStoreData(_list)
+        _list = Fpgrowth._removeWithoutProductIdData(_list)
         _list = Fpgrowth._removeTransactionHeadData(_list)
 
-        pyfpgrowth = Fpgrowth()
         _numberKeyDict, _columnKeyDict = pyfpgrowth._getKeyDictionaries(_list)
 
         _encodedList = pyfpgrowth._encode(_list, _columnKeyDict)
@@ -154,6 +165,30 @@ class Fpgrowth():
             result.append(_eachResult)
         return result
 
+    @staticmethod
+    def _removeWithoutProductIdData(_list) -> list:
+        """remove product data containing no product id
+
+        Arguments:
+            _list {[type]} -- [description]
+
+        Returns:
+            list -- [description]
+        """
+        result = []
+        for _eachBasket in _list:
+            _eachResult = []
+            for _each in _eachBasket:
+                if not (_each.startswith(Basket.PREFIXES_PRODUCT)): # store__{"id": xxx}
+                    _eachResult.append(_each)
+                    continue
+                _dictString = _each.replace(Basket.PREFIXES_PRODUCT, "")
+                _json = ujson.loads(_dictString)
+                if (_json["id"] is not None):
+                    _eachResult.append(_each)
+                    continue
+            result.append(_eachResult)
+        return result
 
     @staticmethod
     def createByPatternJson(_json):
@@ -212,18 +247,27 @@ class Fpgrowth():
         vis = VisJs()
 
         if len(self._result) <= 0:
+            self._logger.debug("debug3")
             return vis
 
+        self._logger.info("---- calc max lift ----")
         _maxLift = max([nodeGroup['lift'] for nodeGroup in self._result])
+
+        self._logger.info("maxLift: {}".format(_maxLift))
+
+        self._logger.info("nodeGroup: {}件".format(len(self._result)))
         for nodeGroup in self._result:
             # edgesがlimitを超えたら了
             if (len(vis.edgeList) > self.MAX_EDGE_COUNT): break
 
             # edgeから見ていく（キーの要素数が1、要素の要素数が1の場合）
             # edgeのfrom, toで、まだnodeにない場合はnodeに格納
+            # productId=nullの場合もある。nullは未登録商品だったりテーブルチャージなので、nodeに加えない
             for node in nodeGroup['from']:
                 nodeFrom = node
                 if (nodeFrom["id"] not in [node.id for node in vis.nodeList]):
+                    self._logger.info("find 'from' node id: {}".format(nodeFrom["id"]))
+
                     vis.nodeList.append(vis.Node(
                         id = nodeFrom["id"],
                         label = nodeFrom["label"],
@@ -232,6 +276,7 @@ class Fpgrowth():
             for node in nodeGroup['to']:
                 nodeTo = node
                 if (nodeTo["id"] not in [node.id for node in vis.nodeList]):
+                    self._logger.info("find 'to' node id: {}".format(nodeTo["id"]))
                     vis.nodeList.append(vis.Node(
                         id = nodeTo["id"],
                         label = nodeTo["label"],
@@ -244,6 +289,8 @@ class Fpgrowth():
                     toNode = nodeGroup['to'][0]["id"],
                     width = nodeGroup['lift'] / _maxLift * 5
                 ))
+        self._logger.info("---- convertion finished ----")
+        self._logger.info(vis)
         return vis
 
 

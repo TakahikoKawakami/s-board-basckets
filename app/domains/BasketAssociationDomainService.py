@@ -53,17 +53,21 @@ class BasketAssociationDomainService(AbstractDomainService):
         mergedBasketList = []
         for dailyBasketListModel in dailyBasketListModelList:
             mergedBasketList += dailyBasketListModel.basketList
-        mergedPyfpgrowthEntity = Fpgrowth.createByDataList(mergedBasketList, 0.1)
+        mergedPyfpgrowthEntity = Fpgrowth.createByDataList(mergedBasketList, 0.1, self._logger)
         return mergedPyfpgrowthEntity
 
     async def convertAssociationResultToVisJs(self, fpgrowth):
         vis = None
+        self._logger.info("-----convert association result to vis.js-----")
+        self._logger.info(fpgrowth)
         if fpgrowth is not None:
-            # logger.debug("-----merged fpgrowth-----")
-            # logger.debug(mergedPyfpgrowthEntity.patterns)
+            self._logger.debug("debug in if content")
             vis = fpgrowth.convertToVisJs()
+            self._logger.debug("----- ----converted fpgrowth to vis.js-----")
             vis = await self._setVisNodeLabel(vis)
+            self._logger.debug("----- ----set label for vis.js-----")
         
+        self._logger.debug("----- ----- vis.js created.")
         return vis
 
     async def _setVisNodeLabel(self, vis):
@@ -74,8 +78,17 @@ class BasketAssociationDomainService(AbstractDomainService):
                 contract_id = self._loginAccount.contractId,
                 product_id = node.id
             ).first()
+            self._logger.debug(product)
+
             if product is None:
+                self._logger.info("fetching product id: {}".format(node.id))
                 productByApi = productsApi.getProductById(node.id)
+                if productByApi is None:
+                    self._logger.info("productsApi.getProductById is failed.")
+                    node.label = "unknown"
+                    result.nodeList.append(node)
+                    continue
+                self._logger.debug(productByApi)
                 product = await Product.create(
                     contract_id = self._loginAccount.contractId,
                     product_id = productByApi['productId'],
