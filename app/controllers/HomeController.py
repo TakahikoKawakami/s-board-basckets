@@ -12,7 +12,7 @@ def index(req, resp):
 
     if ('contract_id' in req.session):
         logger.debug('go to index')
-        resp.redirect('/baskets/associate', set_text=True, status_code=303)
+        resp.redirect('/baskets', set_text=True, status_code=303)
         return
     else:
         logger.debug('go to welcome')

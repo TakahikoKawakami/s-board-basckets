@@ -26,13 +26,19 @@ class AccountStore(AbstractController):
         
     async def on_put(self, req, resp):
         self._logger.info('put AccountStore')
-        storeDomainService = StoreDomainService(self._loginAccount)
-        await storeDomainService.deleteAllStores()
-        await storeDomainService.syncAllStores()
+        try:
+            storeDomainService = StoreDomainService(self._loginAccount)
+            await storeDomainService.deleteAllStores()
+            await storeDomainService.syncAllStores()
 
-        resp.media = {
-            "status": 200
-        }
+            resp.media = {
+                "status": 200
+   	        }
+        except Exception as e:
+            self._logger.exception('raise error: %s', e)
+            resp.media = {
+                "status": 500
+   	        }
         return
 
 class AccountSetting(AbstractController):
