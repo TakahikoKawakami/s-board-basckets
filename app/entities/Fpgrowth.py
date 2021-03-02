@@ -28,7 +28,7 @@ class Fpgrowth():
         self._logger = None
 
     def __str__(self):
-	    return """
+        return """
             patterns: {}件
             rules: {}
             stats: {}

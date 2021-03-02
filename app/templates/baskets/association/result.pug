@@ -8,7 +8,7 @@
         h2 Pick Up!
         .summary
             div.
-                {{ pickUpMessage.store.storeName }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、<br>
+                {{ pickUpMessage.store.name }}店舗の{{ pickUpMessage.from }}から{{ pickUpMessage.to }}の期間、<br>
                 {% if pickUpMessage.productFrom == None %}
                 取引が存在しないか、関係性を見つけられませんでした。<br>
                 分析期間を変更して、再度分析してみてください。
