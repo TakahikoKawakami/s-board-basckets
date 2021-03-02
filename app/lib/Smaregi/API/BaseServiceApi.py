@@ -61,12 +61,16 @@ class BaseServiceApi(BaseApi):
         
     def _api(self, uri, header, body):
         response = requests.get(self.uri, headers=header, params=urlencode(body))
+        if response.status_code != 200:
+            return None
         resultList = response.json()
 
         while (('link' in response.headers) and ('next' in response.links)):
             print(response.links)
             uriNext = response.links['next']['url']
             response = requests.get(uriNext, headers=header)
+            if response.status_code != 200:
+                return None
             resultList.extend(response.json())
 
         return resultList

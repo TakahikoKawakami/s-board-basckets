@@ -97,14 +97,18 @@ class AssociateResult(AbstractController):
             query['date_from'],
             query['date_to']
         )
+        self._logger.info('create fpgrowth')
 
         vis = await self._basketAssociationDomainService.convertAssociationResultToVisJs(fpgrowth)
+        self._logger.info('create vis')
+
         pickUpMessage = await self._basketAssociationDomainService.convertAssociationResultToPickUpMessage(
             fpgrowth,
             targetStore.storeId,
             query['date_from'],
             query['date_to']
         )
+        self._logger.info('create pickup messages')
 
         visDict = vis.toDict()
 

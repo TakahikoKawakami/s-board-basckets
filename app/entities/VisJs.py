@@ -5,6 +5,12 @@ class VisJs():
         self.nodeList = []
         self.edgeList = []
 
+    def __str__(self):
+        return """
+            nodeList: {} counts
+			edgeList: {} counts
+        """.format(len(self.nodeList), len(self.edgeList))
+
     def toDict(self):
         result = {
             'nodes': [],
