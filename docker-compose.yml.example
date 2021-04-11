@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+    nginx-proxy:
+        hostname: nginx-proxy
+        container_name: nginx-proxy
+        image: nginx:latest
+        ports:
+            - 80:80
+        volumes:
+            - ./nginx/default.conf:/etc/nginx/default.conf
+            - ./nginx/conf.d:/etc/nginx/conf.d
+    responder:
+        hostname: responder
+        container_name: responder
+        build: "./app"
+        restart: always
+        tty: true # コンテナを起動し続ける
+        expose:
+            - "80"
+        # command: /bin/sh -c "python /root/run.py"
+        volumes:
+            - ".:/root"
+    database:
+        image: mysql:5.7
+        hostname: mysql
+        container_name: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: LOOK_INTO_BASKETS
+            MYSQL_USER: mysql
+            MYSQL_PASSWORD: mysql
+            TZ: 'Asia/Tokyo'
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - ./database/data:/var/lib/mysql
+            - ./database/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ./database/sql:/docker-entrypoint-initdb.d
+        ports:
+            - 3306:3306

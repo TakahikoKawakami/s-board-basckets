@@ -2,7 +2,14 @@ Pipfile
 app/static/node_modules
 /.vscode
 .env
+docker-compose.yml
 log/*
+
+database/data/*
+database/sql/*
+local
+.bash_history
+.python_history
 
 migrations/
 # Byte-compiled / optimized / DLL files
