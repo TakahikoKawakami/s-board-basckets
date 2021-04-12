@@ -1,3 +1,10 @@
+.vscode
+.npm
+.config
+.local
+.gnupg
+.vscode-server
+.gitconfig
 Pipfile
 app/static/node_modules
 /.vscode
