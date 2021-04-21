@@ -6,7 +6,7 @@ class Product(AbstractTortoiseModel):
     """
     商品モデル
     """
-    product_id = fields.IntField(null=False)
+    product_id = fields.BigIntField(null=False)
     name = fields.CharField(max_length=255, null=False)
     color = fields.CharField(max_length=64, null=True)
     size = fields.CharField(max_length=64, null=True)
