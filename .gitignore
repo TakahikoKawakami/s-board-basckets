@@ -1,4 +1,6 @@
 .vscode
+.ssh
+.ultrahook
 .npm
 .config
 .local
