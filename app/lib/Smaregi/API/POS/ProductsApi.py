@@ -20,9 +20,9 @@ class ProductsApi(BaseServiceApi):
         self.uri = self.uriPos + '/products'
         
         header = self._getHeader()
-        body = self._getBody('productId,productName', sort, whereDict)
+        body = self._getQuery('productId,productName', sort, whereDict)
         
-        result = self._api(self.uri, header, body)
+        result = self._apiGet(self.uri, header, body)
 
         self.logger.info(result)
         return result
@@ -34,7 +34,7 @@ class ProductsApi(BaseServiceApi):
         self.uri = self.uriPos + '/products/' + id
         
         header = self._getHeader()
-        body = self._getBodyForDetail('productId,productName', sort, whereDict)
+        body = self._getQueryForDetail('productId,productName', sort, whereDict)
         
-        result = self._api(self.uri, header, body)
+        result = self._apiGet(self.uri, header, body)
         return result

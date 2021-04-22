@@ -37,12 +37,12 @@ class Basket(AbstractController):
         self._logger.info('sync DailyBasket')
         self._basketDomainService = BasketDomainService(self._loginAccount)
         request = await req.media(format='json')
-        dateFrom = request['startDate']
-        dateTo = request['endDate']
+        dateFrom = request['startDate'] + 'T00:00:00+0900'
+        dateTo = request['endDate'] + 'T23:59:59+0900'
         try:
             syncedDailyBasketList = await self._basketDomainService.syncDailyBasketListByDateRange(dateFrom ,dateTo)
-            jsonDailyBasketList = [await model.serialize for model in syncedDailyBasketList]
-            resp.media = jsonDailyBasketList
+            # jsonDailyBasketList = [await model.serialize for model in syncedDailyBasketList]
+            # resp.media = jsonDailyBasketList
         except Exception:
             resp.status_code = 400
 

@@ -58,52 +58,76 @@ class BasketDomainService(AbstractDomainService):
         ).delete()
         return _dailyBasketList
 
-    async def syncDailyBasketListByDateRange(self, startDate: datetime.date, endDate: datetime.date):
+    async def syncDailyBasketListByDateRange(self, startDate: datetime.datetime, endDate: datetime.datetime):
+        """指定された期間の日次バスケットデータを作成、同期します
+
+        Args:
+            startDate (datetime.datetime): 開始日
+            endDate (datetime.datetime): 終了日
+
+        Raises:
+            e: [description]
+
+        Returns:
+            [type]: [description]
+        """
         accountSetting = await self._loginAccount.accountSetting
         storeId = accountSetting.displayStoreId
 
         _transactionsApi = TransactionsApi(self._apiConfig)
-        _targetTransactionHeadList = _transactionsApi.getTransactionHeadList(
+        _transactionsApi.createTransactionDetailCsv(
             whereDict={
-                'store_id': storeId,
-                'sum_date-from': startDate,
-                'sum_date-to': endDate,
+                'storeId': storeId,
+                'transactionDateTimeFrom': startDate,
+                'transactionDateTimeTo': endDate,
+                # 'callbackUrl': self._appConfig.APP_URI + '/webhook'
+                'callbackUrl': "https://webhook.site/48815cd1-d43c-4c6f-90a7-79c1e1751353"
             }, 
             sort='sumDate:asc'
         )
-        # 締日ごとに並び替え
-        _sumDateCategorizedTransactionHeadList = DictionaryUtil.categorizeByKey('sumDate', _targetTransactionHeadList)
-        try:
-            for _sumDate, _transactionHeadList in _sumDateCategorizedTransactionHeadList.items():
-                # 締め日データが既にあれば無視。なければレコード作成
-                _existedRecords = await DailyBasketList.filter(
-                    contract_id = self._loginAccount.contractId,
-                    store_id = storeId,
-                    target_date = _sumDate
-                ).all()
-                if (_existedRecords == []):
 
-                    _dailyBasketListModelList = self._getBasketListByTransactionHeadList(_transactionHeadList, _sumDate)
-                    for _dailyBasketListModel in _dailyBasketListModelList:
-                        await _dailyBasketListModel.save()
-                        # self._logger.debug(_registered)
-        except Exception as e:
-            raise e
+        # _targetTransactionHeadList = _transactionsApi.getTransactionHeadList(
+        #     whereDict={
+        #         'store_id': storeId,
+        #         'sum_date-from': startDate,
+        #         'sum_date-to': endDate,
+        #     }, 
+        #     sort='sumDate:asc'
+        # )
+        # # 締日ごとに並び替え
+        # _sumDateCategorizedTransactionHeadList = DictionaryUtil.categorizeByKey('sumDate', _targetTransactionHeadList)
+        # try:
+        #     for _sumDate, _transactionHeadList in _sumDateCategorizedTransactionHeadList.items():
+        #         # 締め日データが既にあれば無視。なければレコード作成
+        #         _existedRecords = await DailyBasketList.filter(
+        #             contract_id = self._loginAccount.contractId,
+        #             store_id = storeId,
+        #             target_date = _sumDate
+        #         ).all()
+        #         if (_existedRecords == []):
 
-        _result = await DailyBasketList.filter(
-            contract_id = self._loginAccount.contractId,
-            store_id = storeId,
-            target_date__range = (startDate, endDate)
-        ).all()
-        return _result 
+        #             _dailyBasketListModelList = self._getBasketListByTransactionHeadList(_transactionHeadList, _sumDate)
+        #             for _dailyBasketListModel in _dailyBasketListModelList:
+        #                 await _dailyBasketListModel.save()
+        #                 # self._logger.debug(_registered)
+        # except Exception as e:
+        #     raise e
+
+        # _result = await DailyBasketList.filter(
+        #     contract_id = self._loginAccount.contractId,
+        #     store_id = storeId,
+        #     target_date__range = (startDate, endDate)
+        # ).all()
+        # return _result 
 
 
-        _dailyBasketList = await DailyBasketList.filter(
-            contract_id = self._loginAccount.contractId,
-            store_id = storeId,
-            target_date__range = (startDate, endDate)
-        ).delete()
-        return _dailyBasketList
+        # _dailyBasketList = await DailyBasketList.filter(
+        #     contract_id = self._loginAccount.contractId,
+        #     store_id = storeId,
+        #     target_date__range = (startDate, endDate)
+        # ).delete()
+        # return _dailyBasketList
+        return
 
     def _getBasketListByTransactionHeadList(self, _transactionHeadList, _sumDate):
         """取引ヘッダリストに紐づく全取引明細を取得し、日別バスケット分析用データモデルを返却します

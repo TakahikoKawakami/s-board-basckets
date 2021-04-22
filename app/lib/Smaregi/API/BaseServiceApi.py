@@ -23,7 +23,7 @@ class BaseServiceApi(BaseApi):
         }
         
         
-    def _getBody(self, field=None, sort=None, whereDict=None):
+    def _getQuery(self, field=None, sort=None, whereDict=None):
         body = {
             'limit': 1000,
             'page': 1
@@ -42,7 +42,7 @@ class BaseServiceApi(BaseApi):
         return body
         
         
-    def _getBodyForDetail(self, field=None, sort=None, whereDict=None):
+    def _getQueryForDetail(self, field=None, sort=None, whereDict=None):
         body = {
         }
         if (field is not None):
@@ -58,8 +58,13 @@ class BaseServiceApi(BaseApi):
 
         return body
 
+    
+    def _getRequestBody():
+        body = {}
+
+
         
-    def _api(self, uri, header, body):
+    def _apiGet(self, uri, header, body):
         response = requests.get(self.uri, headers=header, params=urlencode(body))
         if response.status_code != 200:
             return None
@@ -74,3 +79,10 @@ class BaseServiceApi(BaseApi):
             resultList.extend(response.json())
 
         return resultList
+
+
+    def _apiPost(self, uri, header, body):
+        response = requests.post(self.uri, headers=header, data=json.dumps(body))
+        if response.status_code != 200:
+            return None
+        return response.json()

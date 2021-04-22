@@ -17,9 +17,9 @@ class StoresApi(BaseServiceApi):
         self.uri = self.uriPos + '/stores'
         
         header = self._getHeader()
-        body = self._getBody('storeId,storeName', sort, whereDict)
+        body = self._getQuery('storeId,storeName', sort, whereDict)
         
-        result = self._api(self.uri, header, body)
+        result = self._apiGet(self.uri, header, body)
 
         # self.logger.info(result)
         return result
@@ -31,8 +31,8 @@ class StoresApi(BaseServiceApi):
         self.uri = self.uriPos + '/stores/' + id
         
         header = self._getHeader()
-        body = self._getBodyForDetail('storeId,storeName', sort, whereDict)
+        body = self._getQueryForDetail('storeId,storeName', sort, whereDict)
         
-        result = self._api(self.uri, header, body)
+        result = self._apiGet(self.uri, header, body)
         return result
 

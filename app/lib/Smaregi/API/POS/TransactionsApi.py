@@ -12,9 +12,9 @@ class TransactionsApi(BaseServiceApi):
         self.uri = self.uriPos + '/transactions'
         
         header = self._getHeader()
-        body = self._getBody(sort=sort, whereDict=whereDict)
+        body = self._getQuery(sort=sort, whereDict=whereDict)
         
-        result = self._api(self.uri, header, body)
+        result = self._apiGet(self.uri, header, body)
         return result
 
 
@@ -24,9 +24,9 @@ class TransactionsApi(BaseServiceApi):
         self.uri = self.uriPos + '/transactions/' + transactionHeadId + '/details'
         
         header = self._getHeader()
-        body = self._getBody(sort=sort, whereDict=whereDict)
+        body = self._getQuery(sort=sort, whereDict=whereDict)
         
-        result = self._api(self.uri, header, body)
+        result = self._apiGet(self.uri, header, body)
         return result
         
 
@@ -36,11 +36,30 @@ class TransactionsApi(BaseServiceApi):
         self.uri = self.uriPos + '/transactions/' + transactionHeadId
         
         header = self._getHeader()
-        body = self._getBodyForDetail(sort=sort, whereDict=whereDict)
+        body = self._getQueryForDetail(sort=sort, whereDict=whereDict)
         
-        result = self._api(self.uri, header, body)
+        result = self._apiGet(self.uri, header, body)
         return result
         
+    
+    def createTransactionDetailCsv(self, field=None, sort=None, whereDict=None):
+        """取引明細CSV作成APIを実施します
+
+        Args:
+            field (dict, optional): [description]. Defaults to None.
+            sort (dict, optional): [description]. Defaults to None.
+            whereDict (dict, optional): [description]. Defaults to None.
+        """
+        contractId = self.config.contractId
+        self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
+        self.uri = self.uriPos + '/transactions/details/out_file_async'
+        
+        header = self._getHeader()
+        body = self._getQueryForDetail(sort=sort, whereDict=whereDict)
+        
+        result = self._apiPost(self.uri, header, body)
+        return result
+
         
 class TransactionDetail():
     def __init__(self):
