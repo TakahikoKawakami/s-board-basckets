@@ -36,6 +36,23 @@ class BasketDomainService(AbstractDomainService):
         _dailyBasketList.appendBasket(_basket)
         await _dailyBasketList.save()
 
+
+    async def registerBasketByTransaction(self, transactionHead, transactionDetail):
+        _basket = Basket()
+        _basket.setByTransactionHead(transactionHead)
+        _basket.setByTransactionDetailList(transactionDetail)
+
+        _dailyBasketListTuple = await DailyBasketList.get_or_create(
+            contract_id = self._loginAccount.contractId,
+            store_id = _basket.storeId,
+            target_date = _basket.targetDate
+        )
+
+        _dailyBasketList = _dailyBasketListTuple[0] # [1]は取得したか、作成したかのboolean true: create
+        _dailyBasketList.appendBasket(_basket)
+        await _dailyBasketList.save()
+
+
     async def getDailyBasketListByDateRange(self, startDate: datetime.date, endDate: datetime.date):
         accountSetting = await self._loginAccount.accountSetting
         storeId = accountSetting.displayStoreId
@@ -80,8 +97,7 @@ class BasketDomainService(AbstractDomainService):
                 'storeId': storeId,
                 'transactionDateTimeFrom': startDate,
                 'transactionDateTimeTo': endDate,
-                # 'callbackUrl': self._appConfig.APP_URI + '/webhook'
-                'callbackUrl': "https://webhook.site/48815cd1-d43c-4c6f-90a7-79c1e1751353"
+                'callbackUrl': self._appConfig.APP_URI + '/webhook'
             }, 
             sort='sumDate:asc'
         )

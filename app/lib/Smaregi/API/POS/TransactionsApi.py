@@ -55,7 +55,10 @@ class TransactionsApi(BaseServiceApi):
         self.uri = self.uriPos + '/transactions/details/out_file_async'
         
         header = self._getHeader()
-        body = self._getQueryForDetail(sort=sort, whereDict=whereDict)
+
+        body = self._getQueryForDetail(sort=sort, whereDict=whereDict, state={
+            'contractId': self.config.contractId
+        })
         
         result = self._apiPost(self.uri, header, body)
         return result

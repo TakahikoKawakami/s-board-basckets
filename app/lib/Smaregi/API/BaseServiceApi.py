@@ -42,7 +42,7 @@ class BaseServiceApi(BaseApi):
         return body
         
         
-    def _getQueryForDetail(self, field=None, sort=None, whereDict=None):
+    def _getQueryForDetail(self, field=None, sort=None, whereDict=None, **kwargs):
         body = {
         }
         if (field is not None):
@@ -55,6 +55,7 @@ class BaseServiceApi(BaseApi):
             })
         if (whereDict is not None):
             body.update(whereDict)
+        body.update(kwargs)
 
         return body
 
