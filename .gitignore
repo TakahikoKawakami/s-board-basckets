@@ -1,6 +1,7 @@
 .vscode
 .ssh
 .ultrahook
+.pylint.d
 .npm
 .config
 .local
