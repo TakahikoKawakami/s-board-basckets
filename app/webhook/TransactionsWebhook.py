@@ -32,6 +32,10 @@ class TransactionsWebhook(AbstractWebhook):
         self._logger.info('transaction callback received.')
         
         urlList = body.get("file_url")
+        if urlList is None:
+            self._logger.info(body.get("message"))
+            self._logger.info(f'request_code : "{body.get("request_code")}"')
+            return
         basketDomainService = await BasketDomainService.createInstance(self._accessAccount)
         await basketDomainService.registerBasketByGzipUrlList(urlList)
 
