@@ -17,6 +17,9 @@ class DailyBasketList(AbstractTortoiseModel):
         abstract=False
         table="daily_basket_list"
 
+    def __repr__(self):
+        return f'store_id: "{self.store_id}", target_date: "{self.target_date}", basket_list_length: "{len(self.basket_list)}"'
+
     @property
     def storeId(self) -> int:
         return self.store_id

@@ -18,6 +18,4 @@ def categorizeByKey(key, dictList):
 
 
 def getByKey(_key, _dict):
-    if _key in _dict:
-        return _dict[_key]
-    return None
+    return _dict.get(_key)

@@ -22,10 +22,12 @@ class ProductsApi(BaseServiceApi):
         header = self._getHeader()
         body = self._getQuery('productId,productName', sort, whereDict)
         
-        result = self._apiGet(self.uri, header, body)
+        response = self._apiGet(self.uri, header, body)
+        if response[0] != 200:
+            raise response[1]
+        responseData = response[1]
 
-        self.logger.info(result)
-        return result
+        return responseData
 
 
     def getProductById(self, id, field=None, sort=None, whereDict=None):
@@ -36,5 +38,8 @@ class ProductsApi(BaseServiceApi):
         header = self._getHeader()
         body = self._getQueryForDetail('productId,productName', sort, whereDict)
         
-        result = self._apiGet(self.uri, header, body)
-        return result
+        response = self._apiGet(self.uri, header, body)
+        if response[0] != 200:
+            raise response[1]
+        responseData = response[1]
+        return responseData

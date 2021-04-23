@@ -19,10 +19,12 @@ class StoresApi(BaseServiceApi):
         header = self._getHeader()
         body = self._getQuery('storeId,storeName', sort, whereDict)
         
-        result = self._apiGet(self.uri, header, body)
+        response = self._apiGet(self.uri, header, body)
+        if response[0] != 200:
+            raise response[1]
+        responseData = response[1]
 
-        # self.logger.info(result)
-        return result
+        return responseData
 
 
     def getStoreById(self, id, ield=None, sort=None, whereDict=None):
@@ -33,6 +35,9 @@ class StoresApi(BaseServiceApi):
         header = self._getHeader()
         body = self._getQueryForDetail('storeId,storeName', sort, whereDict)
         
-        result = self._apiGet(self.uri, header, body)
-        return result
+        response = self._apiGet(self.uri, header, body)
+        if response[0] != 200:
+            raise response[1]
+        responseData = response[1]
+        return responseData
 

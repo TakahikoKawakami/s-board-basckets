@@ -4,6 +4,7 @@ from pprint import pprint
 import json
 
 import app.database as db
+from app.lib.Smaregi.API.POS.entities import TransactionHead, TransactionDetail
 
 import logging
 
@@ -45,7 +46,7 @@ class Basket():
         pass
     
     
-    def setByTransactionDetailList(self, _transactionDetailList)-> None:
+    def setByTransactionDetailList(self, _transactionDetailList: list['TransactionDetail'])-> None:
         """取引明細からバスケットentityに必要なデータを抽出、セットします
         
         Arguments:
@@ -54,45 +55,45 @@ class Basket():
         for transactionDetail in _transactionDetailList:
             self._productList.append(
                 {
-                    "id": transactionDetail['productId'],
-                    "name": transactionDetail['productName'],
-                    "categoryId": transactionDetail['categoryId'],
+                    "id": transactionDetail.productId,
+                    "name": transactionDetail.productName,
+                    "categoryId": transactionDetail.categoryId,
                 }
             )
     
 
-    def setByTransactionHead(self, _transactionHead) -> None:
+    def setByTransactionHead(self, _transactionHead: 'TransactionHead') -> None:
         """取引ヘッダからバスケットentityに必要なデータを抽出、セットします
 
         Arguments:
             _transactionHead {[type]} -- [description]
         """
-        self._transactionHeadId = _transactionHead['transactionHeadId']
+        self._transactionHeadId = _transactionHead.transactionHeadId
 
-        if _transactionHead["sumDate"] is None:
+        if _transactionHead.sumDate is None:
             self._targetDate = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).strftime("%Y-%m-%d")
         else:
-            self._targetDate = _transactionHead['sumDate']
+            self._targetDate = _transactionHead.sumDate
 
-        if _transactionHead["customerId"] is not None:
-            self._memberId = _transactionHead["customerId"]
+        if _transactionHead.customerId is not None:
+            self._memberId = _transactionHead.customerId
         else:
             self._memberId = "-1"
             
-        if _transactionHead["customerGroupId"] is not None:
-            self._customerGroupIdList.append(_transactionHead["customerGroupId"])
+        if _transactionHead.customerGroupId is not None:
+            self._customerGroupIdList.append(_transactionHead.customerGroupId)
         for i in range(2,6):
-            if _transactionHead["customerGroupId" + str(i)] is not None:
-                self._customerGroupIdList.append(_transactionHead["customerGroupId" + str(i)])
+            if getattr(_transactionHead, "customerGroupId" + str(i)) is not None:
+                self._customerGroupIdList.append(getattr(_transactionHead, "customerGroupId" + str(i)))
                 
-        self._storeId = _transactionHead["storeId"]
+        self._storeId = _transactionHead.storeId
         
-        if _transactionHead["guestNumbersMale"] is not None:
-            self._customerSexDict["male"] = _transactionHead["guestNumbersMale"]
-        if _transactionHead["guestNumbersFemale"] is not None:
-            self._customerSexDict["female"] = _transactionHead["guestNumbersFemale"]
-        if _transactionHead["guestNumbersUnknown"] is not None:
-            self._customerSexDict["unknown"] = _transactionHead["guestNumbersUnknown"]
+        if _transactionHead.guestNumbersMale is not None:
+            self._customerSexDict["male"] = _transactionHead.guestNumbersMale
+        if _transactionHead.guestNumbersFemale is not None:
+            self._customerSexDict["female"] = _transactionHead.guestNumbersFemale
+        if _transactionHead.guestNumbersUnknown is not None:
+            self._customerSexDict["unknown"] = _transactionHead.guestNumbersUnknown
         # TODO 取引日時区分
 
     

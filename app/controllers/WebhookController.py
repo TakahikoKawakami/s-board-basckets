@@ -28,9 +28,9 @@ class Webhook(AbstractController):
     @classmethod
     async def router(cls, header, body):
         # 通常のwebhookではなく、callbackの場合
-        if DictionaryUtil.getByKey('proc_name', body) is not None:
-            _contractId = DictionaryUtil.getByKey('contractId', DictionaryUtil.getByKey('state', body))
-            _event = DictionaryUtil.getByKey('proc_name', body)
+        if body.get('proc_name') is not None:
+            _contractId = body.get('state').get('contractId')
+            _event = body.get('proc_name')
         else:
             _contractId = header['smaregi-contract-id']
             _event = header['smaregi-event']
@@ -42,6 +42,7 @@ class Webhook(AbstractController):
         if (_event == cls.EVENT_GET_TRANSACTION_DETAIL_LIST):
             transactionsWebhook = await webhook.TransactionsWebhook.createInstance(_accessAccount)
             await transactionsWebhook.callback(_event, body)
+            return
         
         _accountSetting = await _accessAccount.accountSetting
         if not _accountSetting.use_smaregi_webhook:
@@ -50,4 +51,4 @@ class Webhook(AbstractController):
         if (_event == cls.EVENT_TRANSACTIONS):
             transactionsWebhook = await webhook.TransactionsWebhook.createInstance(_accessAccount)
             await transactionsWebhook.received(_event, body)
-
+            return
