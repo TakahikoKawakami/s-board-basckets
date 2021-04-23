@@ -76,6 +76,11 @@ class Associate(AbstractController):
         )
 
 class AssociateResult(AbstractController):
+    """分析結果コントローラ
+
+    Args:
+        AbstractController ([type]): [description]
+    """
     def __init__(self) -> None:
         super().__init__()
         self._basketAssociationDomainService = None
@@ -86,37 +91,39 @@ class AssociateResult(AbstractController):
         try:
             schema = BasketValidators.AccosiationCondition()
             query = schema.load(req.params)
+
+            self._basketAssociationDomainService = await BasketAssociationDomainService.createInstance(self._loginAccount)
+            targetStore = await self._basketAssociationDomainService.targetStore
+            fpgrowth = await self._basketAssociationDomainService.associate(query['date_from'], query['date_to'])
+            self._logger.info('create fpgrowth')
+
+            vis = await self._basketAssociationDomainService.convertAssociationResultToVisJs(fpgrowth)
+            self._logger.info('create vis')
+
+            pickUpMessage = await self._basketAssociationDomainService.convertAssociationResultToPickUpMessage(
+                fpgrowth,
+                targetStore.storeId,
+                query['date_from'],
+                query['date_to']
+            )
+            self._logger.info('create pickup messages')
+
+            visDict = vis.toDict()
+
+            await self.render(
+                path = "baskets/association/result.pug",
+                search_from = query['date_from'],
+                search_to = query['date_to'],
+                vis = visDict,
+                pickUpMessage = pickUpMessage,
+            )
+            return
+
         except ValidationError as e:
             SessionManager.set(resp.session, SessionManager.KEY_ERROR_MESSAGES, e.messages)
             resp.redirect('/baskets', status_code=302)
             return
-
-        self._basketAssociationDomainService = await BasketAssociationDomainService.createInstance(self._loginAccount)
-        targetStore = await self._basketAssociationDomainService.targetStore
-        fpgrowth = await self._basketAssociationDomainService.associate(
-            query['date_from'],
-            query['date_to']
-        )
-        self._logger.info('create fpgrowth')
-
-        vis = await self._basketAssociationDomainService.convertAssociationResultToVisJs(fpgrowth)
-        self._logger.info('create vis')
-
-        pickUpMessage = await self._basketAssociationDomainService.convertAssociationResultToPickUpMessage(
-            fpgrowth,
-            targetStore.storeId,
-            query['date_from'],
-            query['date_to']
-        )
-        self._logger.info('create pickup messages')
-
-        visDict = vis.toDict()
-
-        await self.render(
-            path = "baskets/association/result.pug",
-            search_from = query['date_from'],
-            search_to = query['date_to'],
-            vis = visDict,
-            pickUpMessage = pickUpMessage,
-        )
-        return
+        except Exception as e:
+            SessionManager.set(resp.session, SessionManager.KEY_ERROR_MESSAGES, e.messages)
+            resp.redirect('/baskets', status_code=302)
+            return

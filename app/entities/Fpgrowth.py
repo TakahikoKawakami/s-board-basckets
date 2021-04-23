@@ -54,6 +54,7 @@ class Fpgrowth():
         _encodedList = pyfpgrowth._encode(_list, _columnKeyDict)
 
         # X, mapping = fp.OneHot.encode(_list)
+        # TODO 今後、ルールやリフト値も引数にして画面から入力できるようにしたい
         itemsets = dict(fp.frequent_itemsets(_encodedList, 0.01))
         pyfpgrowth._patterns = itemsets
         # アソシエーションルールの抽出
