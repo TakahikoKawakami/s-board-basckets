@@ -27,9 +27,11 @@ link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
                 {% for error in message.date_from %}
                 span(style="color: var(--color__danger);") {{error}}<br>
                 {% endfor %}
-    div.basket-container
-        div.calendar-container
-            div#calendar
+    .basket-container
+        .calendar-container
+            #calendar
+            .calendar-loading
+                .loader
         //- div testtesttest
 
 
@@ -135,6 +137,7 @@ script.
                 },
             })
             .then(function (response) {
+                $(".calendar-loading").hide();
                 resp = response.data
                 resp.forEach(function(element, index) {
                     var el = JSON.parse(element);
@@ -144,6 +147,7 @@ script.
             .catch(function (error) {
                 console.log(error);
             });
+            $(".calendar-loading").show();
         };
 
         $('#date-modal').find('.sync').click(function() {
@@ -164,6 +168,7 @@ script.
             
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").addClass('loader');
+            document.cookie
             closeDateModal();
         });
         
