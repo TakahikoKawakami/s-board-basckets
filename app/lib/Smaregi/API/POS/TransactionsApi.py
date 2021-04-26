@@ -78,7 +78,10 @@ class TransactionsApi(BaseServiceApi):
         header = self._getHeader()
 
         body = self._getQueryForDetail(sort=sort, whereDict=whereDict, state={
-            'contractId': self.config.contractId
+            'contractId': self.config.contractId,
+            'field': field,
+            'sort': sort,
+            'where': whereDict,
         })
         
         response = self._apiPost(self.uri, header, body)

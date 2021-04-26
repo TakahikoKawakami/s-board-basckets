@@ -130,7 +130,7 @@ script.
         })
         
         function getDateListHavingBaskets(startStr, endStr) {
-            axios.get('/baskets', {
+            axios.get('/api/baskets', {
                 params: {
                     startDate: startStr,
                     endDate: endStr,
@@ -141,8 +141,14 @@ script.
                 resp = response.data
                 resp.forEach(function(element, index) {
                     var el = JSON.parse(element);
-                    $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                    $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-events").removeClass('loader');
+                    if (hasBasketInApiResponseData(element)){
+                        $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                    } else {
+                        $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasEmptyBasket');
+                    }
                 });
+                checkSyncBasketsAreFinished();
             })
             .catch(function (error) {
                 console.log(error);
@@ -152,14 +158,8 @@ script.
 
         $('#date-modal').find('.sync').click(function() {
             let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
-            syncBaskets(targetDate)
+            resyncBaskets(targetDate)
                 .then(function (response) {
-                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").removeClass('loader');
-                    if (response.data.length > 0) {
-                        $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
-                    } else {
-                        alert('同期できる取引データがありませんでした。')
-                    }
                     closeDateModal();
                 })
                 .catch(function (error) {
@@ -168,7 +168,8 @@ script.
             
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").addClass('loader');
-            document.cookie
+
+            addLoadingDateToCookie(targetDate);
             closeDateModal();
         });
         
@@ -176,12 +177,6 @@ script.
             let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
             resyncBaskets(targetDate)
                 .then(function (response) {
-                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").removeClass('loader');
-                    if (response.data.length > 0) {
-                        $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
-                    } else {
-                        alert('同期できる取引データがありませんでした。')
-                    }
                     closeDateModal();
                 })
                 .catch(function (error) {
@@ -190,6 +185,8 @@ script.
             
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").addClass('loader');
+
+            addLoadingDateToCookie(targetDate);
             closeDateModal();
         });
 
@@ -206,7 +203,7 @@ script.
         });
 
         async function deleteBaskets(dateStr) {
-            return axios.delete('/baskets', {
+            return axios.delete('/api/baskets', {
                 params: {
                     startDate: dateStr,
                     endDate: dateStr,
@@ -216,7 +213,7 @@ script.
 
         async function syncBaskets(dateStr) {
             let csrf = "{{ csrf_token }}"
-            return axios.put('/baskets', {
+            return axios.put('/api/baskets', {
                 csrf_token: csrf,
                 startDate: dateStr,
                 endDate: dateStr,
@@ -229,9 +226,94 @@ script.
             return result;
         }
 
+        async function getBasket(dateStr) {
+            const targetDateTimeStr = dateStr + "T00:00:00+09:00";
+            axios.get('/api/baskets', {
+                params: {
+                    startDate: targetDateTimeStr,
+                    endDate: targetDateTimeStr,
+                },
+            })
+            .then(function (response) {
+                if (response.data.length > 0) {
+                    $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-events").removeClass('loader');
+                    if (hasBasketInApiResponseData(response.data[0])> 0){
+                        $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                    } else {
+                        $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-number").addClass('hasEmptyBasket');
+                    }
+                    removeLoadingDateFromCookie(dateStr);
+                } else {
+                    //- alert('同期できる取引データがありませんでした。')
+                }
+                return;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+
+        function hasBasketInApiResponseData(responseData) {
+            const data = JSON.parse(responseData);
+            const basketList = JSON.parse(data.basket_list);
+            return basketList.length > 0;
+        }
+
         function closeDateModal() {
             $('#date-modal').fadeOut(200);
         }
+
+        async function checkSyncBasketsAreFinished() {
+            let loadingDateStr = $.cookie("loading-date");
+            if (loadingDateStr === undefined) return;
+            let loadingDate = loadingDateStr.split(",");
+            if (loadingDate.length == 0) return;
+
+            try {
+                loadingDate.forEach((value, index) => {
+                    $("td[data-date = " + value + " ]").find(".fc-daygrid-day-events").addClass('loader');
+                    getBasket(value, value);
+                });
+            } catch (e) {
+                console.log(e);
+                $.removeCookie("loading-date");
+            }
+        }
+
+        function addLoadingDateToCookie(targetDate) {
+            let loadingDateStr = $.cookie("loading-date");
+            if (loadingDateStr !== undefined && loadingDateStr.split(",").length !== 0) {
+                let loadingDate = $.cookie("loading-date").split(",");
+                if (!loadingDate.includes(targetDate)) {
+                    loadingDate.push(targetDate);
+                }
+                $.cookie("loading-date", loadingDate.join(","));
+            } else {
+                $.cookie("loading-date", targetDate);
+            }
+        }
+
+        function removeLoadingDateFromCookie(targetDate) {
+            let loadingDateStr = $.cookie("loading-date");
+            if (loadingDateStr === undefined) return;
+            let loadingDate = loadingDateStr.split(",");
+            if (loadingDate.length == 0) return;
+
+            let removedLoadingDateArray = loadingDate.filter(x =>{
+                return x !== targetDate;
+            });
+            const removedLoadingDateStr = removedLoadingDateArray.join(",");
+            if (removedLoadingDateStr === "") {
+                $.removeCookie("loading-date");
+                return;
+            }
+
+            $.cookie("loading-date", removedLoadingDateStr);
+            return;
+        }
+
+        checkSyncBasketsAreFinished();
+        setInterval(checkSyncBasketsAreFinished, 10000);
     });
 
 {% endblock %}

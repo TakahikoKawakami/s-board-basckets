@@ -23,6 +23,7 @@ class BasketDomainService(AbstractDomainService):
 
     async def registerBasketByTransactionHeadId(self, transactionHeadId: int) -> None:
         """取引ヘッダIDからバスケットデータを作成し、DBに登録します
+        取引が存在しない場合でも、空のバスケットをDBに登録します
 
         Args:
             transactionHeadId (int): [description]
@@ -284,3 +285,21 @@ class BasketDomainService(AbstractDomainService):
             _resultList.append(_dailyBasketListModel)
             
         return _resultList
+
+    async def registerEmptyBasket(self, storeId: int, targetDate: datetime) -> None:
+        """空のバスケットデータを作成します
+        もし存在していたら何もしない
+
+        Args:
+            storeId (int): [description]
+            targetDate (datetime): [description]
+        """
+        dailyBasketListTuple = await DailyBasketList.get_or_create(
+            contract_id = self._loginAccount.contractId,
+            store_id = storeId,
+            target_date = targetDate
+        )
+
+        if dailyBasketListTuple[1] is True: # [1]は取得したか、作成したかのboolean true: create
+            _dailyBasketList = dailyBasketListTuple[0] 
+            await _dailyBasketList.save()

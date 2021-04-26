@@ -35,6 +35,13 @@ class TransactionsWebhook(AbstractWebhook):
         if urlList is None:
             self._logger.info(body.get("message"))
             self._logger.info(f'request_code : "{body.get("request_code")}"')
+            # データが0件だった場合、0件だったということがわかるよう、バスケットDBに空データを登録しておく
+            if (body.get("message") == 'no data'):
+                whereDict = body.get("state").get("where")
+                storeId = whereDict["storeId"]
+                targetDate = whereDict["transactionDateTimeFrom"].split("T")[0]
+                basketDomainService = await BasketDomainService.createInstance(self._accessAccount)
+                await basketDomainService.registerEmptyBasket(storeId, targetDate)
             return
         basketDomainService = await BasketDomainService.createInstance(self._accessAccount)
         await basketDomainService.registerBasketByGzipUrlList(urlList)
