@@ -8,11 +8,11 @@ ENV PYTHON_ROOT $HOME/local/python-$PYTHON_VERSION
 ENV PATH $PYTHON_ROOT/bin:$PATH
 # ENV PYENV_ROOT $HOME/.pyenv
 RUN apt-get update && apt-get upgrade -y \
- && apt-get install -y \
-    vim \
-    gcc \
-    git \
-    make
+    && apt-get install -y \
+        vim \
+        gcc \
+        git \
+        make
 RUN apt-get install -y \
     build-essential \
     libssl-dev \
@@ -21,7 +21,8 @@ RUN apt-get install -y \
     libreadline-dev \
     libsqlite3-dev \
     curl \
-    wget
+    wget \
+    ruby
 # RUN apt-get install -y \
 #     wget \
 #     llvm \
@@ -43,5 +44,9 @@ RUN pip install --upgrade pip setuptools wheel
 
 # for nodejs
 RUN apt-get install -y nodejs npm
+
+# for ultrahook
+# RUN echo "api_key: {{your api key}}" > ~/.ultrahook
+RUN gem install ultrahook && ultrahook look-into-baskets http://0.0.0.0:5500
 
 WORKDIR /root

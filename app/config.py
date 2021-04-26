@@ -51,6 +51,9 @@ class AppConfig(object):
     JSON_SORT_KEYS = False
 
     APP_URI = os.environ.get('APP_URI')
+    CALLBACK_URI = os.environ.get('CALLBACK_URI')
+    if CALLBACK_URI is None:
+        CALLBACK_URI = APP_URI
 
     SQLALCHEMY_DATABASE_URI = ''
     SQLALCHEMY_NATIVE_UNICODE = 'utf-8'

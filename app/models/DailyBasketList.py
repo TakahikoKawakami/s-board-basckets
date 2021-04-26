@@ -1,5 +1,6 @@
 from tortoise import fields
 from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
+from app.entities.Baskets import Basket
 
 from datetime import datetime
 import ujson
@@ -16,6 +17,9 @@ class DailyBasketList(AbstractTortoiseModel):
     class Meta:
         abstract=False
         table="daily_basket_list"
+
+    def __repr__(self):
+        return f'store_id: "{self.store_id}", target_date: "{self.target_date}", basket_list_length: "{len(self.basket_list)}"'
 
     @property
     def storeId(self) -> int:
@@ -45,7 +49,7 @@ class DailyBasketList(AbstractTortoiseModel):
         _stringList = DailyBasketList.convertBasketListToString(basketList)
         self.basket_list = ujson.dumps(_stringList)
 
-    def appendBasket(self, basket) -> None:
+    def appendBasket(self, basket:'Basket') -> None:
         _basketList = self.basketList
         _basketList.append(basket.convertListForAnalysis())
         self.basket_list = ujson.dumps(_basketList)

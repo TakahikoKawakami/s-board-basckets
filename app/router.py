@@ -1,5 +1,7 @@
 import responder
 from app.controllers import *
+from app.controllers.api import *
+# from app.controllers.view import *
 
 
 def add_routers(api: responder.API):
@@ -14,6 +16,8 @@ def add_routers(api: responder.API):
     api.add_route('/baskets', BasketController.Basket)
     api.add_route('/baskets/associate', BasketController.Associate)
     api.add_route('/baskets/associate/result', BasketController.AssociateResult)
+
+    api.add_route('/api/baskets', ApiBasketController.ApiBasket)
 
     api.add_route('/webhook', WebhookController.Webhook)
     api.add_route('/', HomeController.index)
