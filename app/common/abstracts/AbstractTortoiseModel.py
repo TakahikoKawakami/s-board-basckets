@@ -56,17 +56,3 @@ class AbstractTortoiseModel(Model):
     @createdAt.setter
     def createdAt(self, val):
         self.created_at = val
-
-
-    def register(self):
-        # insert into users(name, address, tel, mail) values(..)
-        db.session.add(self)
-        db.session.flush()
-        return self
-    
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.flush()
-        return self
-
