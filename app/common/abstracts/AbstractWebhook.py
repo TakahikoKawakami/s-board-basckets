@@ -1,22 +1,23 @@
-from datetime import datetime
-
-import app.database as db
+from abc import ABCMeta, abstractmethod
 
 from app import logger
+from app.models import Account
 from app.config import AppConfig
 from app.lib.Smaregi.config import config as SmaregiConfig
 
 
-class AbstractWebhook():
-    def __init__(self, account):
+class AbstractWebhook(metaclass=ABCMeta):
+    def __init__(self, account: 'Account'):
         self._accessAccount = account
         self._logger = None
 
 
     @classmethod
-    async def createInstance(cls, account):
+    @abstractmethod
+    async def createInstance(cls, account: 'Account'):
         webhook = cls(account)
-        webhook._logger = await logger.getLogger(account)
+        if account is None:
+            webhook._logger = await logger.getLogger(account)
         return webhook
 
 

@@ -11,6 +11,7 @@ from app.domains.AccountDomainService import AccountDomainService
 class Webhook(AbstractController):
     EVENT_TRANSACTIONS = 'pos:transactions'
     EVENT_GET_TRANSACTION_DETAIL_LIST = 'get_transaction_detail_list'
+    EVENT_APP_SUBSCRIPTION = 'AppSubscription'
 
     async def on_post(self, req, resp):
         # @backgroundQueue.task
@@ -38,6 +39,11 @@ class Webhook(AbstractController):
         _accountDomainService = AccountDomainService(None)
         await _accountDomainService.loginByContractId(_contractId)
         _accessAccount = _accountDomainService.loginAccount
+
+        if (_event == cls.EVENT_APP_SUBSCRIPTION):
+            accountsWebhook = await webhook.AccountsWebhook.createInstance(None)
+            await accountsWebhook.received(_event, body)
+            return
 
         if (_event == cls.EVENT_GET_TRANSACTION_DETAIL_LIST):
             transactionsWebhook = await webhook.TransactionsWebhook.createInstance(_accessAccount)
