@@ -47,6 +47,7 @@ RUN apt-get install -y nodejs npm
 
 # for ultrahook
 # RUN echo "api_key: {{your api key}}" > ~/.ultrahook
-RUN gem install ultrahook && ultrahook look-into-baskets http://0.0.0.0:5500
+RUN gem install ultrahook
+#&& ultrahook look-into-baskets http://0.0.0.0:5500
 
 WORKDIR /root
