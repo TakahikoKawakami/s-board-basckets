@@ -225,7 +225,7 @@ class AccountDomainService(AbstractDomainService):
                 account_setting.serialize
             )
 
-    async def saveAccountSetting(self, request):
+    async def save_account_setting(self, request):
         account_setting = await AccountSetting.filter(contract_id=self.login_account.contract_id).first()
         account_setting.display_store_id = request['display_store_id']
         account_setting.use_smaregi_webhook = request['use_smaregi_webhook']

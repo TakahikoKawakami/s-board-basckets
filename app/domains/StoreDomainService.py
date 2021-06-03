@@ -24,18 +24,18 @@ class StoreDomainService(AbstractDomainService):
             store_id=account_setting.display_store_id
         ).first()
 
-    async def deleteAllStores(self):
+    async def delete_all_stores(self):
         await Store.filter(
             contract_id=self.login_account.contract_id
         ).delete()
 
-    async def syncAllStores(self):
+    async def sync_all_stores(self):
         stores_api = StoresApi(self._api_config)
-        all_store_list = storesApi.get_store_list()
+        all_store_list = stores_api.get_store_list()
         print(all_store_list)
         for store in all_store_list:
             await Store.create(
-                contract_id=self.login_account.contractId,
+                contract_id=self.login_account.contract_id,
                 store_id=store.store_id,
                 name=store.store_name
             )
