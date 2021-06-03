@@ -1,8 +1,5 @@
 from app.config import templates
-from app.common.managers import SessionManager
 from logging import getLogger
-import json
-
 
 logger = getLogger(__name__)
 

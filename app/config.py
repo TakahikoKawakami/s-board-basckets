@@ -12,12 +12,19 @@ backgroundQueue = responder.background.BackgroundQueue()
 templates = responder.templates.Templates(
     directory="app/templates"
 )
+
+
 # staticをjinja2で解決するためにstaticフィルタを定義
 def static_filter(path):
+
     # directoryで指定したtemplatesと同階層ががroot扱い？
     return '/static/' + path + '?v=' + datetime.datetime.today().strftime('%y%m%d%H%M%S%F')
+
+
 def node_modules_filter(path):
     return '/static/node_modules/' + path
+
+
 # staticをフィルタに追加
 # v1系ではjinja_envだったが、v2からからtemplates._envに変更された
 templates._env.filters['css'] = static_filter
@@ -38,10 +45,10 @@ class AppConfig(object):
     """base config"""
 
     ENV_DIVISION = os.environ.get("ENV_DIVISION")
-    
+
     SMAREGI_CLIENT_ID = os.environ.get('SMAREGI_CLIENT_ID')
     SMAREGI_CLIENT_SECRET = os.environ.get('SMAREGI_CLIENT_SECRET')
-    
+
     SECRET_KEY = os.environ.get('SECRET_KEY')
 
     """for flask"""
@@ -86,5 +93,3 @@ class AppConfig(object):
     elif (ENV_DIVISION == ENV_DIVISION_LOCAL or ENV_DIVISION == ENV_DIVISION_MOCK):
         DEBUG = True
         TESTING = True
-    
-

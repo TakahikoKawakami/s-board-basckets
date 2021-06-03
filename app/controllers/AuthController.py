@@ -14,6 +14,7 @@ from app.domains.AccountDomainService import AccountDomainService
 
 from app.config import AppConfig
 
+
 appConfig = AppConfig()
 
 apiConfig = SmaregiConfig(
@@ -29,6 +30,7 @@ logger = getLogger('flask.app')
 def authorize(req, resp):
     logger.debug('authorize')
     resp.redirect(authorizeApi.authorize())
+
 
 async def login(req, resp):
     logger.info('login!!!')

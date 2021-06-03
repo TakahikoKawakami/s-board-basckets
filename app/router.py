@@ -6,7 +6,7 @@ from app.controllers.api import *
 
 def add_routers(api: responder.API):
     # api.add_route("/accounts/token", AuthController.getToken)
-    api.add_route('/favicon.ico', HomeController.favicon)
+    # api.add_route('/favicon.ico', HomeController.favicon)
 
     api.add_route('/accounts/login', AuthController.login)
     api.add_route('/accounts/logout', AuthController.logout)

@@ -1,7 +1,8 @@
 .vscode
 .ssh
-.ultrahook
-.pylint.d
+.vim
+.zcompdump
+.zplug
 .npm
 .config
 .local

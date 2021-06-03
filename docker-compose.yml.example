@@ -1,26 +1,31 @@
 version: '3.7'
 
 services:
-    nginx-proxy:
-        hostname: nginx-proxy
-        container_name: nginx-proxy
-        image: nginx:latest
-        ports:
-            - 80:80
-        volumes:
-            - ./nginx/default.conf:/etc/nginx/default.conf
-            - ./nginx/conf.d:/etc/nginx/conf.d
+    # nginx-proxy:
+    #     hostname: nginx-proxy
+    #     container_name: nginx-proxy
+    #     image: nginx:latest
+    #     ports:
+    #         - 80:80
+    #     volumes:
+    #         - ./nginx/default.conf:/etc/nginx/default.conf
+    #         - ./nginx/conf.d:/etc/nginx/conf.d
     responder:
         hostname: responder
         container_name: responder
-        build: "./app"
+        build:
+          context: ./app
+          dockerfile: Dockerfile
+          # args:
+          #     - USER_NAME="docker"
         restart: always
         tty: true # コンテナを起動し続ける
-        expose:
-            - "80"
+        ports:
+            - 5500:5500
+            - 9000:9000
         # command: /bin/sh -c "python /root/run.py"
         volumes:
-            - ".:/root"
+            - .:/var/www/html
     database:
         image: mysql:5.7
         hostname: mysql
@@ -37,4 +42,4 @@ services:
             - ./database/my.cnf:/etc/mysql/conf.d/my.cnf
             - ./database/sql:/docker-entrypoint-initdb.d
         ports:
-            - 3306:3306
+            - 33060:3306

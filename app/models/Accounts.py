@@ -1,6 +1,5 @@
 from enum import Enum, IntEnum, auto
 from tortoise import fields
-from datetime import datetime
 
 from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
 from app.entities.AccessToken import AccessToken
@@ -16,8 +15,8 @@ class AccountSetting(AbstractTortoiseModel):
     account: fields.ReverseRelation["Account"]
 
     class Meta:
-        abstract=False
-        table="account_setting"
+        abstract = False
+        table = "account_setting"
 
     @property
     def displayStoreId(self):
@@ -42,8 +41,8 @@ class Account(AbstractTortoiseModel):
     """
 
     class Meta:
-        abstract=False
-        table="accounts"
+        abstract = False
+        table = "accounts"
 
     class PlanEnum(IntEnum):
         FREE = 0
@@ -62,11 +61,12 @@ class Account(AbstractTortoiseModel):
             """
             if enum == cls.FREE:
                 return "フリープラン"
-            if enum == cls.STANDARD:
+            elif enum == cls.STANDARD:
                 return "スタンダードプラン"
-            if enum == cls.PREMIUM:
+            elif enum == cls.PREMIUM:
                 return "プレミアムプラン"
-            return None
+            else:
+                return "プレミアムプラン"
 
         @classmethod
         def getPlanEnumValue(cls, planName: str) -> int:
@@ -78,7 +78,7 @@ class Account(AbstractTortoiseModel):
             Returns:
                 int: [description]
             """
-            if planName ==  "フリープラン":
+            if planName == "フリープラン":
                 return cls.FREE
             elif planName == "スタンダードプラン":
                 return cls.STANDARD
@@ -86,7 +86,6 @@ class Account(AbstractTortoiseModel):
                 return cls.PREMIUM
             else:
                 return cls.PREMIUM
-            return None
 
     class StatusEnum(IntEnum):
         STATUS_START = 0
@@ -100,20 +99,27 @@ class Account(AbstractTortoiseModel):
 
     loginStatus = LoginStatusEnum.SIGN_ON
 
-    access_token = fields.CharField(max_length = 1024)
+    access_token = fields.CharField(max_length=1024)
     expiration_date_time = fields.DatetimeField()
-    status = fields.CharField(max_length = 16, null = True)
-    user_status = fields.IntEnumField(enum_type = StatusEnum)
-    plan = fields.IntEnumField(enum_type = PlanEnum, null = True)
-#    last_login_version = fields.IntEnumField(enum_type = PlanEnum, null = True)
-    
-    account_setting: fields.OneToOneRelation[AccountSetting] = fields.OneToOneField(
-        "models.AccountSetting",
-        related_name="account"
-    )
+    status = fields.CharField(max_length=16, null=True)
+    user_status = fields.IntEnumField(enum_type=StatusEnum)
+    plan = fields.IntEnumField(enum_type=PlanEnum, null=True)
+    last_login_version = fields.CharField(max_length=32, null=True)
+
+    account_setting: fields.OneToOneRelation[AccountSetting] = \
+        fields.OneToOneField(
+            "models.AccountSetting",
+            related_name="account"
+        )
 
     def __repr__(self) -> str:
-        return f'Account(contract_id: "{self.contract_id}", status: "{self.user_sutatus}", plan: "{self.plan}")'
+        return f'''
+            Account(
+                contract_id: "{self.contract_id}",
+                status: "{self.user_status}",
+                plan: "{self.plan}"
+            )
+        '''
 
     @property
     def contractId(self):
@@ -147,7 +153,7 @@ class Account(AbstractTortoiseModel):
 
     @property
     async def accountSetting(self) -> AccountSetting:
-        print (type(self.account_setting))
+        print(type(self.account_setting))
         if type(self.account_setting) == AccountSetting:
             return self.account_setting 
         return await self.account_setting.all()
@@ -155,16 +161,15 @@ class Account(AbstractTortoiseModel):
     @classmethod
     async def create(cls, contractId, accessToken, plan=None):
         newAccountSetting = await AccountSetting.create(
-            contract_id = contractId
+            contract_id=contractId
         )
 
         newAccount = await super().create(
-            contract_id = contractId,
-            access_token = accessToken.accessToken,
-            expiration_date_time = accessToken.expirationDatetime,
-            user_status = cls.StatusEnum.STATUS_START,
-            plan = plan,
-            account_setting = newAccountSetting
+            contract_id=contractId,
+            access_token=accessToken.accessToken,
+            expiration_date_time=accessToken.expirationDatetime,
+            user_status=cls.StatusEnum.STATUS_START,
+            plan=plan,
+            account_setting=newAccountSetting
         )
         return newAccount
-
