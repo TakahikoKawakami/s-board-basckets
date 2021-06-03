@@ -1,10 +1,8 @@
 import datetime
 import pytz
-from pprint import pprint
 import json
 
-import app.database as db
-from app.lib.Smaregi.API.POS.entities import TransactionHead, TransactionDetail
+from SmaregiPlatformApi.entities import TransactionHead, TransactionDetail
 
 import logging
 
@@ -19,84 +17,102 @@ class Basket():
     PREFIXES_STORE = "store__"
     PREFIXES_MEMBER = "member__"
 
-
     def __init__(self):
-        self._inputData = []
+        self._input_data = []
         self._output = {}
         self._products = {}
 
-        self._transactionHeadId = ""
-        self._productList = [] # {"id": xxx, "name": yyy}形式のdictリスト
-        self._customerGroupIdList = []
-        self._storeId = ""
-        self._memberId = ""
-        self._customerSexDict = {"male": 0, "female": 0, "unknown": 0}
-        self._entryDateDivision = "" # 取引日時を２時間毎に区分わけ
+        self._transaction_head_id = 0
+        self._product_list = []  # {"id": xxx, "name": yyy}形式のdictリスト
+        self._customer_group_id_list = []
+        self._store_id = 0
+        self._member_id = 0
+        self._customer_sex_dict = {"male": 0, "female": 0, "unknown": 0}
+        self._entry_date_division = ""  # 取引日時を２時間毎に区分わけ
 
-        self._targetDate = ""
+        self._target_date = ""
 
         self._logger = logging.getLogger('flask.app')
-        
-        
+
     def __resp__(self):
-        return "Basket entity<{}, {}, {}, {}, {}>".format(self._productList, self._customerGroupId, self._storeId, self._memberId, self._customerSexDict)
-        
-        
+        return "Basket entity<{}, {}, {}, {}, {}>".\
+            format(
+                self._product_list,
+                self._customer_group_id_list,
+                self._store_id,
+                self._member_id,
+                self._customer_sex_dict
+            )
+
     def __str__(self):
         pass
-    
-    
-    def setByTransactionDetailList(self, _transactionDetailList: list['TransactionDetail'])-> None:
+
+    def set_by_transaction_detail_list(
+        self,
+        _transaction_detail_list: list['TransactionDetail']
+    ) -> None:
         """取引明細からバスケットentityに必要なデータを抽出、セットします
-        
+
         Arguments:
             transactionDetail {[type]} -- [description]
         """
-        for transactionDetail in _transactionDetailList:
-            self._productList.append(
+        for transaction_detail in _transaction_detail_list:
+            self._product_list.append(
                 {
-                    "id": transactionDetail.productId,
-                    "name": transactionDetail.productName,
-                    "categoryId": transactionDetail.categoryId,
+                    "id": transaction_detail.product_id,
+                    "name": transaction_detail.product_name,
+                    "categoryId": transaction_detail.category_id,
                 }
             )
-    
 
-    def setByTransactionHead(self, _transactionHead: 'TransactionHead') -> None:
+    def set_by_transaction_head(
+        self,
+        _transaction_head: 'TransactionHead'
+    ) -> None:
         """取引ヘッダからバスケットentityに必要なデータを抽出、セットします
 
         Arguments:
             _transactionHead {[type]} -- [description]
         """
-        self._transactionHeadId = _transactionHead.transactionHeadId
+        self._transaction_head_id = _transaction_head.transaction_head_id
 
-        if _transactionHead.sumDate is None:
-            self._targetDate = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).strftime("%Y-%m-%d")
+        if _transaction_head.sum_date is None:
+            self._target_date = datetime.datetime.\
+                now(pytz.timezone('Asia/Tokyo')).\
+                strftime("%Y-%m-%d")
         else:
-            self._targetDate = _transactionHead.sumDate
+            self._target_date = _transaction_head.sum_date
 
-        if _transactionHead.customerId is not None:
-            self._memberId = _transactionHead.customerId
+        if _transaction_head.customer_id is not None:
+            self._memberId = _transaction_head.customer_id
         else:
             self._memberId = "-1"
-            
-        if _transactionHead.customerGroupId is not None:
-            self._customerGroupIdList.append(_transactionHead.customerGroupId)
-        for i in range(2,6):
-            if getattr(_transactionHead, "customerGroupId" + str(i)) is not None:
-                self._customerGroupIdList.append(getattr(_transactionHead, "customerGroupId" + str(i)))
-                
-        self._storeId = _transactionHead.storeId
-        
-        if _transactionHead.guestNumbersMale is not None:
-            self._customerSexDict["male"] = _transactionHead.guestNumbersMale
-        if _transactionHead.guestNumbersFemale is not None:
-            self._customerSexDict["female"] = _transactionHead.guestNumbersFemale
-        if _transactionHead.guestNumbersUnknown is not None:
-            self._customerSexDict["unknown"] = _transactionHead.guestNumbersUnknown
+
+        if _transaction_head.customer_group_id is not None:
+            self._customerGroupIdList.\
+                append(_transaction_head.customer_group_id)
+        for i in range(2, 6):
+            if getattr(
+                _transaction_head,
+                "customerGroupId" + str(i)
+            ) is not None:
+                self._customer_group_id_list.append(
+                    getattr(_transaction_head, "customerGroupId" + str(i))
+                )
+
+        self._storeId = _transaction_head.store_id
+
+        if _transaction_head.guest_numbers_male is not None:
+            self._customer_sex_dict["male"] = \
+                _transaction_head.guest_numbers_male
+        if _transaction_head.guest_numbers_female is not None:
+            self._customer_sex_dict["female"] = \
+                _transaction_head.guest_numbers_female
+        if _transaction_head.guest_numbers_unknown is not None:
+            self._customer_sex_dict["unknown"] = \
+                _transaction_head.guest_numbers_unknown
         # TODO 取引日時区分
 
-    
     def convertListForAnalysis(self) -> list:
         """当entityをバスケット分析用のリスト型に変換します
 
@@ -104,75 +120,85 @@ class Basket():
             list -- [description]
         """
         result = []
-        for product in self._productList:
+        for product in self._product_list:
             result.append(self.PREFIXES_PRODUCT + json.dumps(product))
 
-        if "male" in self._customerSexDict and int(self._customerSexDict["male"]) != 0:
-            _customerSexDict = {}
-            _customerSexDict["sex"] = "male"
-            result.append(self.PREFIXES_SEX + json.dumps(_customerSexDict))
-        if "female" in self._customerSexDict and int(self._customerSexDict["female"]) != 0:
-            _customerSexDict = {}
-            _customerSexDict["sex"] = "female"
-            result.append(self.PREFIXES_SEX + json.dumps(_customerSexDict))
-        if "unknown" in self._customerSexDict and int(self._customerSexDict["unknown"]) != 0:
-            _customerSexDict = {}
-            _customerSexDict["sex"] = "unknown"
-            result.append(self.PREFIXES_SEX + json.dumps(_customerSexDict))
-        if self._storeId != "":
+        if (
+            "male" in self._customer_sex_dict and
+            int(self._customerSexDict["male"]) != 0
+        ):
+            _customer_sex_dict = {}
+            _customer_sex_dict["sex"] = "male"
+            result.append(self.PREFIXES_SEX + json.dumps(_customer_sex_dict))
+        if (
+            "female" in self._customer_sex_dict and
+            int(self._customer_sex_dict["female"]) != 0
+        ):
+            _customer_sex_dict = {}
+            _customer_sex_dict["sex"] = "female"
+            result.append(self.PREFIXES_SEX + json.dumps(_customer_sex_dict))
+        if (
+            "unknown" in self._customer_sex_dict and
+            int(self._customer_sex_dict["unknown"]) != 0
+        ):
+            _customer_sex_dict = {}
+            _customer_sex_dict["sex"] = "unknown"
+            result.append(self.PREFIXES_SEX + json.dumps(_customer_sex_dict))
+        if self._store_id != "":
             _store = {}
-            _store['id'] = self._storeId
+            _store['id'] = self._store_id
             result.append(self.PREFIXES_STORE + json.dumps(_store))
 
-        if self._memberId != "":
+        if self._member_id != "":
             _member = {}
-            _member['id'] = self._memberId
+            _member['id'] = self._member_id
             result.append(self.PREFIXES_MEMBER + json.dumps(_member))
 
-        if self._transactionHeadId != "":
-            _transactionHead = {}
-            _transactionHead['id'] = self._transactionHeadId
-            result.append(self.PREFIXES_TRANSACTION_HEAD + json.dumps(_transactionHead))
-        
+        if self._transaction_head_id != "":
+            _transaction_head = {}
+            _transaction_head['id'] = self._transaction_head_id
+            result.append(
+                self.PREFIXES_TRANSACTION_HEAD + json.dumps(_transaction_head)
+            )
+
         return result
-        
 
     @property
-    def customerGroupIdList(self)->list:
-        return self._customerGroupIdList
+    def customer_group_id_list(self) -> list:
+        return self._customer_group_id_list
 
-    @customerGroupIdList.setter
-    def customerGroupIdList(self, val:list) -> None:
-        self._customerGroupIdList = val
+    @customer_group_id_list.setter
+    def customer_group_id_list(self, val: list) -> None:
+        self._customer_group_id_list = val
 
     @property
-    def storeId(self)->int:
-        return self._storeId
+    def store_id(self) -> int:
+        return self._store_id
 
-    @storeId.setter
-    def storeId(self, val:int) -> None:
+    @store_id.setter
+    def store_id(self, val: int) -> None:
         self._storeId = val
 
     @property
-    def memberId(self)->int:
-        return self._memberId
+    def member_id(self) -> int:
+        return self._member_id
 
-    @memberId.setter
-    def memberId(self, val:int) -> None:
-        self._memberId = val
-
-    @property
-    def customerSexDict(self)->dict:
-        return self._customerSexDict
-
-    @customerSexDict.setter
-    def customerSexDict(self, val:dict) -> None:
-        self._customerSexDict = val
+    @member_id.setter
+    def member_id(self, val: int) -> None:
+        self._member_id = val
 
     @property
-    def targetDate(self):
-        return self._targetDate
+    def customer_sex_dict(self) -> dict:
+        return self._customer_sex_dict
 
-    @targetDate.setter
-    def targetDate(self, val):
-        self._targetDate = datetime.datetime.strptime(val, "%Y-%m-%d")
+    @customer_sex_dict.setter
+    def customer_sex_dict(self, val: dict) -> None:
+        self._customer_sex_dict = val
+
+    @property
+    def target_date(self):
+        return self._target_date
+
+    @target_date.setter
+    def target_date(self, val):
+        self._target_date = datetime.datetime.strptime(val, "%Y-%m-%d")

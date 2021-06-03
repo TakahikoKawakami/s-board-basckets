@@ -9,13 +9,13 @@ from app.domains.StoreDomainService import StoreDomainService
 
 
 class AccountStore(AbstractController):
-    def __init__(self) ->None:
+    def __init__(self) -> None:
         super().__init__()
 
     async def on_get(self, req, resp):
         self._logger.info('get AccountStore')
         storeDomainService = StoreDomainService(self._loginAccount)
-        storeList = await storeDomainService.getStoreList()
+        storeList = await storeDomainService.get_store_list()
 
         jsonEncoded = []
         for store in storeList:

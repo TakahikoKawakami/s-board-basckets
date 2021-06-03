@@ -16,5 +16,5 @@ def index(req, resp):
         resp.html = templates.render("home/welcome.pug")
 
 
-def favicon():
-    return app.send_static_file("favicon.ico")
+# def favicon():
+#     return app.send_static_file("favicon.ico")

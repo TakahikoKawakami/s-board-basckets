@@ -1,14 +1,11 @@
 import numpy as np
 import itertools
-from scipy.sparse import lil_matrix  # other types would convert to LIL anyway
 import ast
 import ujson
 from orangecontrib.associate import fpgrowth as fp
-import logging
 
 from app import logger
 from app.entities.Baskets import Basket
-from app.domains.ProductsRepository import ProductsRepository
 from app.entities.VisJs import VisJs
 
 

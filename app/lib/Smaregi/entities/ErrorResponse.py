@@ -5,6 +5,12 @@ class ErrorResponse(Exception):
         self.detail = response.get('detail')
         self.status = response.get('status')
 
-    
     def __repr__(self):
-        return f'ErrorResponse(type: "{self.type}", title: "{self.title}", detail: "{self.detail}", status: "{self.status}")'
+        return f'''
+            ErrorResponse(
+                type: "{self.type}",
+                title: "{self.title}",
+                detail: "{self.detail}",
+                status: "{self.status}"
+            )
+        '''

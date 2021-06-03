@@ -1,15 +1,9 @@
-import datetime
 from logging import getLogger
-
-from app.models import Accounts as models
-
-"""TODO: lib.Smaregiをpip installでimportできるようにする"""
-from app.lib.Smaregi.config import config as SmaregiConfig
-from app.lib.Smaregi.API.Authorize import AuthorizeApi
+from SmaregiPlatformApi.config import Config as SmaregiConfig
+from SmaregiPlatformApi.authorize import AuthorizeApi
 
 
 from app.common.managers import SessionManager
-from app.common.utils import DictionaryUtil
 from app.domains.AccountDomainService import AccountDomainService
 
 from app.config import AppConfig
@@ -42,21 +36,29 @@ async def login(req, resp):
         resp.redirect('/accounts/authorize', status_code=303)
         return
 
-    accountDomainService = AccountDomainService(req.session).withSmaregiApi(None, None)
+    account_domain_service = \
+        AccountDomainService(req.session).with_smaregi_api(None, None)
     try:
-        account = await accountDomainService.loginByCodeAndState(code, state)
-    except Exception as e:
+        account = await account_domain_service.login_by_code_and_state(
+            code,
+            state
+        )
+    except Exception:
         resp.redirect('/', status_code=302)
         return
-    
-    SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
-    if account.loginStatus == account.LoginStatusEnum.SIGN_UP:
+
+    SessionManager.set(
+        resp.session,
+        SessionManager.KEY_CONTRACT_ID,
+        account.contract_id
+    )
+    if account.login_status == account.LoginStatusEnum.SIGN_UP:
         SessionManager.set(resp.session, SessionManager.KEY_SIGN_UP, True)
     resp.redirect('/baskets', status_code=303)
     return
+
 
 async def logout(req, resp):
     resp.session.clear()
     resp.redirect('/', status_code=303)
     return
-

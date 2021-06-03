@@ -18,22 +18,6 @@ class AccountSetting(AbstractTortoiseModel):
         abstract = False
         table = "account_setting"
 
-    @property
-    def displayStoreId(self):
-        return self.display_store_id
-
-    @displayStoreId.setter
-    def displayStoreId(self, val):
-        self.display_store_id = val
-
-    @property
-    def useSmaregiWebhook(self):
-        return self.use_smaregi_webhook
-
-    @useSmaregiWebhook.setter
-    def useSmaregiWebhook(self, val):
-        self.use_smaregi_webhook = val
-
 
 class Account(AbstractTortoiseModel):
     """
@@ -97,7 +81,7 @@ class Account(AbstractTortoiseModel):
         SIGN_ON = auto()
         SIGN_OUT = auto()
 
-    loginStatus = LoginStatusEnum.SIGN_ON
+    login_status = LoginStatusEnum.SIGN_ON
 
     access_token = fields.CharField(max_length=1024)
     expiration_date_time = fields.DatetimeField()
@@ -122,54 +106,40 @@ class Account(AbstractTortoiseModel):
         '''
 
     @property
-    def contractId(self):
-        return self.contract_id
+    def access_token_entity(self):
+        access_token = AccessToken(
+            self.access_token,
+            self.expiration_date_time
+        )
+        return access_token
 
-    @contractId.setter
-    def contractId(self, contractId):
-        self.contract_id = contractId
-
-    @property
-    def accessToken(self):
-        accessToken = AccessToken(self.access_token, self.expiration_date_time)
-        return accessToken
-
-    @accessToken.setter
-    def accessToken(self, accessToken):
-        self.access_token = accessToken.accessToken
-        self.expiration_date_time = accessToken.expirationDatetime
+    @access_token_entity.setter
+    def access_token_entity(self, access_token):
+        self.access_token = access_token.access_token
+        self.expiration_date_time = access_token.expiration_date_time
 
     @property
-    def expirationDatetime(self):
+    def expiration_datetime(self):
         return self.expiration_date_time
 
     @property
-    def userStatus(self):
-        return self.user_status
-
-    @userStatus.setter
-    def userStatus(self, value):
-        self.user_status = value
-
-    @property
-    async def accountSetting(self) -> AccountSetting:
-        print(type(self.account_setting))
+    async def account_setting_model(self) -> "AccountSetting":
         if type(self.account_setting) == AccountSetting:
-            return self.account_setting 
+            return self.account_setting
         return await self.account_setting.all()
 
     @classmethod
-    async def create(cls, contractId, accessToken, plan=None):
-        newAccountSetting = await AccountSetting.create(
-            contract_id=contractId
+    async def create(cls, contract_id, access_token, plan=None):
+        new_account_setting = await AccountSetting.create(
+            contract_id=contract_id
         )
 
-        newAccount = await super().create(
-            contract_id=contractId,
-            access_token=accessToken.accessToken,
-            expiration_date_time=accessToken.expirationDatetime,
+        new_account = await super().create(
+            contract_id=contract_id,
+            access_token=access_token.access_token,
+            expiration_date_time=access_token.expiration_datetime,
             user_status=cls.StatusEnum.STATUS_START,
             plan=plan,
-            account_setting=newAccountSetting
+            account_setting=new_account_setting
         )
-        return newAccount
+        return new_account

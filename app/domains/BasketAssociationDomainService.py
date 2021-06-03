@@ -1,6 +1,4 @@
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
-from app.common.managers import SessionManager
-from app.common.utils import DictionaryUtil
 
 from app.models.DailyBasketList import DailyBasketList
 from app.models.Products import Product
@@ -9,9 +7,7 @@ from app.entities.Fpgrowth import Fpgrowth
 from app.entities.VisJs import VisJs
 
 
-from app.lib.Smaregi.API.POS.StoresApi import StoresApi
-from app.lib.Smaregi.API.POS.ProductsApi import ProductsApi
-from app.lib.Smaregi.API.POS.entities import Product as ProductByApi
+from SmaregiPlatformApi.pos import StoresApi, ProductsApi
 
 from app.models import Store
 

@@ -2,31 +2,29 @@ import datetime
 
 from marshmallow import ValidationError
 
-from app.common.managers import SessionManager, HttpManager
 from app.common.abstracts.AbstractController import AbstractController
-from app.domains.AccountDomainService import AccountDomainService
 from app.domains.BasketAssociationDomainService import BasketAssociationDomainService
 from app.domains.BasketDomainService import BasketDomainService
 from app.validators import BasketValidators
 
 
 class Basket(AbstractController):
-    def __init__(self) ->None:
+    def __init__(self) -> None:
         super().__init__()
-        self._basketDomainService = None
+        self._basket_domain_service = None
 
     async def on_get(self, req, resp):
-        if self.isBookingRedirect():
+        if self.is_booking_redirect():
             return
         self._logger.info('access DailyBasket')
-        self._basketDomainService = BasketDomainService(self._loginAccount)
+        self._basket_domain_service = BasketDomainService(self.login_account)
         if req.params != {}:
-            startDate = datetime.datetime.strptime(req.params['startDate'], "%Y-%m-%dT%H:%M:%S%z").date()
-            endDate = datetime.datetime.strptime(req.params['endDate'], "%Y-%m-%dT%H:%M:%S%z").date()
-            dailyBasketList = await self._basketDomainService.getDailyBasketListByDateRange(startDate, endDate)
+            start_date = datetime.datetime.strptime(req.params['startDate'], "%Y-%m-%dT%H:%M:%S%z").date()
+            end_date = datetime.datetime.strptime(req.params['endDate'], "%Y-%m-%dT%H:%M:%S%z").date()
+            daily_basket_list = await self._basket_domain_service.get_daily_basket_list_by_date_range(start_date, end_date)
 
-            jsonDailyBasketList = [await model.serialize for model in dailyBasketList]
-            resp.media = jsonDailyBasketList
+            json_daily_basket_list = [await model.serialize for model in daily_basket_list]
+            resp.media = json_daily_basket_list
             return
         else:
             await self.render('baskets/index.pug')
@@ -40,7 +38,7 @@ class Basket(AbstractController):
         dateFrom = request['startDate'] + 'T00:00:00+0900'
         dateTo = request['endDate'] + 'T23:59:59+0900'
         try:
-            syncedDailyBasketList = await self._basketDomainService.syncDailyBasketListByDateRange(dateFrom ,dateTo)
+            synced_daily_basket_list = await self._basket_domain_service.syncDailyBasketListByDateRange(dateFrom ,dateTo)
             # jsonDailyBasketList = [await model.serialize for model in syncedDailyBasketList]
             # resp.media = jsonDailyBasketList
         except Exception:

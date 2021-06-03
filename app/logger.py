@@ -11,32 +11,32 @@ class CsvFormatter(logging.Formatter):
         return super(CsvFormatter, self).format(record) 
 
 class ApplicationLogger(logging.getLoggerClass()):
-    def __init__(self, name, level=logging.NOTSET, contractId=None):
+    def __init__(self, name, level=logging.NOTSET, contract_id=None):
         super().__init__(name, level)
-        self._contractId = None
+        self._contract_id = None
 
     @property
-    def contractId(self):
-        return self._contractId
+    def contract_id(self):
+        return self._contract_id
 
-    @contractId.setter
-    def contractId(self, val):
-        self._contractId = val
+    @contract_id.setter
+    def contract_id(self, val):
+        self._contract_id = val
 
     def _log(self, level, msg, args, exc_info=None, extra=None, stack_info=False, stacklevel=1):
         extra = {
-            "contractId": self.contractId
+            "contract_id": self.contract_id
         }
         super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)
 
 
-async def getLogger(account):
+async def get_logger(account):
     # import pdb; pdb.set_trace()
     logging.setLoggerClass(ApplicationLogger)
     with open("app/logging_config.yaml", 'r') as f:
         conf_file = yaml.safe_load(f.read())
     logging.config.dictConfig(conf_file)
     logger = logging.getLogger("appLogger")
-    logger.contractId = account.contractId
+    logger.contract_id = account.contract_id
 
     return logger

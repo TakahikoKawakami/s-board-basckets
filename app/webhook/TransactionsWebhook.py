@@ -31,20 +31,20 @@ class TransactionsWebhook(AbstractWebhook):
         """
         self._logger.info('transaction callback received.')
         
-        urlList = body.get("file_url")
-        if urlList is None:
+        url_list = body.get("file_url")
+        if url_list is None:
             self._logger.info(body.get("message"))
             self._logger.info(f'request_code : "{body.get("request_code")}"')
             # データが0件だった場合、0件だったということがわかるよう、バスケットDBに空データを登録しておく
             if (body.get("message") == 'no data'):
-                whereDict = body.get("state").get("where")
-                storeId = whereDict["storeId"]
-                targetDate = whereDict["transactionDateTimeFrom"].split("T")[0]
-                basketDomainService = await BasketDomainService.createInstance(self._accessAccount)
-                await basketDomainService.registerEmptyBasket(storeId, targetDate)
+                where_dict = body.get("state").get("where")
+                store_id = where_dict["storeId"]
+                target_date = where_dict["transactionDateTimeFrom"].split("T")[0]
+                basket_domain_service = await BasketDomainService.createInstance(self._accessAccount)
+                await basket_domain_service.register_empty_basket(store_id, target_date)
             return
-        basketDomainService = await BasketDomainService.createInstance(self._accessAccount)
-        await basketDomainService.registerBasketByGzipUrlList(urlList)
+        basket_domain_service = await BasketDomainService.createInstance(self._accessAccount)
+        await basket_domain_service.register_basket_by_gzip_url_list(url_list)
 
 
     async def created(self, _targetTransactionHeadList):
