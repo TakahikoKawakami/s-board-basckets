@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+html(lang="ja")
+    title Look into Baskets
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(rel="shortcut icon", href="{{ 'favicon.ico' | css }}", type="image/x-icon")
+        link(rel="stylesheet", href="{{ 'css/destyle.css' | css}}")
+        link(rel="stylesheet", href="{{ 'css/root.css' | css}}")
+        link(rel="stylesheet", href="{{ 'css/style.css' | css }}")
+        link(rel="stylesheet", href="{{ 'css/button.css' | css }}")
+
+    body
+        #basket-main
+            h1 support login
+            form(action="/accounts/support_login", method="get")
+                .date-range_group
+                    input#contract_id(name="contract_id", placeholder="contract_id")
+                    input#client_id(name="client_id", placeholder="client_id")
+                    input#secret_id(name="secret_id", placeholder="secret_id")
+                    button(type="submit") support-login

@@ -6,6 +6,8 @@ def add_routers(api: responder.API):
     # api.add_route("/accounts/token", AuthController.getToken)
     api.add_route('/favicon.ico', HomeController.favicon)
 
+    api.add_route('/accounts/support_login', AuthController.support_login)
+
     api.add_route('/accounts/login', AuthController.login)
     api.add_route('/accounts/logout', AuthController.logout)
     api.add_route('/accounts/authorize', AuthController.authorize)

@@ -1,0 +1,27 @@
+{% extends "base.pug" %}
+{% block body %}
+
+#basket-main
+    h1 support login
+    form(action="accounts/support_login", method="get")
+        div(style="margin: 10px;")
+            {% for error in message._schema %}
+            span(style="color: var(--color__danger);") {{error}}<br>
+            {% endfor %}
+        .date-range_group
+            input#contract_id(name="contract_id", placeholder="contract_id")
+            input#client_id(name="client_id", placeholder="client_id")
+            input#secret_id(name="secret_id", placeholder="secret_id")
+            button(type="submit") support-login
+        .from__group
+            div(style="margin: 10px;")
+                {% for error in message.date_to %}
+                span(style="color: var(--color__danger);") {{error}}<br>
+                {% endfor %}
+            div(style="margin: 10px;")
+                {% for error in message.date_from %}
+                span(style="color: var(--color__danger);") {{error}}<br>
+                {% endfor %}
+
+{% endblock %}
+

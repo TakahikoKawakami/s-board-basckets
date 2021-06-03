@@ -12,7 +12,7 @@ from app.common.managers import SessionManager
 from app.common.utils import DictionaryUtil
 from app.domains.AccountDomainService import AccountDomainService
 
-from app.config import AppConfig
+from app.config import AppConfig, templates
 
 appConfig = AppConfig()
 
@@ -47,6 +47,29 @@ async def login(req, resp):
         resp.redirect('/', status_code=302)
         return
     
+    SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
+    if account.loginStatus == account.LoginStatusEnum.SIGN_UP:
+        SessionManager.set(resp.session, SessionManager.KEY_SIGN_UP, True)
+    resp.redirect('/baskets', status_code=303)
+    return
+
+async def support_login(req, resp):
+    if req.params.get("contract_id") is None:
+        resp.html = templates.render("home/support_login.pug")
+        return
+    contract_id = req.params.get("contract_id")
+    client_id = req.params.get("client_id")
+    secret_id = req.params.get("secret_id")
+    accountDomainService = AccountDomainService(req.session)
+    account = await accountDomainService.login_for_support_login(
+        contract_id,
+        client_id,
+        secret_id
+    )
+    if account is None:
+        resp.html = templates.render("home/support_login.pug")
+        return
+
     SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
     if account.loginStatus == account.LoginStatusEnum.SIGN_UP:
         SessionManager.set(resp.session, SessionManager.KEY_SIGN_UP, True)

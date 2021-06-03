@@ -105,6 +105,28 @@ class AccountDomainService(AbstractDomainService):
         # それでもなければ取得、dbとセッションに保存
         await self.signUpAccount(_contractId)
         return
+
+    async def login_for_support_login(self, contract_id, client_id, secret_id):
+        _accountModel = await Account.filter(contract_id=contract_id).first()
+        if _accountModel is not None: 
+            if not _accountModel.accessToken.isAccessTokenAvailable():
+                self.with_smaregi_api_for_support_login(contract_id, client_id, secret_id, None)
+                _authorizeApi = AuthorizeApi(self._apiConfig, self._appConfig.APP_URI + '/accounts/login')
+                _accessTokenByCreation = _authorizeApi.getAccessToken(
+                    contract_id,
+                    [
+                        'pos.products:read',
+                        'pos.transactions:read',
+                        'pos.stores:read',
+                    ]
+                )
+                _accountModel.accessToken = _accessTokenByCreation
+                await _accountModel.save()
+            self.loginAccount = _accountModel
+            self.loginAccount.loginStatus = Account.LoginStatusEnum.SIGN_IN
+            return self.loginAccount
+        return None
+
     
     async def signUpAccount(self, _contractId):
         _accessTokenByCreation = self.getAccessTokenByContractId(_contractId)

@@ -33,3 +33,17 @@ class AbstractDomainService():
 
         return self
 
+
+    def with_smaregi_api_for_support_login(self, contract_id, client_id, secret_id, access_token):
+        self._appConfig = AppConfig()
+        self._apiConfig = SmaregiConfig(
+            "PROD",
+            client_id,
+            secret_id,
+            self._logger
+        )
+        self._apiConfig.accessToken = access_token
+        self._apiConfig.contractId = contract_id
+
+        return self
+
