@@ -121,7 +121,7 @@ scipy==1.6.0
 SecretStorage==3.3.0
 serverfiles==0.3.1
 six==1.15.0
-SmaregiPlatformApi @ git+https://github.com/shabaraba/smaregi-platform-api@0d0696c95d3861ee44f21eb08df1e91313a980c7
+SmaregiPlatformApi @ git+https://github.com/shabaraba/SmaregiPlatformApi@1d30a7e40ac3641fc16ca8b868bc1fc90d8e459e
 sniffio==1.2.0
 SQLAlchemy==1.4.6
 starlette==0.13.8
