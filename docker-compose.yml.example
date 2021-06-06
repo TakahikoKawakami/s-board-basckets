@@ -1,15 +1,6 @@
 version: '3.7'
 
 services:
-    # nginx-proxy:
-    #     hostname: nginx-proxy
-    #     container_name: nginx-proxy
-    #     image: nginx:latest
-    #     ports:
-    #         - 80:80
-    #     volumes:
-    #         - ./nginx/default.conf:/etc/nginx/default.conf
-    #         - ./nginx/conf.d:/etc/nginx/conf.d
     responder:
         hostname: responder
         container_name: responder
@@ -41,5 +32,3 @@ services:
             - ./database/data:/var/lib/mysql
             - ./database/my.cnf:/etc/mysql/conf.d/my.cnf
             - ./database/sql:/docker-entrypoint-initdb.d
-        ports:
-            - 33060:3306
