@@ -1,21 +1,22 @@
-from datetime import datetime
-
-import app.database as db
-
+from typing import TypeVar, Type
+from logging import Logger
 from app import logger
+from app.models.Accounts import Account
 from app.config import AppConfig
 from SmaregiPlatformApi.config import Config as SmaregiConfig
+
+T = TypeVar('T', bound='AbstractDomainService')
 
 
 class AbstractDomainService():
     def __init__(self, account):
         self._app_config = None
         self._api_config = None
-        self.login_account = account
-        self._logger = None
+        self.login_account: 'Account' = account
+        self._logger: Logger = None
 
     @classmethod
-    async def createInstance(cls, account):
+    async def create_instance(cls: Type[T], account: 'Account') -> T:
         domain_service = cls(account)
         domain_service._logger = await logger.get_logger(account)
         return domain_service

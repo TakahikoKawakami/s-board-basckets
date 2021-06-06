@@ -1,36 +1,40 @@
-from abc import ABCMeta, abstractmethod
-
+from typing import TypeVar, Type
+from logging import Logger
 from app import logger
 from app.models import Account
 from app.config import AppConfig
-from app.lib.Smaregi.config import config as SmaregiConfig
+from SmaregiPlatformApi import Config as SmaregiConfig
+from app.entities.AccessToken import AccessToken
 
 
-class AbstractWebhook(metaclass=ABCMeta):
+T = TypeVar('T', bound="AbstractWebhook")
+
+
+class AbstractWebhook():
     def __init__(self, account: 'Account'):
-        self._accessAccount = account
-        self._logger = None
-
+        self._access_account: 'Account' = account
+        self._logger: Logger
 
     @classmethod
-    @abstractmethod
-    async def createInstance(cls, account: 'Account'):
+    async def create_instance(cls: Type[T], account: 'Account') -> T:
         webhook = cls(account)
-        if account is None:
-            webhook._logger = await logger.getLogger(account)
+        if account is not None:
+            webhook._logger = await logger.get_logger(account)
         return webhook
 
-
-    def withSmaregiApi(self, _accessToken, _contractId):
-        self._appConfig = AppConfig()
-        self._apiConfig = SmaregiConfig(
-            self._appConfig.ENV_DIVISION,
-            self._appConfig.SMAREGI_CLIENT_ID,
-            self._appConfig.SMAREGI_CLIENT_SECRET,
+    def with_smaregi_api(
+        self,
+        _access_token: "AccessToken",
+        _contract_id: str
+    ):
+        self._app_config = AppConfig()
+        self._api_config = SmaregiConfig(
+            self._app_config.ENV_DIVISION,
+            self._app_config.SMAREGI_CLIENT_ID,
+            self._app_config.SMAREGI_CLIENT_SECRET,
             self._logger
         )
-        self._apiConfig.accessToken = _accessToken
-        self._apiConfig.contractId = _contractId
+        self._api_config.access_token = _access_token
+        self._api_config.contract_id = _contract_id
 
         return self
-

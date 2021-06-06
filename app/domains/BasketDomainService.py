@@ -1,6 +1,5 @@
-import logging
+import json
 import datetime
-import calendar
 
 from app.common.utils import CsvUtil,  EntityUtil
 
@@ -14,12 +13,13 @@ from app.entities.Baskets import Basket
 from app.entities.Transactions import Transaction
 from app.models.DailyBasketList import DailyBasketList
 
+
 class BasketDomainService(AbstractDomainService):
     def __init__(self, login_account):
         super().__init__(login_account)
         self.with_smaregi_api(login_account.access_token_entity.access_token, login_account.contract_id)
 
-    async def registerBasketByTransactionHeadId(self, transaction_head_id: int) -> None:
+    async def register_basket_by_transaction_head_id(self, transaction_head_id: int) -> None:
         """取引ヘッダIDからバスケットデータを作成し、DBに登録します
         取引が存在しない場合でも、空のバスケットをDBに登録します
 
@@ -135,7 +135,6 @@ class BasketDomainService(AbstractDomainService):
         transaction_detail_list_categorized_by_transaction_head_id = EntityUtil.categorize_by_key('transaction_head_id', transaction_detail_list)
         return transaction_detail_list_categorized_by_transaction_head_id
 
-
     def _get_transaction_head_list_by_api(self, head_id_from: int, head_id_to: int) -> dict[int, list[TransactionHead]]:
         """APIから取引ヘッダリストを取得します
 
@@ -178,7 +177,6 @@ class BasketDomainService(AbstractDomainService):
         ).delete()
         return _daily_basket_list
 
-
     async def sync_daily_basket_list_by_date_range(self, start_date: datetime.datetime, end_date: datetime.datetime):
         """指定された期間の日次バスケットデータを作成、同期します
 
@@ -195,60 +193,23 @@ class BasketDomainService(AbstractDomainService):
         account_setting = await self.login_account.account_setting_model
         store_id = account_setting.display_store_id
         if store_id is None:
+            self._logger.info("store_id is None")
             raise Exception("store_id is None")
 
         _transactions_api = TransactionsApi(self._api_config)
+        self._logger.info("send create_transaction_detail_csv api")
+        where_dict = {
+            'storeId': store_id,
+            'transactionDateTimeFrom': start_date,
+            'transactionDateTimeTo': end_date,
+            'callbackUrl': self._app_config.CALLBACK_URI + '/webhook'
+        }
+        self._logger.debug("where_dict = " + json.dumps(where_dict))
         _transactions_api.create_transaction_detail_csv(
-            where_dict={
-                'storeId': store_id,
-                'transactionDateTimeFrom': start_date,
-                'transactionDateTimeTo': end_date,
-                'callbackUrl': self._app_config.CALLBACK_URI + '/webhook'
-            },
+            where_dict=where_dict,
             sort='sumDate:asc'
         )
 
-        # _targetTransactionHeadList = _transactionsApi.getTransactionHeadList(
-        #     whereDict={
-        #         'store_id': storeId,
-        #         'sum_date-from': startDate,
-        #         'sum_date-to': endDate,
-        #     }, 
-        #     sort='sumDate:asc'
-        # )
-        # # 締日ごとに並び替え
-        # _sumDateCategorizedTransactionHeadList = DictionaryUtil.categorizeByKey('sumDate', _targetTransactionHeadList)
-        # try:
-        #     for _sumDate, _transactionHeadList in _sumDateCategorizedTransactionHeadList.items():
-        #         # 締め日データが既にあれば無視。なければレコード作成
-        #         _existedRecords = await DailyBasketList.filter(
-        #             contract_id = self._loginAccount.contractId,
-        #             store_id = storeId,
-        #             target_date = _sumDate
-        #         ).all()
-        #         if (_existedRecords == []):
-
-        #             _dailyBasketListModelList = self._getBasketListByTransactionHeadList(_transactionHeadList, _sumDate)
-        #             for _dailyBasketListModel in _dailyBasketListModelList:
-        #                 await _dailyBasketListModel.save()
-        #                 # self._logger.debug(_registered)
-        # except Exception as e:
-        #     raise e
-
-        # _result = await DailyBasketList.filter(
-        #     contract_id = self._loginAccount.contractId,
-        #     store_id = storeId,
-        #     target_date__range = (startDate, endDate)
-        # ).all()
-        # return _result 
-
-
-        # _dailyBasketList = await DailyBasketList.filter(
-        #     contract_id = self._loginAccount.contractId,
-        #     store_id = storeId,
-        #     target_date__range = (startDate, endDate)
-        # ).delete()
-        # return _dailyBasketList
         return
 
     def _getBasketListByTransactionHeadList(self, _transactionHeadList, _sumDate):
@@ -286,7 +247,7 @@ class BasketDomainService(AbstractDomainService):
             
         return _resultList
 
-    async def register_empty_basket(self, store_id: int, target_date: datetime) -> None:
+    async def register_empty_basket(self, store_id: int, target_date: datetime.datetime) -> None:
         """空のバスケットデータを作成します
         もし存在していたら何もしない
 
@@ -294,12 +255,13 @@ class BasketDomainService(AbstractDomainService):
             storeId (int): [description]
             targetDate (datetime): [description]
         """
+        import pdb; pdb.set_trace()
         daily_basket_list_tuple = await DailyBasketList.get_or_create(
-            contract_id = self.login_account.contract_id,
-            store_id = store_id,
-            target_date = target_date
+            contract_id=self.login_account.contract_id,
+            store_id=store_id,
+            target_date=target_date
         )
 
-        if daily_basket_list_tuple[1] is True: # [1]は取得したか、作成したかのboolean true: create
-            _daily_basket_list = daily_basket_list_tuple[0] 
+        if daily_basket_list_tuple[1] is True:  # [1]は取得したか、作成したかのboolean true: create
+            _daily_basket_list = daily_basket_list_tuple[0]
             await _daily_basket_list.save()

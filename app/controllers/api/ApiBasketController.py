@@ -38,24 +38,21 @@ class ApiBasket(AbstractController):
             req ([type]): [description]
             resp ([type]): [description]
         """
-        import pdb; pdb.set_trace()
         if self.is_access_denied():
             return
         self._logger.info('sync DailyBasket')
-        self._basket_domain_service = BasketDomainService(self.login_account)
+        self._basket_domain_service = await BasketDomainService.create_instance(self.login_account)
         request = await req.media(format='json')
         date_from = request['startDate'] + 'T00:00:00+0900'
         date_to = request['endDate'] + 'T23:59:59+0900'
         try:
-            await self._basket_domain_service.sync_daily_basket_list_by_date_range(date_from ,date_to)
-            # jsonDailyBasketList = [await model.serialize for model in syncedDailyBasketList]
-            # resp.media = jsonDailyBasketList
+            await self._basket_domain_service.sync_daily_basket_list_by_date_range(date_from, date_to)
         except Exception:
             resp.status_code = 400
 
     async def on_delete(self, req, resp):
         self._logger.info('delete DailyBasket')
-        self._basket_domain_service = BasketDomainService(self.login_account)
+        self._basket_domain_service = await BasketDomainService.create_instance(self.login_account)
         request = req.params
         date_from = request['startDate']
         date_to = request['endDate']
