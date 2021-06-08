@@ -1,4 +1,7 @@
-import gzip, io, requests, csv
+import gzip
+import io
+import requests
+import csv
 
 
 def get_gzip_data_from_url(url) -> list:

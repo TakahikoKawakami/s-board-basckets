@@ -9,6 +9,7 @@ RUN apt-get update && apt-get -y upgrade && apt-get install -y software-properti
 # ubuntu18以降でtzdataとgitを同時に入れると止まってしまうので、gitだけ外だし+ nointeractiveを追加
 RUN apt-get update && apt-get -y upgrade && apt-get install -y git
 RUN apt-get update && apt-get -y upgrade && apt-get install -y --fix-missing\
+    default-mysql-client \
     locales-all \
     apt-utils \
     gawk \

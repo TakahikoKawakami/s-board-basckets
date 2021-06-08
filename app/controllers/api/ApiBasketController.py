@@ -20,11 +20,22 @@ class ApiBasket(AbstractController):
         self._logger.info('get basket')
         self._basket_domain_service = BasketDomainService(self.login_account)
         if req.params != {}:
-            start_date = datetime.datetime.strptime(req.params['startDate'], "%Y-%m-%dT%H:%M:%S%z").date()
-            end_date = datetime.datetime.strptime(req.params['endDate'], "%Y-%m-%dT%H:%M:%S%z").date()
-            daily_basket_list = await self._basket_domain_service.get_daily_basket_list_by_date_range(start_date, end_date)
+            start_date = datetime.datetime.strptime(
+                req.params['startDate'],
+                "%Y-%m-%dT%H:%M:%S%z"
+            ).date()
+            end_date = datetime.datetime.strptime(
+                req.params['endDate'],
+                "%Y-%m-%dT%H:%M:%S%z"
+            ).date()
+            daily_basket_list = await self\
+                ._basket_domain_service\
+                .get_daily_basket_list_by_date_range(start_date, end_date)
 
-            json_daily_basket_list = [await model.serialize for model in daily_basket_list]
+            json_daily_basket_list = [
+                await model.serialize
+                for model in daily_basket_list
+            ]
             resp.media = json_daily_basket_list
             return
         else:

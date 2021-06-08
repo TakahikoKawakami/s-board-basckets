@@ -89,18 +89,18 @@ class Basket():
             self._memberId = "-1"
 
         if _transaction_head.customer_group_id is not None:
-            self._customerGroupIdList.\
+            self._customer_group_id_list.\
                 append(_transaction_head.customer_group_id)
         for i in range(2, 6):
             if getattr(
                 _transaction_head,
-                "customerGroupId" + str(i)
+                "customer_group_id" + str(i)
             ) is not None:
                 self._customer_group_id_list.append(
-                    getattr(_transaction_head, "customerGroupId" + str(i))
+                    getattr(_transaction_head, "customer_group_id" + str(i))
                 )
 
-        self._storeId = _transaction_head.store_id
+        self._store_id = _transaction_head.store_id
 
         if _transaction_head.guest_numbers_male is not None:
             self._customer_sex_dict["male"] = \
@@ -113,7 +113,7 @@ class Basket():
                 _transaction_head.guest_numbers_unknown
         # TODO 取引日時区分
 
-    def convertListForAnalysis(self) -> list:
+    def convert_list_for_analysis(self) -> list:
         """当entityをバスケット分析用のリスト型に変換します
 
         Returns:
@@ -125,7 +125,7 @@ class Basket():
 
         if (
             "male" in self._customer_sex_dict and
-            int(self._customerSexDict["male"]) != 0
+            int(self._customer_sex_dict["male"]) != 0
         ):
             _customer_sex_dict = {}
             _customer_sex_dict["sex"] = "male"
@@ -177,7 +177,7 @@ class Basket():
 
     @store_id.setter
     def store_id(self, val: int) -> None:
-        self._storeId = val
+        self._store_id = val
 
     @property
     def member_id(self) -> int:

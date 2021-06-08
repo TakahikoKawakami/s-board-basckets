@@ -31,7 +31,6 @@ class ApplicationLogger(logging.getLoggerClass()):
 
 
 async def get_logger(account):
-    # import pdb; pdb.set_trace()
     logging.setLoggerClass(ApplicationLogger)
     with open("app/logging_config.yaml", 'r') as f:
         conf_file = yaml.safe_load(f.read())

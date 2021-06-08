@@ -47,7 +47,7 @@ class BasketAssociationDomainService(AbstractDomainService):
         # 全データをマージ
         mergedBasketList = []
         for dailyBasketListModel in dailyBasketListModelList:
-            mergedBasketList += dailyBasketListModel.basketList
+            mergedBasketList += dailyBasketListModel.baskets
         mergedPyfpgrowthEntity = Fpgrowth.createByDataList(mergedBasketList, 0.1, self._logger)
         return mergedPyfpgrowthEntity
 

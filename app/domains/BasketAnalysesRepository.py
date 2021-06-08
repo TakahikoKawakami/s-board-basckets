@@ -169,7 +169,7 @@ class BasketAnalysesRepository(AbstractRepository):
         _resultList = []
         for _storeId, _dailyBasketList in _dailyBasketListDict.items():
             _dailyBasketListModel = DailyBasketList()
-            _dailyBasketListModel.basketList = _dailyBasketList
+            _dailyBasketListModel.baskets = _dailyBasketList
             _dailyBasketListModel.storeId = _storeId
             _dailyBasketListModel.targetDate = datetime.datetime.strptime(_sumDate, "%Y-%m-%d")
             _resultList.append(_dailyBasketListModel)

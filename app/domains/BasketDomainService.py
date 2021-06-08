@@ -53,29 +53,35 @@ class BasketDomainService(AbstractDomainService):
             self._logger.warning("!!raise exception!!")
             self._logger.warning(e)
 
-
-    async def register_basket_by_transaction_list(self, transaction_list: list['Transaction']) -> None:
+    async def register_basket_by_transaction_list(
+        self,
+        transaction_list: list['Transaction']
+    ) -> None:
         """取引entityリストからバスケットデータを作成し、DBに登録します
 
         Args:
             transactionList (list[Transaction]): [description]
         """
+        self._logger.info("register basket by transaction list: start")
+        daily_basket_list = None
         for transaction in transaction_list:
             _basket = Basket()
             _basket.set_by_transaction_head(transaction.head)
             _basket.set_by_transaction_detail_list(transaction.details)
 
-            _daily_basket_list_tuple = await DailyBasketList.get_or_create(
+            daily_basket_list_tuple = await DailyBasketList.get_or_create(
                 contract_id=self.login_account.contract_id,
                 store_id=_basket.store_id,
                 target_date=_basket.target_date
             )
 
-            _daily_basket_list = _daily_basket_list_tuple[0] # [1]は取得したか、作成したかのboolean true: create
-            _daily_basket_list.appendBasket(_basket)
-        await _daily_basket_list.save()
+            daily_basket_list = daily_basket_list_tuple[0]  # [1]は取得したかのbool
+            daily_basket_list.append_basket(_basket)
+        if isinstance(daily_basket_list, DailyBasketList):
+            await daily_basket_list.save()
         self._logger.info('バスケットデータ登録完了')
-        self._logger.info(repr(_daily_basket_list))
+        self._logger.info(repr(daily_basket_list))
+        self._logger.info("register basket by transaction list: finish")
 
 
     async def registerBasketByTransaction(self, transactionHead, transactionDetail):
@@ -95,15 +101,18 @@ class BasketDomainService(AbstractDomainService):
         self._logger.info('バスケットデータ登録完了')
         self._logger.info(repr(_dailyBasketList))
 
-
-    async def register_basket_by_gzip_url_list(self, url_list: list[str]) -> None:
+    async def register_basket_by_gzip_url_list(
+        self,
+        url_list: list[str]
+    ) -> None:
         """Gzip圧縮された取引明細データがおかれているurlリストから、バスケットデータを作成し、DBに登録します
 
         Args:
             urlList (list[str]): [description]
         """
         self._logger.info('データ取得開始---')
-        transaction_detail_list_categorized_by_transaction_head_id = self._get_transaction_detail_list_from_gzip_url_list(url_list)
+        transaction_detail_list_categorized_by_transaction_head_id = \
+            self._get_transaction_detail_list_from_gzip_url_list(url_list)
 
         transaction_head_id_from = min(transaction_detail_list_categorized_by_transaction_head_id.keys())
         transaction_head_id_to = max(transaction_detail_list_categorized_by_transaction_head_id.keys())
@@ -121,8 +130,10 @@ class BasketDomainService(AbstractDomainService):
         ]
         await self.register_basket_by_transaction_list(transaction_list)
 
-
-    def _get_transaction_detail_list_from_gzip_url_list(self, url_list: list[str]) -> dict[int, list['TransactionDetail']]:
+    def _get_transaction_detail_list_from_gzip_url_list(
+        self,
+        url_list: list[str]
+    ) -> dict[int, list['TransactionDetail']]:
         """Gzip圧縮された取引明細ファイルをurlリストから順に取得し、取引ヘッダIDをキー、その明細リストを要素に持つ辞書を返します
 
         Returns:
@@ -153,8 +164,11 @@ class BasketDomainService(AbstractDomainService):
         transaction_head_list_categorized_by_transaction_head_id = EntityUtil.categorize_by_key('transaction_head_id', transaction_head_list)
         return transaction_head_list_categorized_by_transaction_head_id
 
-
-    async def get_daily_basket_list_by_date_range(self, start_date: datetime.date, end_date: datetime.date):
+    async def get_daily_basket_list_by_date_range(
+        self,
+        start_date: datetime.date,
+        end_date: datetime.date
+    ):
         account_setting = await self.login_account.account_setting_model
         store_id = account_setting.display_store_id
 
@@ -240,14 +254,18 @@ class BasketDomainService(AbstractDomainService):
         for _storeId, _dailyBasketList in _dailyBasketListDict.items():
             _dailyBasketListModel = DailyBasketList()
             _dailyBasketListModel.contractId = self._loginAccount.contractId
-            _dailyBasketListModel.basketList = _dailyBasketList
+            _dailyBasketListModel.baskets = _dailyBasketList
             _dailyBasketListModel.storeId = _storeId
             _dailyBasketListModel.targetDate = datetime.datetime.strptime(_sumDate, "%Y-%m-%d")
             _resultList.append(_dailyBasketListModel)
             
         return _resultList
 
-    async def register_empty_basket(self, store_id: int, target_date: datetime.datetime) -> None:
+    async def register_empty_basket(
+        self,
+        store_id: int,
+        target_date: datetime.datetime
+    ) -> None:
         """空のバスケットデータを作成します
         もし存在していたら何もしない
 
@@ -255,13 +273,13 @@ class BasketDomainService(AbstractDomainService):
             storeId (int): [description]
             targetDate (datetime): [description]
         """
-        import pdb; pdb.set_trace()
         daily_basket_list_tuple = await DailyBasketList.get_or_create(
             contract_id=self.login_account.contract_id,
             store_id=store_id,
             target_date=target_date
         )
 
-        if daily_basket_list_tuple[1] is True:  # [1]は取得したか、作成したかのboolean true: create
+        if daily_basket_list_tuple[1] is True:  # [1]は取得したか、作成したかのboolean
+            # true: create
             _daily_basket_list = daily_basket_list_tuple[0]
             await _daily_basket_list.save()
