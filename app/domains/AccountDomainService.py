@@ -28,7 +28,10 @@ class AccountDomainService(AbstractDomainService):
         Returns:
             bool: true: 有り
         """
-        return SessionManager.has(self._session, SessionManager.KEY_CONTRACT_ID)
+        return SessionManager.has(
+            self._session,
+            SessionManager.KEY_CONTRACT_ID
+        )
 
     async def prepare_for_access_processing(self):
         if self._session is None:
@@ -157,7 +160,7 @@ class AccountDomainService(AbstractDomainService):
             )
         self.login_account.login_status = Account.LoginStatusEnum.SIGN_UP
 
-        self.with_smaregi_api(self.login_account.access_token_entity.access_token, self.login_account.contract_id)
+        self.with_smaregi_api(self.login_account.access_token_entity, self.login_account.contract_id)
         stores_api = StoresApi(self._api_config)
         store_list = stores_api.get_store_list()
         for store in store_list:
@@ -222,7 +225,7 @@ class AccountDomainService(AbstractDomainService):
             SessionManager.set(
                 self._session,
                 SessionManager.KEY_ACCOUNT_SETTING,
-                account_setting.serialize
+                await account_setting.serialize()
             )
 
     async def save_account_setting(self, request):

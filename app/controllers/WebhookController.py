@@ -5,6 +5,7 @@ from app import webhook
 from app.common.abstracts.AbstractController import AbstractController
 from app.domains.AccountDomainService import AccountDomainService
 
+
 class Webhook(AbstractController):
     EVENT_TRANSACTIONS = 'pos:transactions'
     EVENT_GET_TRANSACTION_DETAIL_LIST = 'get_transaction_detail_list'

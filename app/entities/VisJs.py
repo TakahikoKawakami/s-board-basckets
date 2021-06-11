@@ -1,5 +1,6 @@
 import json
 
+
 class VisJs():
     def __init__(self):
         self.nodeList = []
@@ -8,7 +9,7 @@ class VisJs():
     def __str__(self):
         return """
             nodeList: {} counts
-			edgeList: {} counts
+            edgeList: {} counts
         """.format(len(self.nodeList), len(self.edgeList))
 
     def toDict(self):

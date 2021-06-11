@@ -13,11 +13,11 @@ class AccountStore(AbstractController):
 
         json_encoded = []
         for store in store_list:
-            json_encoded.append(await store.serialize)
+            json_encoded.append(await store.serialize())
 
         resp.media = json_encoded
         return
-        
+
     async def on_put(self, req, resp):
         self._logger.info('put AccountStore')
         try:
@@ -27,22 +27,23 @@ class AccountStore(AbstractController):
 
             resp.media = {
                 "status": 200
-   	        }
+            }
         except Exception as e:
             self._logger.exception('raise error: %s', e)
             resp.media = {
                 "status": 500
-   	        }
+            }
         return
 
+
 class AccountSetting(AbstractController):
-    def __init__(self) ->None:
+    def __init__(self) -> None:
         super().__init__()
 
     async def on_get(self, req, resp):
         self._logger.info('get AccountSetting')
         account_setting = await self.login_account.account_setting_model
-        json_encoded = await account_setting.serialize
+        json_encoded = await account_setting.serialize()
         resp.media = json_encoded
         return
         

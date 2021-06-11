@@ -14,7 +14,6 @@ class AbstractTortoiseModel(Model):
     class Meta:
         abstract = True
 
-    @property
     async def serialize(self):
         selfPydantic = pydantic_model_creator(self.__class__)
         p = await selfPydantic.from_tortoise_orm(self)

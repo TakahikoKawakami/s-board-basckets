@@ -19,7 +19,7 @@ class AbstractWebhook():
     async def create_instance(cls: Type[T], account: 'Account') -> T:
         webhook = cls(account)
         if account is not None:
-            webhook._logger = await logger.get_logger(account)
+            webhook._logger = await logger.get_logger(account.contract_id)
         return webhook
 
     def with_smaregi_api(

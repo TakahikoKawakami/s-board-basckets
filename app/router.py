@@ -32,10 +32,6 @@ def add_routers(api: responder.API):
         Controllers.BasketController.Basket
     )
     api.add_route(
-        '/baskets/associate',
-        Controllers.BasketController.Associate
-    )
-    api.add_route(
         '/baskets/associate/result',
         Controllers.BasketController.AssociateResult
     )

@@ -33,7 +33,7 @@ class ApiBasket(AbstractController):
                 .get_daily_basket_list_by_date_range(start_date, end_date)
 
             json_daily_basket_list = [
-                await model.serialize
+                await model.serialize()
                 for model in daily_basket_list
             ]
             resp.media = json_daily_basket_list

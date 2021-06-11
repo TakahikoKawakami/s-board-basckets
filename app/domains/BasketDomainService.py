@@ -3,21 +3,22 @@ import datetime
 
 from app.common.utils import CsvUtil,  EntityUtil
 
-from app.entities.Transactions import Transaction
 from SmaregiPlatformApi.pos import TransactionsApi
 from SmaregiPlatformApi.entities import TransactionHead, TransactionDetail
-
 
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.entities.Baskets import Basket
 from app.entities.Transactions import Transaction
+from app.entities.AssociationResult import AssociationResult
+from app.entities.Fpgrowth import Fpgrowth
 from app.models.DailyBasketList import DailyBasketList
+from app.models import Store
 
 
 class BasketDomainService(AbstractDomainService):
     def __init__(self, login_account):
         super().__init__(login_account)
-        self.with_smaregi_api(login_account.access_token_entity.access_token, login_account.contract_id)
+        self.with_smaregi_api(login_account.access_token_entity, login_account.contract_id)
 
     async def register_basket_by_transaction_head_id(self, transaction_head_id: int) -> None:
         """取引ヘッダIDからバスケットデータを作成し、DBに登録します
@@ -178,7 +179,6 @@ class BasketDomainService(AbstractDomainService):
             target_date__range=(start_date, end_date)
         ).all()
         return _daily_basket_list
-    
 
     async def delete_daily_basket_list_by_date_range(self, start_date: datetime.date, end_date: datetime.date):
         account_setting = await self.login_account.account_setting_model
@@ -226,41 +226,6 @@ class BasketDomainService(AbstractDomainService):
 
         return
 
-    def _getBasketListByTransactionHeadList(self, _transactionHeadList, _sumDate):
-        """取引ヘッダリストに紐づく全取引明細を取得し、日別バスケット分析用データモデルを返却します
-
-        Arguments:
-            _transactionHeadList {TransactionHead} -- APIで取得した取引ヘッダリスト
-            _sumDate {str} -- 締め日（Y-m-d）
-
-        Returns:
-            BasketAnalysis -- バスケット分析モデル（分析済）
-        """
-        
-        _transactionsApi = TransactionsApi(self._apiConfig)
-        _dailyBasketListDict = {}
-        for _transactionHead in _transactionHeadList:
-            _transactionDetailList = _transactionsApi.getTransactionDetail(_transactionHead['transactionHeadId'])
-            _basketModel = Basket()
-            _basketModel.setByTransactionHead(_transactionHead)
-            _basketModel.setByTransactionDetailList(_transactionDetailList)
-
-            if (_basketModel.storeId not in _dailyBasketListDict.keys()):
-                _dailyBasketListDict[_basketModel.storeId] = []
-
-            _dailyBasketListDict[_basketModel.storeId].append(_basketModel)
-            
-        _resultList = []
-        for _storeId, _dailyBasketList in _dailyBasketListDict.items():
-            _dailyBasketListModel = DailyBasketList()
-            _dailyBasketListModel.contractId = self._loginAccount.contractId
-            _dailyBasketListModel.baskets = _dailyBasketList
-            _dailyBasketListModel.storeId = _storeId
-            _dailyBasketListModel.targetDate = datetime.datetime.strptime(_sumDate, "%Y-%m-%d")
-            _resultList.append(_dailyBasketListModel)
-            
-        return _resultList
-
     async def register_empty_basket(
         self,
         store_id: int,
@@ -283,3 +248,130 @@ class BasketDomainService(AbstractDomainService):
             # true: create
             _daily_basket_list = daily_basket_list_tuple[0]
             await _daily_basket_list.save()
+
+    async def associate(
+        self,
+        target_store_id: str,
+        target_date_from: datetime.datetime,
+        target_date_to: datetime.datetime
+    ) -> 'AssociationResult':
+        store = await Store.filter(
+            contract_id=self.login_account.contract_id,
+            store_id=target_store_id
+        ).first()
+        if store is None:
+            raise Exception("store does not exists")
+
+        target_date_from_str = target_date_from.strftime("%Y-%m-%d")
+        target_date_to_str = target_date_to.strftime("%Y-%m-%d")
+        self._logger.info("-----search condition-----")
+        self._logger.info("storeId     : " + target_store_id)
+        self._logger.info("search_from : " + target_date_from_str)
+        self._logger.info("search_to   : " + target_date_to_str)
+
+        # 分析期間の日別バスケットリストを取得
+        daily_basket_list_model_list = await DailyBasketList.filter(
+            contract_id=self.login_account.contract_id,
+            store_id=target_store_id,
+            target_date__range=(target_date_from, target_date_to)
+        )
+
+        # 全データをマージ
+        merged_basket_list = []
+        for daily_basket_list_model in daily_basket_list_model_list:
+            merged_basket_list += daily_basket_list_model.baskets
+
+        # fpgrowthを用いて分析
+        fpgrowth = Fpgrowth.createByDataList(
+            merged_basket_list,
+            0.1,
+            self._logger
+        )
+
+        self._logger.debug("----- ----- vis.js created.")
+        return vis
+        association_result = AssociationResult(
+            store=store,
+            date_from=target_date_from,
+            date_to=target_date_to,
+            fpgrowth=fpgrowth
+        )
+
+        return association_result
+
+    async def _convert_association_result_to_vis_js(self, fpgrowth):
+        vis = None
+        self._logger.info("-----convert association result to vis.js-----")
+        self._logger.info(fpgrowth)
+        if fpgrowth is not None:
+            try:
+                self._logger.debug("debug in if content")
+                vis = fpgrowth.convertToVisJs()
+                self._logger.debug("----- ----converted fpgrowth to vis.js-----")
+                vis = await self._setVisNodeLabel(vis)
+                self._logger.debug("----- ----set label for vis.js-----")
+            except Exception as e:
+                raise e
+        
+    async def _setVisNodeLabel(self, vis):
+        productsApi = ProductsApi(self._apiConfig)
+        result = VisJs()
+        try:
+            for node in vis.nodeList:
+                product = await Product.filter(
+                    contract_id = self._loginAccount.contractId,
+                    product_id = node.id
+                ).first()
+                self._logger.debug(repr(product))
+
+                if product is None:
+                    self._logger.info("fetching product id: {}".format(node.id))
+                    productByApi = productsApi.getProductById(node.id)
+                    if productByApi is None:
+                        self._logger.info("productsApi.getProductById is failed.")
+                        node.label = "unknown"
+                        result.nodeList.append(node)
+                        continue
+                    self._logger.debug(productByApi)
+                    product = await Product.create(
+                        contract_id = self._loginAccount.contractId,
+                        product_id = productByApi['productId'],
+                        name = productByApi['productName']
+                        # color = productByApi['color'],
+                        # size = productByApi['size'],
+                        # price = productByApi['price']
+                    )
+                node.label = product.name
+                result.nodeList.append(node)
+        except Exception as e:
+            self._logger.warning("!!raise exception!!")
+            self._logger.warning(e)
+            raise e
+
+        result.edgeList = vis.edgeList
+        return result
+    
+    async def convertAssociationResultToPickUpMessage(self, fpgrowth, storeId, dateFrom, dateTo):
+        store = await self.target_store
+
+        productFrom = None
+        productTo = None
+        if len(fpgrowth.result) > 0:
+            productFromIdList = [result['id'] for result in fpgrowth.result[0]['from']]
+            productToIdList = [result['id'] for result in fpgrowth.result[0]['to']]
+            productFrom = await Product.filter(
+                contract_id = self._loginAccount.contractId,
+                product_id__in = productFromIdList
+            ).all()
+            productTo = await Product.filter(
+                contract_id = self._loginAccount.contractId,
+                product_id__in = productToIdList
+            ).all()
+        message = {
+            'store': store,
+            'from': dateFrom,
+            'to': dateTo,
+            'productFrom': productFrom,
+            'productTo': productTo,
+        }
+        return message

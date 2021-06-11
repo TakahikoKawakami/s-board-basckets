@@ -9,7 +9,10 @@ from app.models import Store
 class StoreDomainService(AbstractDomainService):
     def __init__(self, login_account):
         super().__init__(login_account)
-        self.with_smaregi_api(login_account.access_token_entity, login_account.contract_id)
+        self.with_smaregi_api(
+            login_account.access_token_entity,
+            login_account.contract_id
+        )
 
 
     async def get_store_list(self):

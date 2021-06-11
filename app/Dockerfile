@@ -6,8 +6,12 @@ FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 # add software-properties-common to install "add-apt-repository" command for installing neovim
 RUN apt-get update && apt-get -y upgrade && apt-get install -y software-properties-common
 
-# ubuntu18以降でtzdataとgitを同時に入れると止まってしまうので、gitだけ外だし+ nointeractiveを追加
-RUN apt-get update && apt-get -y upgrade && apt-get install -y git
+# for git
+ARG GIT_USER_NAME
+ARG GIT_USER_EMAIL
+RUN apt-get update && apt-get -y upgrade && apt-get install -y git \
+    &&git config --global user.name ${GIT_USER_NAME} && git config --global user.name ${GIT_USER_NAME}
+
 RUN apt-get update && apt-get -y upgrade && apt-get install -y --fix-missing\
     default-mysql-client \
     locales-all \
@@ -68,9 +72,14 @@ RUN apt-get install -y \
 RUN pip3 install --upgrade pip setuptools wheel
 
 # for ultrahook
-# RUN echo "api_key: {{your api key}}" > ~/.ultrahook
-RUN gem install ultrahook
-#&& ultrahook look-into-baskets http://0.0.0.0:5500
+ARG USE_ULTRAHOOK
+ARG ULTRAHOOK_KEY
+ARG ULTRAHOOK_URL
+RUN if [ "${USE_ULTRAHOOK}" = true ]; then \
+        gem install ultrahook \
+        echo "api_key: ${ULTRAHOOK_KEY}" > ~/.ultrahook \
+        ultrahook ${ULTRAHOOK_URL} http://0.0.0.0:${ULTRAHOOK_PORT}; \
+    fi
 
 # neovim
 RUN pip3 install --upgrade pip
@@ -115,3 +124,11 @@ ENV PATH $PYTHON_ROOT/bin:$PATH
 
 WORKDIR /var/www/html
 #CMD cd ${HOME}/dotfiles && systemctl start snapd && make install
+COPY requirements.txt requirements.txt
+# RUN pip3 install -r requirements.txt
+# RUN expect -c " \
+#     pip3 install -r app/requirements.txt; \
+#     expect name ; send ${GIT_USER_NAME}  ; \
+#     expect password ; send ${GIT_PASSWORD} ; \
+#     expect $ ; exit"
+# RUN rm requirements.txt
