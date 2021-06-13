@@ -1,7 +1,7 @@
 import random
 from app import logger
 
-from app.config import templates
+from app.config import templates, AppConfig
 import app.common.managers.SessionManager as SessionManager
 from app.domains.AccountDomainService import AccountDomainService
 from app.domains.StoreDomainService import StoreDomainService
@@ -59,6 +59,8 @@ class AbstractController():
         self.create_csrf_token()
         kwargs['csrf_hidden_input'] = self._input_csrf_token()
         kwargs['csrf_token'] = SessionManager.get(self._resp.session, SessionManager.KEY_CSRF_TOKEN)
+
+        kwargs['app_version'] = AppConfig.APP_VERSION
 
         self._resp.html = templates.render(path, kwargs)
 

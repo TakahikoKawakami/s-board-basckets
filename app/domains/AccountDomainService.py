@@ -1,3 +1,4 @@
+from app.config import AppConfig
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.common.managers import SessionManager
 
@@ -108,6 +109,7 @@ class AccountDomainService(AbstractDomainService):
         """契約IDでログインします
         スマレジAPIではなく、look-into-basketsにログインする
         userStatusがstartのもののみ
+        また、last-app-versionを保存する
 
         Args:
             _contractId (str): [description]
@@ -120,9 +122,10 @@ class AccountDomainService(AbstractDomainService):
             if not _account_model.access_token_entity.is_access_token_available():
                 _accessTokenForUpdate = self.get_access_token_by_contract_id(_contract_id)
                 _account_model.access_token_entity = _accessTokenForUpdate
-                await _account_model.save()
             else:
                 _accessTokenForUpdate = _account_model.access_token
+            _account_model.last_login_version = AppConfig.APP_VERSION
+            await _account_model.save()
             self.login_account = _account_model
             self.login_account.login_status = Account.LoginStatusEnum.SIGN_IN
             return
@@ -146,7 +149,7 @@ class AccountDomainService(AbstractDomainService):
         account = await Account.get_or_none(contract_id=_contract_id)
         if account is not None:
             account.user_status = Account.StatusEnum.STATUS_START
-            account.access_token = _access_token_by_creation
+            account.access_token_entity = _access_token_by_creation
             account.plan = _plan
             await account.save()
             self.login_account = account

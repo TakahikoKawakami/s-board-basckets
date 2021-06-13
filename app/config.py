@@ -45,6 +45,7 @@ load_dotenv(dotenv_path)
 
 class AppConfig(object):
     """base config"""
+    APP_VERSION = str('1.0.3')
 
     ENV_DIVISION = os.environ.get("ENV_DIVISION")
 
