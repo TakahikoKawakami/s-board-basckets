@@ -16,10 +16,6 @@ from app.models import Store
 
 
 class BasketDomainService(AbstractDomainService):
-    def __init__(self, login_account):
-        super().__init__(login_account)
-        self.with_smaregi_api(login_account.access_token_entity, login_account.contract_id)
-
     async def register_basket_by_transaction_head_id(self, transaction_head_id: int) -> None:
         """取引ヘッダIDからバスケットデータを作成し、DBに登録します
         取引が存在しない場合でも、空のバスケットをDBに登録します

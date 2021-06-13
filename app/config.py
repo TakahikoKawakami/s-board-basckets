@@ -48,8 +48,8 @@ class AppConfig(object):
 
     ENV_DIVISION = os.environ.get("ENV_DIVISION")
 
-    SMAREGI_CLIENT_ID = os.environ.get('SMAREGI_CLIENT_ID')
-    SMAREGI_CLIENT_SECRET = os.environ.get('SMAREGI_CLIENT_SECRET')
+    SMAREGI_CLIENT_ID = os.environ.get('SMAREGI_CLIENT_ID', '')
+    SMAREGI_CLIENT_SECRET = os.environ.get('SMAREGI_CLIENT_SECRET', '')
 
     SECRET_KEY = os.environ.get('SECRET_KEY')
 
@@ -59,7 +59,7 @@ class AppConfig(object):
     JSON_AS_ASCII = False
     JSON_SORT_KEYS = False
 
-    APP_URI = os.environ.get('APP_URI')
+    APP_URI = os.environ.get('APP_URI', '')
     CALLBACK_URI = os.environ.get('CALLBACK_URI')
     if CALLBACK_URI is None:
         CALLBACK_URI = APP_URI

@@ -18,7 +18,8 @@ class Basket(AbstractController):
         if self.is_booking_redirect():
             return
         self._logger.info('access DailyBasket')
-        self._basket_domain_service = BasketDomainService(self.login_account)
+        self._basket_domain_service = \
+            await BasketDomainService.create_instance(self.login_account)
         if req.params != {}:
             start_date = datetime.datetime.strptime(
                 req.params['startDate'],

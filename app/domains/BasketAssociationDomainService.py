@@ -14,13 +14,6 @@ from app.models import Store
 
 
 class BasketAssociationDomainService(AbstractDomainService):
-    def __init__(self, loginAccount):
-        super().__init__(loginAccount)
-        self.with_smaregi_api(
-            self.login_account.access_token_entity,
-            self.login_account.contract_id
-        )
-
     @property
     async def target_store(self) -> Optional['Store']:
         account_setting = await self.login_account.account_setting_model
@@ -30,7 +23,7 @@ class BasketAssociationDomainService(AbstractDomainService):
         ).first()
 
     def getStoreList(self):
-        _storesApi = StoresApi(self._api_config)
+        _storesApi = StoresApi()
         _apiResponse = _storesApi.get_store_list()
         return _apiResponse
 
@@ -42,6 +35,7 @@ class BasketAssociationDomainService(AbstractDomainService):
         self._logger.info("search_from : " + targetDateFrom.strftime("%Y-%m-%d"))
         self._logger.info("search_to   : " + targetDateTo.strftime("%Y-%m-%d"))
 
+        import pdb; pdb.set_trace()
         # 分析期間の日別バスケットリストを取得
         dailyBasketListModelList = await DailyBasketList.filter(
             contract_id=self.login_account.contract_id,

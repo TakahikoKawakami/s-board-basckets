@@ -7,14 +7,6 @@ from app.models import Store
 
 
 class StoreDomainService(AbstractDomainService):
-    def __init__(self, login_account):
-        super().__init__(login_account)
-        self.with_smaregi_api(
-            login_account.access_token_entity,
-            login_account.contract_id
-        )
-
-
     async def get_store_list(self):
         return await Store.filter(
             contract_id=self.login_account.contract_id
@@ -33,7 +25,7 @@ class StoreDomainService(AbstractDomainService):
         ).delete()
 
     async def sync_all_stores(self):
-        stores_api = StoresApi(self._api_config)
+        stores_api = StoresApi()
         all_store_list = stores_api.get_store_list()
         print(all_store_list)
         for store in all_store_list:

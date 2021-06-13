@@ -1,7 +1,7 @@
 from logging import getLogger
-from SmaregiPlatformApi.config import Config as SmaregiConfig
+from SmaregiPlatformApi import smaregi_config
+from SmaregiPlatformApi import Config as SmaregiConfig
 from SmaregiPlatformApi.authorize import AuthorizeApi
-
 
 from app.common.managers import SessionManager
 from app.domains.AccountDomainService import AccountDomainService
@@ -9,14 +9,18 @@ from app.domains.AccountDomainService import AccountDomainService
 from app.config import AppConfig
 
 
-appConfig = AppConfig()
-
-apiConfig = SmaregiConfig(
-    appConfig.ENV_DIVISION,
-    appConfig.SMAREGI_CLIENT_ID,
-    appConfig.SMAREGI_CLIENT_SECRET
-)
-authorizeApi = AuthorizeApi(apiConfig, appConfig.APP_URI + '/accounts/login')
+app_config = AppConfig()
+if app_config.ENV_DIVISION in (
+    AppConfig.ENV_DIVISION_MOCK,
+    AppConfig.ENV_DIVISION_LOCAL,
+    AppConfig.ENV_DIVISION_STAGING,
+):
+    smaregi_env = SmaregiConfig.ENV_DIVISION_DEVELOPMENT
+else:
+    smaregi_env = SmaregiConfig.ENV_DIVISION_PRODUCTION
+smaregi_config.smaregi_client_id = app_config.SMAREGI_CLIENT_ID
+smaregi_config.smaregi_client_secret = app_config.SMAREGI_CLIENT_SECRET
+authorizeApi = AuthorizeApi(app_config.APP_URI + '/accounts/login')
 
 logger = getLogger('flask.app')
 
@@ -36,8 +40,7 @@ async def login(req, resp):
         resp.redirect('/accounts/authorize', status_code=303)
         return
 
-    account_domain_service = \
-        AccountDomainService(req.session).with_smaregi_api(None, None)
+    account_domain_service = AccountDomainService(req.session)
     try:
         account = await account_domain_service.login_by_code_and_state(
             code,

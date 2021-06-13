@@ -1,42 +1,86 @@
-from typing import TypeVar, Type, Optional
+from typing import TypeVar, Type
 from logging import Logger
+from SmaregiPlatformApi import (
+    smaregi_config,
+    Config as SmaregiConfig
+)
+
 from app import logger
 from app.models.Accounts import Account
 from app.config import AppConfig
-from SmaregiPlatformApi.config import Config as SmaregiConfig
 from app.entities.AccessToken import AccessToken
 
 T = TypeVar('T', bound='AbstractDomainService')
 
 
 class AbstractDomainService():
-    def __init__(self, account):
-        self._app_config: Optional[AppConfig] = None
-        self._api_config: Optional[SmaregiConfig] = None
-        self.login_account: Optional[Account] = account
-        self._logger: Optional[Logger] = None
+    _app_config: AppConfig
+    login_account: Account
+    _logger: Logger
+
+    def __init__(self, account: Account):
+        self._app_config = AppConfig()
+        self.login_account = account
 
     @classmethod
-    async def create_instance(cls: Type[T], account: Optional['Account']) -> T:
+    async def create_instance(cls: Type[T], account: Account) -> T:
         domain_service = cls(account)
-        if isinstance(account, Account):
-            domain_service._logger = \
-                await logger.get_logger(account.contract_id)
+        domain_service._logger = \
+            await logger.get_logger(account.contract_id)
+        domain_service.set_smaregi_api(
+            domain_service.login_account.access_token_entity,
+            domain_service.login_account.contract_id
+        )
         return domain_service
 
     def with_smaregi_api(
         self,
-        _access_token: Optional[AccessToken],
+        _access_token: AccessToken,
         _contract_id
     ):
-        self._app_config = AppConfig()
-        self._api_config = SmaregiConfig(
-            self._app_config.ENV_DIVISION,
+        if self._app_config.ENV_DIVISION in (
+            AppConfig.ENV_DIVISION_MOCK,
+            AppConfig.ENV_DIVISION_LOCAL,
+            AppConfig.ENV_DIVISION_STAGING,
+        ):
+            smaregi_env = SmaregiConfig.ENV_DIVISION_DEVELOPMENT
+        else:
+            smaregi_env = SmaregiConfig.ENV_DIVISION_PRODUCTION
+
+        config = SmaregiConfig(
+            smaregi_env,
+            _contract_id,
             self._app_config.SMAREGI_CLIENT_ID,
-            self._app_config.SMAREGI_CLIENT_SECRET
+            self._app_config.SMAREGI_CLIENT_SECRET,
+            _access_token,
+            self._logger
         )
-        if _access_token is not None:
-            self._api_config.access_token = _access_token
-        self._api_config.contract_id = _contract_id
+        smaregi_config.set_by_object(config)
+
+        return self
+
+    def set_smaregi_api(
+        self,
+        _access_token: AccessToken,
+        _contract_id
+    ):
+        if self._app_config.ENV_DIVISION in (
+            AppConfig.ENV_DIVISION_MOCK,
+            AppConfig.ENV_DIVISION_LOCAL,
+            AppConfig.ENV_DIVISION_STAGING,
+        ):
+            smaregi_env = SmaregiConfig.ENV_DIVISION_DEVELOPMENT
+        else:
+            smaregi_env = SmaregiConfig.ENV_DIVISION_PRODUCTION
+
+        config = SmaregiConfig(
+            smaregi_env,
+            _contract_id,
+            self._app_config.SMAREGI_CLIENT_ID,
+            self._app_config.SMAREGI_CLIENT_SECRET,
+            _access_token,
+            self._logger
+        )
+        smaregi_config.set_by_object(config)
 
         return self

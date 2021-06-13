@@ -1,9 +1,12 @@
 from typing import TypeVar, Type
 from logging import Logger
+from SmaregiPlatformApi import (
+    smaregi_config,
+    Config as SmaregiConfig
+)
 from app import logger
 from app.models import Account
 from app.config import AppConfig
-from SmaregiPlatformApi import Config as SmaregiConfig
 from app.entities.AccessToken import AccessToken
 
 
@@ -24,17 +27,27 @@ class AbstractWebhook():
 
     def with_smaregi_api(
         self,
-        _access_token: "AccessToken",
-        _contract_id: str
+        _access_token: AccessToken,
+        _contract_id
     ):
         self._app_config = AppConfig()
-        self._api_config = SmaregiConfig(
-            self._app_config.ENV_DIVISION,
+        if self._app_config.ENV_DIVISION in (
+            AppConfig.ENV_DIVISION_MOCK,
+            AppConfig.ENV_DIVISION_LOCAL,
+            AppConfig.ENV_DIVISION_STAGING,
+        ):
+            smaregi_env = SmaregiConfig.ENV_DIVISION_DEVELOPMENT
+        else:
+            smaregi_env = SmaregiConfig.ENV_DIVISION_PRODUCTION
+
+        config = SmaregiConfig(
+            smaregi_env,
+            _contract_id,
             self._app_config.SMAREGI_CLIENT_ID,
             self._app_config.SMAREGI_CLIENT_SECRET,
+            _access_token,
             self._logger
         )
-        self._api_config.access_token = _access_token
-        self._api_config.contract_id = _contract_id
+        smaregi_config.set_by_object(config)
 
         return self

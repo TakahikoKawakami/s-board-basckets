@@ -6,6 +6,7 @@ import app.common.managers.SessionManager as SessionManager
 from app.domains.AccountDomainService import AccountDomainService
 from app.domains.StoreDomainService import StoreDomainService
 
+
 class AbstractController():
     def __init__(self) -> None:
         self._logger = None
@@ -28,6 +29,7 @@ class AbstractController():
         await self._account_domain_service.prepare_for_access_processing()
         self.login_account = self._account_domain_service.login_account
         self._logger = await logger.get_logger(self.login_account.contract_id)
+        self._logger.contract_id = self.login_account.contract_id
 
         if self._req.method in ("post", "put", "patch"):
             await self._check_csrf_token()

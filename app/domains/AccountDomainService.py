@@ -20,7 +20,6 @@ class AccountDomainService(AbstractDomainService):
         self.login_account = None  # [Account]
         super().__init__(self.login_account)
         self._session = session
-        self.with_smaregi_api(None, None)
 
     def has_contract_id(self) -> bool:
         """sessionに契約IDが入っているか確認します
@@ -64,7 +63,6 @@ class AccountDomainService(AbstractDomainService):
             [type]: [description]
         """
         _authorize_api = AuthorizeApi(
-            self._api_config,
             self._app_config.APP_URI + '/accounts/login'
         )
         try:
@@ -95,7 +93,7 @@ class AccountDomainService(AbstractDomainService):
         Returns:
             AccessToken: [description]
         """
-        _authorize_api = AuthorizeApi(self._api_config, self._app_config.APP_URI + '/accounts/login')
+        _authorize_api = AuthorizeApi(self._app_config.APP_URI + '/accounts/login')
         _access_token_by_creation = _authorize_api.get_access_token(
             contract_id,
             [
@@ -121,7 +119,7 @@ class AccountDomainService(AbstractDomainService):
         if _account_model is not None:
             if not _account_model.access_token_entity.is_access_token_available():
                 _accessTokenForUpdate = self.get_access_token_by_contract_id(_contract_id)
-                _account_model.access_token = _accessTokenForUpdate
+                _account_model.access_token_entity = _accessTokenForUpdate
                 await _account_model.save()
             else:
                 _accessTokenForUpdate = _account_model.access_token
@@ -160,7 +158,7 @@ class AccountDomainService(AbstractDomainService):
             )
         self.login_account.login_status = Account.LoginStatusEnum.SIGN_UP
 
-        self.with_smaregi_api(self.login_account.access_token_entity, self.login_account.contract_id)
+        self.set_smaregi_api(self.login_account.access_token_entity, self.login_account.contract_id)
         stores_api = StoresApi(self._api_config)
         store_list = stores_api.get_store_list()
         for store in store_list:

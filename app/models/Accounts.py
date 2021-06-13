@@ -114,9 +114,9 @@ class Account(AbstractTortoiseModel):
         return access_token
 
     @access_token_entity.setter
-    def access_token_entity(self, access_token):
+    def access_token_entity(self, access_token: AccessToken):
         self.access_token = access_token.access_token
-        self.expiration_date_time = access_token.expiration_date_time
+        self.expiration_date_time = access_token.expiration_datetime
 
     @property
     def expiration_datetime(self):

@@ -32,7 +32,7 @@ class ApplicationLogger(logging.getLoggerClass()):
         super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)
 
 
-async def get_logger(contract_id: Optional[str]):
+async def get_logger(contract_id: Optional[str] = None) -> ApplicationLogger:
     logging.setLoggerClass(ApplicationLogger)
     with open("app/logging_config.yaml", 'r') as f:
         conf_file = yaml.safe_load(f.read())
