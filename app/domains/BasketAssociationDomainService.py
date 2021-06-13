@@ -27,15 +27,13 @@ class BasketAssociationDomainService(AbstractDomainService):
         _apiResponse = _storesApi.get_store_list()
         return _apiResponse
 
-    async def associate(self, targetDateFrom, targetDateTo) -> 'Fpgrowth':
+    async def associate(self, target_store_id: str, targetDateFrom, targetDateTo) -> 'Fpgrowth':
         account_setting = await self.login_account.account_setting_model
-        target_store_id = str(account_setting.display_store_id)
         self._logger.info("-----search condition-----")
         self._logger.info("storeId     : " + target_store_id)
         self._logger.info("search_from : " + targetDateFrom.strftime("%Y-%m-%d"))
         self._logger.info("search_to   : " + targetDateTo.strftime("%Y-%m-%d"))
 
-        import pdb; pdb.set_trace()
         # 分析期間の日別バスケットリストを取得
         dailyBasketListModelList = await DailyBasketList.filter(
             contract_id=self.login_account.contract_id,
@@ -68,7 +66,7 @@ class BasketAssociationDomainService(AbstractDomainService):
         return vis
 
     async def _setVisNodeLabel(self, vis):
-        productsApi = ProductsApi(self._api_config)
+        productsApi = ProductsApi()
         result = VisJs()
         try:
             for node in vis.nodeList:

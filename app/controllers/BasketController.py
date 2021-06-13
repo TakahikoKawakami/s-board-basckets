@@ -93,7 +93,7 @@ class AssociateResult(AbstractController):
                 .target_store
 
             fpgrowth = await self._basket_association_domain_service\
-                .associate(query['date_from'], query['date_to'])
+                .associate(query['store_id'], query['date_from'], query['date_to'])
             self._logger.info('create fpgrowth')
 
             vis = await self\
@@ -105,7 +105,7 @@ class AssociateResult(AbstractController):
                 ._basket_association_domain_service\
                 .convert_association_result_to_pickup_message(
                     fpgrowth,
-                    targetStore.storeId,
+                    query['store_id'],
                     query['date_from'],
                     query['date_to']
                 )

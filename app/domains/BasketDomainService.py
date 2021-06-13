@@ -24,7 +24,7 @@ class BasketDomainService(AbstractDomainService):
             transactionHeadId (int): [description]
         """
 
-        _transactions_api = TransactionsApi(self._api_config)
+        _transactions_api = TransactionsApi()
         where_dict = {
             'with_details': 'all'
         }
@@ -153,7 +153,7 @@ class BasketDomainService(AbstractDomainService):
         Returns:
             dict: 取引ヘッダID: [ヘッダリスト] の辞書
         """
-        transactions_api = TransactionsApi(self._api_config)
+        transactions_api = TransactionsApi()
         transaction_head_list = transactions_api.get_transaction_head_list(where_dict= {
             'transaction_head_id-from': head_id_from,
             'transaction_head_id-to': head_id_to,
@@ -206,7 +206,7 @@ class BasketDomainService(AbstractDomainService):
             self._logger.info("store_id is None")
             raise Exception("store_id is None")
 
-        _transactions_api = TransactionsApi(self._api_config)
+        _transactions_api = TransactionsApi()
         self._logger.info("send create_transaction_detail_csv api")
         where_dict = {
             'storeId': store_id,
@@ -310,7 +310,7 @@ class BasketDomainService(AbstractDomainService):
                 raise e
         
     async def _setVisNodeLabel(self, vis):
-        productsApi = ProductsApi(self._apiConfig)
+        productsApi = ProductsApi()
         result = VisJs()
         try:
             for node in vis.nodeList:
