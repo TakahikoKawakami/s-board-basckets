@@ -17,8 +17,8 @@ class TransactionsWebhook(AbstractWebhook):
         )
 
         if body['action'] == self.ACTION_CREATED:
-            _targetTransactionHeadList = body['transactionHeadIds']
-            await self.created(_targetTransactionHeadList)
+            _target_transaction_head_list = body['transactionHeadIds']
+            await self.created(_target_transaction_head_list)
 
     async def callback(self, event: str, body: dict):
         """取引明細CSV作成APIのcallback。csvからデータを取得し、daily_basket_list DBに登録します。

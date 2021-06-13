@@ -29,8 +29,14 @@ class BasketDomainService(AbstractDomainService):
             'with_details': 'all'
         }
         try:
-            _api_response = _transactions_api.get_transaction(transaction_head_id, where_dict=where_dict)
-            transaction = Transaction(_api_response['head'], _api_response['details'])
+            _api_response = _transactions_api.get_transaction(
+                transaction_head_id,
+                where_dict=where_dict
+            )
+            transaction = Transaction(
+                _api_response['head'],
+                _api_response['details']
+            )
             _basket = Basket()
             _basket.set_by_transaction_head(transaction.head)
             _basket.set_by_transaction_detail_list(transaction.details)
@@ -42,7 +48,7 @@ class BasketDomainService(AbstractDomainService):
             )
 
             _daily_basket_list = _daily_basket_list_tuple[0]  # [1]は取得したか、作成したかのboolean true: create
-            _daily_basket_list.appendBasket(_basket)
+            _daily_basket_list.append_basket(_basket)
             await _daily_basket_list.save()
             self._logger.info('バスケットデータ登録完了')
             self._logger.info(repr(_daily_basket_list))
