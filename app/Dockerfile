@@ -3,6 +3,22 @@ ARG VARIANT="3.9"
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 # FROM python:3.9
 
+# in main docker image
+# # [Option] Install zsh
+# ARG INSTALL_ZSH="true"
+# # [Option] Upgrade OS packages to their latest versions
+# ARG UPGRADE_PACKAGES="true"
+# # Install needed packages and setup non-root user. Use a separate RUN statement to add your own dependencies.
+# ARG USERNAME
+# ARG USER_UID
+# ARG USER_GID=$USER_UID
+# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+#     # Remove imagemagick due to https://security-tracker.debian.org/tracker/CVE-2019-10131
+#     && apt-get purge -y imagemagick imagemagick-6-common \
+#     # Install common packages, non-root user
+#     && bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" "true" "true" \
+#     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
 # add software-properties-common to install "add-apt-repository" command for installing neovim
 RUN apt-get update && apt-get -y upgrade && apt-get install -y software-properties-common
 
