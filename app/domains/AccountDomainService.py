@@ -6,9 +6,7 @@ from app.models import Account, AccountSetting, Store
 
 import datetime
 
-from SmaregiPlatformApi.authorize import AuthorizeApi
-from SmaregiPlatformApi.entities.authorize import AccessToken
-from SmaregiPlatformApi.pos import StoresApi
+from smaregipy import Store, account
 
 
 class AccountDomainService(AbstractDomainService):
@@ -66,6 +64,7 @@ class AccountDomainService(AbstractDomainService):
         _authorize_api = AuthorizeApi(
             self._app_config.APP_URI + '/accounts/login'
         )
+        smaregi_account = Account.
         try:
             _user_info = _authorize_api.get_user_info(_code, _state)
         except Exception as e:
