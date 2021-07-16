@@ -3,6 +3,7 @@ import itertools
 import ast
 import ujson
 from orangecontrib.associate import fpgrowth as fp
+from logging import Logger
 
 from app import logger
 from app.entities.Baskets import Basket
@@ -17,12 +18,12 @@ class Fpgrowth():
     """
     def __init__(self):
         self._basketList = []
-        self._patterns = [] # pyfpgrowthの生データ
-        self._rules = [] # 出力の際に算出
+        self._patterns = []  # pyfpgrowthの生データ
+        self._rules = []  # 出力の際に算出
         self._stats = []
         self._result = []
         
-        self._logger = None
+        self._logger: Logger
 
     def __str__(self):
         return """
@@ -33,18 +34,23 @@ class Fpgrowth():
         """.format(len(self._patterns), self._rules, self._stats, len(self._result))
 
     @staticmethod
-    def createByDataList(_list, _count, _logger) -> 'Fpgrowth':
+    def createByDataList(_list, _field_list, _count, _logger) -> 'Fpgrowth':
         pyfpgrowth = Fpgrowth()
         if _logger is not None:
             pyfpgrowth._logger = _logger
 
         # 店舗情報をlistから取り除く
         # TODO 今後、店舗情報も分析対象に加えたい
-        _list = Fpgrowth._removeStoreData(_list)
-        _list = Fpgrowth._removeMemberData(_list)
-        _list = Fpgrowth._removeSexData(_list)
         _list = Fpgrowth._removeWithoutProductIdData(_list)
         _list = Fpgrowth._removeTransactionHeadData(_list)
+        if Basket.PREFIXES_STORE not in _field_list:
+            _list = Fpgrowth._removeStoreData(_list)
+        if Basket.PREFIXES_MEMBER not in _field_list:
+            _list = Fpgrowth._removeMemberData(_list)
+        if Basket.PREFIXES_SEX not in _field_list:
+            _list = Fpgrowth._removeSexData(_list)
+        if Basket.PREFIXES_CUSTOMER_GROUP not in _field_list:
+            _list = Fpgrowth._remove_customer_group_data(_list)
 
         _numberKeyDict, _columnKeyDict = pyfpgrowth._getKeyDictionaries(_list)
 
@@ -64,7 +70,7 @@ class Fpgrowth():
 
         result = []
         if len(itemsets) > 0:
-            for s in sorted(stats, key = lambda x: x[6], reverse = True):
+            for s in sorted(stats, key=lambda x: x[6], reverse=True):
 
                 lhs = pyfpgrowth._decode(s[0], _numberKeyDict)
                 rhs = pyfpgrowth._decode(s[1], _numberKeyDict)
@@ -90,7 +96,6 @@ class Fpgrowth():
         pyfpgrowth._result = result
         return pyfpgrowth
 
-
     @staticmethod
     def _getKeyDictionaries(_list):
         # バスケット内に登場する全データを重複を除いて1行リストにまとめる
@@ -101,7 +106,6 @@ class Fpgrowth():
         _columnKeyDict = {key: value for value, key in _numberKeyDict.items()}
         return _numberKeyDict, _columnKeyDict
 
-
     @staticmethod
     def _encode(_list, _columnKeyDict) -> list:
         # orange3-associate用のデータ整形
@@ -110,7 +114,6 @@ class Fpgrowth():
             [_columnKeyDict[column] for column in _each] for _each in _list
         ]
         return _encodedList
-
 
     @staticmethod
     def _decode(_X, _numberKeyDict) -> list:
@@ -161,6 +164,17 @@ class Fpgrowth():
                 if not (_each.startswith(Basket.PREFIXES_SEX)): # store__{"id": xxx}
                     _eachResult.append(_each)
             result.append(_eachResult)
+        return result
+
+    @staticmethod
+    def _remove_customer_group_data(_list) -> list:
+        result = []
+        for _each_basket in _list:
+            _each_result = []
+            for _each in _each_basket:
+                if not (_each.startswith(Basket.PREFIXES_CUSTOMER_GROUP)): # store__{"id": xxx}
+                    _each_result.append(_each)
+            result.append(_each_result)
         return result
 
     @staticmethod
@@ -233,7 +247,7 @@ class Fpgrowth():
             [type] -- [description]
         """
         for key, value in _pyfpgrowthEntity.patterns.items():
-            if not key in self._patterns.keys():
+            if key not in self._patterns.keys():
                 self._patterns[key] = 0
             self._patterns[key] += value
 
@@ -268,6 +282,7 @@ class Fpgrowth():
 
                     vis.nodeList.append(vis.Node(
                         id=nodeFrom["id"],
+                        type_prefix=nodeFrom["type_prefix"],
                         label=nodeFrom["label"],
                         uri="/"
                     ))
@@ -277,6 +292,7 @@ class Fpgrowth():
                     self._logger.info("find 'to' node id: {}".format(nodeTo["id"]))
                     vis.nodeList.append(vis.Node(
                         id=nodeTo["id"],
+                        type_prefix=nodeTo["type_prefix"],
                         label=nodeTo["label"],
                         uri="/"
                     ))
@@ -341,9 +357,10 @@ class Fpgrowth():
             dataJson = data.split(Basket.PREFIXES_PRODUCT)[1]
             dataDict = ujson.loads(dataJson)
             return {
-                "id":dataDict["id"],
+                "id": dataDict["id"],
                 # "label": _productsRepository.getProductById(dataDict["id"]).name
-                "label": dataDict['id']
+                "label": dataDict['id'],
+                "type_prefix": Basket.PREFIXES_PRODUCT
             }
         elif (data.startswith(Basket.PREFIXES_SEX)): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
             customerSexJson = data.split(Basket.PREFIXES_SEX)[1]
@@ -352,8 +369,9 @@ class Fpgrowth():
             nodeLabel = customerSexDict['sex']
 
             return {
-                "id"   : nodeId,
+                "id": nodeId,
                 "label": nodeLabel,
+                "type_prefix": Basket.PREFIXES_SEX
             }
         elif (data.startswith(Basket.PREFIXES_STORE)): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
             storeJson = data.split(Basket.PREFIXES_STORE)[1]
@@ -362,8 +380,9 @@ class Fpgrowth():
             nodeLabel = storeDict["id"]
 
             return {
-                "id"   : nodeId,
+                "id": nodeId,
                 "label": nodeLabel,
+                "type_prefix": Basket.PREFIXES_STORE
             }
         elif (data.startswith(Basket.PREFIXES_MEMBER)): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
             memberJson = data.split(Basket.PREFIXES_MEMBER)[1]
@@ -372,8 +391,20 @@ class Fpgrowth():
             nodeLabel = memberDict["id"]
 
             return {
-                "id"   : nodeId,
+                "id": nodeId,
                 "label": nodeLabel,
+                "type_prefix": Basket.PREFIXES_MEMBER
+            }
+        elif (data.startswith(Basket.PREFIXES_CUSTOMER_GROUP)): # product__{"id": xxx, "name": xxx, "categoryId": xxx}
+            customer_group_json = data.split(Basket.PREFIXES_CUSTOMER_GROUP)[1]
+            customer_group_dict = ujson.loads(customer_group_json)
+            node_id = customer_group_dict["id"]
+            node_label = customer_group_dict["id"]
+
+            return {
+                "id": node_id,
+                "label": node_label,
+                "type_prefix": Basket.PREFIXES_CUSTOMER_GROUP
             }
         else:
             return None

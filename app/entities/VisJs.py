@@ -25,8 +25,9 @@ class VisJs():
         return result
 
     class Node():
-        def __init__(self, id, label='', uri='', value=1, color="#B69E86"):
+        def __init__(self, id, type_prefix='', label='', uri='', value=1, color="#B69E86"):
             self._id = id
+            self._type_prefix = type_prefix
             self._label = label
             self._value = value
             self._uri = uri
@@ -35,13 +36,23 @@ class VisJs():
         @property
         def id(self):
             return self._id
+
         @id.setter
         def id(self, value):
             self._id = value
         
         @property
+        def type_prefix(self):
+            return self._type_prefix
+
+        @type_prefix.setter
+        def type_prefix(self, value):
+            self._type_prefix = value
+        
+        @property
         def label(self):
             return self._label
+
         @label.setter
         def label(self, value):
             self._label = value
@@ -49,6 +60,7 @@ class VisJs():
         @property
         def uri(self):
             return self._uri
+
         @uri.setter
         def uri(self, value):
             self._uri = value
@@ -56,12 +68,12 @@ class VisJs():
         def toDict(self):
             return {
                 'id': self._id,
+                'type_prefix': self._type_prefix,
                 'label': self._label,
                 'value': self._value,
                 'uri': self._uri,
                 'color': self._color,
             }
-
 
     class Edge():
         def __init__(self, fromNode, toNode, width=1, arrows="to"):

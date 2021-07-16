@@ -1,10 +1,15 @@
 import datetime
 from dateutil.relativedelta import relativedelta
 
-from marshmallow import Schema, fields, validates, validates_schema, ValidationError
+from marshmallow import Schema, fields, validate, validates, validates_schema, ValidationError
 
 
 class AccosiationCondition(Schema):
+    select_analyze_target = fields.Integer(
+        required=True,
+        validate=validate.OneOf([0, 1]),
+        error_messages={"required": "[分析対象] プルダウンから選択してください"}
+    )
     store_id = fields.String(
         required=True,
         error_messages={"required": "[店舗選択] 設定画面から、店舗を選択してください"}

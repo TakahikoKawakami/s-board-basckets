@@ -16,6 +16,7 @@ class Basket():
     PREFIXES_SEX = "customerSex__"
     PREFIXES_STORE = "store__"
     PREFIXES_MEMBER = "member__"
+    PREFIXES_CUSTOMER_GROUP = "customerGroup__"
 
     def __init__(self):
         self._input_data = []
@@ -160,6 +161,11 @@ class Basket():
             result.append(
                 self.PREFIXES_TRANSACTION_HEAD + json.dumps(_transaction_head)
             )
+
+        for customer_group_id in self._customer_group_id_list:
+            _customer_group = {}
+            _customer_group['id'] = customer_group_id
+            result.append(self.PREFIXES_CUSTOMER_GROUP + json.dumps(_customer_group))
 
         return result
 
