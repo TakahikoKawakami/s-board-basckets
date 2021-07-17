@@ -1,12 +1,13 @@
 from app.config import AppConfig
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.common.managers import SessionManager
+from app.entities import AccessToken
 
 from app.models import Account, AccountSetting, Store
 
 import datetime
 
-from smaregipy import Store, account
+import smaregipy
 
 
 class AccountDomainService(AbstractDomainService):
@@ -39,6 +40,13 @@ class AccountDomainService(AbstractDomainService):
 
         # セッション内にあればそれを返す
         _contract_id = SessionManager.get(self._session, SessionManager.KEY_CONTRACT_ID)
+        smaregipy.SmaregiPy.init_by_dict({
+            'env_division': AppConfig.ENV_DIVISION,
+            'contract_id': _contract_id,
+            'smaregi_client_id': AppConfig.SMAREGI_CLIENT_ID,
+            'smaregi_client_secret': AppConfig.SMAREGI_CLIENT_SECRET,
+            'redirect_uri': AppConfig.APP_URI + '/accounts/login'
+        })
         # セッションになくDBにあれば（webhookなどの通信）それを返す
         # それでもなければ取得、dbとセッションに保存
         await self.login_by_contract_id(_contract_id)
@@ -61,23 +69,16 @@ class AccountDomainService(AbstractDomainService):
         Returns:
             [type]: [description]
         """
-        _authorize_api = AuthorizeApi(
-            self._app_config.APP_URI + '/accounts/login'
-        )
-        smaregi_account = Account.
-        try:
-            _user_info = _authorize_api.get_user_info(_code, _state)
-        except Exception as e:
-            raise e
+        smaregi_account = smaregipy.account.Account.authenticate(_code, _state)
 
         _account = await Account.filter(
-            contract_id=_user_info.contract_id
+            contract_id=smaregi_account.contract_id
         ).first()
         if (_account is None):
             SessionManager.set(
                 self._session,
                 SessionManager.KEY_CONTRACT_ID,
-                _user_info.contract_id
+                smaregi_account.contract_id
             )
             await self.prepare_for_access_processing()
             _account = self.login_account
@@ -93,8 +94,7 @@ class AccountDomainService(AbstractDomainService):
         Returns:
             AccessToken: [description]
         """
-        _authorize_api = AuthorizeApi(self._app_config.APP_URI + '/accounts/login')
-        _access_token_by_creation = _authorize_api.get_access_token(
+        account = smaregipy.account.Account.authorize(
             contract_id,
             [
                 'pos.products:read',
@@ -102,7 +102,10 @@ class AccountDomainService(AbstractDomainService):
                 'pos.stores:read',
             ]
         )
-        return _access_token_by_creation
+        return AccessToken(
+            account.access_token.access_token,
+            account.access_token.expiration_datetime
+        )
 
     async def login_by_contract_id(self, _contract_id: str) -> None:
         """契約IDでログインします
