@@ -7,6 +7,7 @@ from SmaregiPlatformApi import (
 
 from app import logger
 from app.models.Accounts import Account
+from app.common.globals import globals
 from app.config import AppConfig
 from app.entities.AccessToken import AccessToken
 
@@ -20,7 +21,7 @@ class AbstractDomainService():
 
     def __init__(self, account: Account):
         self._app_config = AppConfig()
-        self.login_account = account
+        self.login_account = globals.logged_in_account
 
     @classmethod
     async def create_instance(cls: Type[T], account: Account) -> T:

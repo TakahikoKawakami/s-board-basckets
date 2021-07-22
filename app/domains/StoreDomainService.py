@@ -2,7 +2,7 @@ import logging
 
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 
-from SmaregiPlatformApi.pos import StoresApi
+from app.repositories import StoresRepository
 from app.models import Store
 
 
@@ -25,12 +25,5 @@ class StoreDomainService(AbstractDomainService):
         ).delete()
 
     async def sync_all_stores(self):
-        stores_api = StoresApi()
-        all_store_list = stores_api.get_store_list()
-        print(all_store_list)
-        for store in all_store_list:
-            await Store.create(
-                contract_id=self.login_account.contract_id,
-                store_id=store.store_id,
-                name=store.store_name
-            )
+        all_store_list = await StoresRepository.get_all_with_smaregipy()
+        await StoresRepository.save_all(all_store_list)
