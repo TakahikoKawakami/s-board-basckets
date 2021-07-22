@@ -1,5 +1,6 @@
 from app.config import AppConfig
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
+from app.common.globals import globals
 from app.common.managers import SessionManager
 from app.entities import AccessToken
 
@@ -38,21 +39,9 @@ class AccountDomainService(AbstractDomainService):
         if not self.has_contract_id():
             raise Exception("not set session")
 
-        # セッション内にあればそれを返す
         _contract_id = SessionManager.get(self._session, SessionManager.KEY_CONTRACT_ID)
-        smaregipy.SmaregiPy.init_by_dict({
-            'env_division': AppConfig.ENV_DIVISION,
-            'contract_id': _contract_id,
-            'smaregi_client_id': AppConfig.SMAREGI_CLIENT_ID,
-            'smaregi_client_secret': AppConfig.SMAREGI_CLIENT_SECRET,
-            'redirect_uri': AppConfig.APP_URI + '/accounts/login'
-        })
-        # セッションになくDBにあれば（webhookなどの通信）それを返す
-        # それでもなければ取得、dbとセッションに保存
         await self.login_by_contract_id(_contract_id)
-        # self._set_access_token_data_to_session()
-        # await self._set_account_setting_to_session()
-            
+
         return
 
     async def login_by_code_and_state(self, _code, _state) -> 'Account':
@@ -80,7 +69,7 @@ class AccountDomainService(AbstractDomainService):
                 SessionManager.KEY_CONTRACT_ID,
                 smaregi_account.contract_id
             )
-            await self.prepare_for_access_processing()
+            await self.login_by_contract_id(smaregi_account.contract_id)
             _account = self.login_account
 
         return _account
@@ -103,7 +92,7 @@ class AccountDomainService(AbstractDomainService):
             ]
         )
         return AccessToken(
-            account.access_token.access_token,
+            account.access_token.token,
             account.access_token.expiration_datetime
         )
 
@@ -116,35 +105,60 @@ class AccountDomainService(AbstractDomainService):
         Args:
             _contractId (str): [description]
         """
+        smaregipy.SmaregiPy.init_by_dict({
+            'env_division': AppConfig.ENV_DIVISION,
+            'contract_id': _contract_id,
+            'smaregi_client_id': AppConfig.SMAREGI_CLIENT_ID,
+            'smaregi_client_secret': AppConfig.SMAREGI_CLIENT_SECRET,
+            'redirect_uri': AppConfig.APP_URI + '/accounts/login'
+        })
+
         _account_model = await Account.filter(
             contract_id=_contract_id,
             user_status=Account.StatusEnum.STATUS_START
             ).first()
         if _account_model is not None:
-            if not _account_model.access_token_entity.is_access_token_available():
-                _accessTokenForUpdate = self.get_access_token_by_contract_id(_contract_id)
-                _account_model.access_token_entity = _accessTokenForUpdate
-            else:
-                _accessTokenForUpdate = _account_model.access_token
+            _account_model.access_token_entity = (
+                self
+                .get_access_token_by_contract_id(_contract_id)
+            )
             _account_model.last_login_version = AppConfig.APP_VERSION
             await _account_model.save()
             self.login_account = _account_model
             self.login_account.login_status = Account.LoginStatusEnum.SIGN_IN
+
+            globals.login(self.login_account)
+
+            smaregipy.config.update_access_token(
+                globals.logged_in_account.access_token_entity
+            )
+
             return
 
         # それでもなければ取得、dbとセッションに保存
-        await self.signUpAccount(_contract_id)
-        # self._set_access_token_data_to_session()
+        await self.sign_up_account(_contract_id)
+
+        smaregipy.config.update_access_token(
+            globals
+            .logged_in_account
+            .access_token_entity
+        )
         return
 
-
-    async def signUpAccount(self, _contract_id: str, _plan_name="フリープラン") -> None:
+    async def sign_up_account(
+        self,
+        _contract_id: str,
+        _plan_name="フリープラン"
+    ) -> None:
         """sign upします
 
         Args:
             _contractId (str): [description]
         """
-        _access_token_by_creation = self.get_access_token_by_contract_id(_contract_id)
+        _access_token_by_creation = (
+            self
+            .get_access_token_by_contract_id(_contract_id)
+        )
         _plan = Account.PlanEnum.getPlanEnumValue(_plan_name)
 
         # 存在確認（一度やめて戻ってきた人）
@@ -173,6 +187,9 @@ class AccountDomainService(AbstractDomainService):
                 name=store.store_name
             )
 
+        global login_account
+        login_account = self.login_account
+
     async def changePlan(self, _contractId: str, _planName) -> None:
         """プランを変更します
 
@@ -194,6 +211,10 @@ class AccountDomainService(AbstractDomainService):
         else:
             self._logger.info("アカウントが登録されていません")
             return
+
+        global login_account
+        login_account = self.login_account
+
         self._logger.info("プラン変更終了")
 
     async def breakOffAccount(self, contractId: str) -> None:
@@ -214,7 +235,7 @@ class AccountDomainService(AbstractDomainService):
             SessionManager.set(
                 self._session,
                 SessionManager.KEY_ACCESS_TOKEN,
-                access_token.access_token
+                access_token.token
             )
             SessionManager.set(
                 self._session,
@@ -238,4 +259,5 @@ class AccountDomainService(AbstractDomainService):
         await account_setting.save()
         SessionManager.set(self._session, SessionManager.KEY_TARGET_STORE, account_setting.display_store_id)
         # json = await accountSetting.serialize
+
         return

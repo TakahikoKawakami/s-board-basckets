@@ -2,7 +2,7 @@ import datetime
 import pytz
 import json
 
-from SmaregiPlatformApi.entities import TransactionHead, TransactionDetail
+from smaregipy.entities.transaction import HeadEntity, DetailEntity
 
 import logging
 
@@ -31,7 +31,7 @@ class Basket():
         self._customer_sex_dict = {"male": 0, "female": 0, "unknown": 0}
         self._entry_date_division = ""  # 取引日時を２時間毎に区分わけ
 
-        self._target_date = ""
+        self._target_date: datetime.datetime
 
         self._logger = logging.getLogger('flask.app')
 
@@ -50,7 +50,7 @@ class Basket():
 
     def set_by_transaction_detail_list(
         self,
-        _transaction_detail_list: list['TransactionDetail']
+        _transaction_detail_list: list['DetailEntity']
     ) -> None:
         """取引明細からバスケットentityに必要なデータを抽出、セットします
 
@@ -68,7 +68,7 @@ class Basket():
 
     def set_by_transaction_head(
         self,
-        _transaction_head: 'TransactionHead'
+        _transaction_head: 'HeadEntity'
     ) -> None:
         """取引ヘッダからバスケットentityに必要なデータを抽出、セットします
 
@@ -78,9 +78,10 @@ class Basket():
         self._transaction_head_id = _transaction_head.transaction_head_id
 
         if _transaction_head.sum_date is None:
-            self._target_date = datetime.datetime.\
+            now = datetime.datetime.\
                 now(pytz.timezone('Asia/Tokyo')).\
                 strftime("%Y-%m-%d")
+            self._target_date = datetime.datetime.strptime(now, "%Y-%m-%d")
         else:
             self._target_date = _transaction_head.sum_date
 

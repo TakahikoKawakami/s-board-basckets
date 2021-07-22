@@ -2,21 +2,29 @@ import json
 import datetime
 
 from app.common.utils import CsvUtil,  EntityUtil
+from app.common.abstracts.AbstractDomainService import AbstractDomainService
 
 from SmaregiPlatformApi.pos import TransactionsApi
 from SmaregiPlatformApi.entities import TransactionHead, TransactionDetail
 
-from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.entities.Baskets import Basket
 from app.entities.Transactions import Transaction
 from app.entities.AssociationResult import AssociationResult
 from app.entities.Fpgrowth import Fpgrowth
 from app.models.DailyBasketList import DailyBasketList
 from app.models import Store
+from app.repositories import (
+    TransactionsRepository,
+    DailyBasketListRepository,
+)
+from app.factories import BasketsFactory
 
 
 class BasketDomainService(AbstractDomainService):
-    async def register_basket_by_transaction_head_id(self, transaction_head_id: int) -> None:
+    async def register_basket_by_transaction_head_id(
+        self: 'BasketDomainService',
+        transaction_head_id: int
+    ) -> None:
         """取引ヘッダIDからバスケットデータを作成し、DBに登録します
         取引が存在しない場合でも、空のバスケットをDBに登録します
 
@@ -24,34 +32,28 @@ class BasketDomainService(AbstractDomainService):
             transactionHeadId (int): [description]
         """
 
-        _transactions_api = TransactionsApi()
-        where_dict = {
-            'with_details': 'all'
-        }
         try:
-            _api_response = _transactions_api.get_transaction(
-                transaction_head_id,
-                where_dict=where_dict
+            transaction = await TransactionsRepository.get_by_id(
+                head_id=transaction_head_id,
+                with_=['details']
             )
-            transaction = Transaction(
-                _api_response['head'],
-                _api_response['details']
-            )
-            _basket = Basket()
-            _basket.set_by_transaction_head(transaction.head)
-            _basket.set_by_transaction_detail_list(transaction.details)
+            print(transaction)
+            basket = BasketsFactory.make_basket_by_transaction(transaction)
 
-            _daily_basket_list_tuple = await DailyBasketList.get_or_create(
-                contract_id=self.login_account.contract_id,
-                store_id=_basket.store_id,
-                target_date=_basket.target_date
-            )
+            daily_basket_list = \
+                await DailyBasketListRepository.get_by_store_and_datetime(
+                    store_id=basket.store_id,
+                    datetime=basket.target_date
+                )
 
-            _daily_basket_list = _daily_basket_list_tuple[0]  # [1]は取得したか、作成したかのboolean true: create
-            _daily_basket_list.append_basket(_basket)
-            await _daily_basket_list.save()
+            updated_basket_list = \
+                await DailyBasketListRepository.append_basket_to(
+                    daily_basket_list,
+                    basket
+                )
+
             self._logger.info('バスケットデータ登録完了')
-            self._logger.info(repr(_daily_basket_list))
+            self._logger.info(repr(updated_basket_list))
         except Exception as e:
             self._logger.warning("!!raise exception!!")
             self._logger.warning(e)

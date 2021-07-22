@@ -19,14 +19,21 @@ class AbstractController():
         self._resp = None
 
     async def on_request(self, req, resp):
+        print('on_request')
         self._req = req
         self._resp = resp
 
         self._account_domain_service = AccountDomainService(resp.session)
         if not self._account_domain_service.has_contract_id():
+            # sessionに契約IDがない場合、およびwebhook受信時
             resp.redirect('/', status_code=303)
             return
-        await self._account_domain_service.prepare_for_access_processing()
+
+        contract_id = SessionManager.get(
+            resp.session,
+            SessionManager.KEY_CONTRACT_ID
+        )
+        await self._account_domain_service.login_by_contract_id(contract_id)
         self.login_account = self._account_domain_service.login_account
         self._logger = await logger.get_logger(self.login_account.contract_id)
         self._logger.contract_id = self.login_account.contract_id
