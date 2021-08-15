@@ -5,3 +5,13 @@ from app.controllers import (
     WebhookController,
     SettingController
 )
+
+
+__all__ = [
+    'AuthController',
+    'BasketController',
+    'HomeController',
+    'WebhookController',
+    'SettingController'
+    
+]

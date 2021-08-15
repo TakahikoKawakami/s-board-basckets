@@ -5,7 +5,6 @@ from app.entities.Fpgrowth import Fpgrowth
 from app.entities.VisJs import VisJs
 from app.models import Store
 from app.models import Product
-from SmaregiPlatformApi.pos import ProductsApi
 
 
 class AssociationResult():

@@ -177,15 +177,15 @@ class AccountDomainService(AbstractDomainService):
             )
         self.login_account.login_status = Account.LoginStatusEnum.SIGN_UP
 
-        self.set_smaregi_api(self.login_account.access_token_entity, self.login_account.contract_id)
-        stores_api = StoresApi(self._api_config)
-        store_list = stores_api.get_store_list()
-        for store in store_list:
-            await Store.update_or_create(
-                contract_id=self.login_account.contract_id,
-                store_id=store.store_id,
-                name=store.store_name
-            )
+        # self.set_smaregi_api(self.login_account.access_token_entity, self.login_account.contract_id)
+        # stores_api = StoresApi(self._api_config)
+        # store_list = stores_api.get_store_list()
+        # for store in store_list:
+        #     await Store.update_or_create(
+        #         contract_id=self.login_account.contract_id,
+        #         store_id=store.store_id,
+        #         name=store.store_name
+        #     )
 
         global login_account
         login_account = self.login_account

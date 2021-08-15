@@ -10,7 +10,7 @@ from app.entities.VisJs import VisJs
 from app.entities.Baskets import Basket
 
 
-from SmaregiPlatformApi.pos import StoresApi, ProductsApi
+from app.repositories import ProductsRepository
 
 from app.models import Store
 
@@ -27,11 +27,6 @@ class BasketAssociationDomainService(AbstractDomainService):
             contract_id=self.login_account.contract_id,
             store_id=account_setting.display_store_id
         ).first()
-
-    def getStoreList(self):
-        _storesApi = StoresApi()
-        _apiResponse = _storesApi.get_store_list()
-        return _apiResponse
 
     async def associate(
         self,
@@ -86,7 +81,7 @@ class BasketAssociationDomainService(AbstractDomainService):
                 self._logger.debug("debug in if content")
                 vis = fpgrowth.convert_to_vis_js()
                 self._logger.debug("----- ----converted fpgrowth to vis.js-----")
-                vis = await self._setVisNodeLabel(vis)
+                vis = await self._set_vis_node_label(vis)
                 self._logger.debug("----- ----set label for vis.js-----")
             except Exception as e:
                 raise e
@@ -94,8 +89,7 @@ class BasketAssociationDomainService(AbstractDomainService):
         self._logger.debug("----- ----- vis.js created.")
         return vis
 
-    async def _setVisNodeLabel(self, vis):
-        productsApi = ProductsApi()
+    async def _set_vis_node_label(self, vis):
         result = VisJs()
         try:
             for node in vis.nodeList:
@@ -105,12 +99,12 @@ class BasketAssociationDomainService(AbstractDomainService):
                 # ).first()
                 # self._logger.debug(repr(product))
 
-                import pdb; pdb.set_trace()
                 if node.type_prefix == Basket.PREFIXES_PRODUCT:
                     self._logger.info(
                         "fetching product id: {}".format(node.id)
                     )
-                    productByApi = productsApi.get_product_by_id(node.id)
+                    # productByApi = productsApi.get_product_by_id(node.id)
+                    productByApi = await ProductsRepository.get_by_id(node.id)
                     if productByApi is None:
                         self._logger.info(
                             "productsApi.getProductById is failed."
@@ -132,7 +126,7 @@ class BasketAssociationDomainService(AbstractDomainService):
                     self._logger.info(
                         "fetching customer group id: {}".format(node.id)
                     )
-                    productByApi = productsApi.get_product_by_id(node.id)
+                    productByApi = await ProductsRepository.get_by_id(node.id)
                     if productByApi is None:
                         self._logger.info(
                             "CustomerGroupApi.getCustomerGroupById is failed."

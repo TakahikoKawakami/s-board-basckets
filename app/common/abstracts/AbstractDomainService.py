@@ -1,6 +1,7 @@
 from typing import TypeVar, Type
 from logging import Logger
-from SmaregiPlatformApi import (
+from smaregipy import (
+    SmaregiPy,
     smaregi_config,
     Config as SmaregiConfig
 )
@@ -28,37 +29,45 @@ class AbstractDomainService():
         domain_service = cls(account)
         domain_service._logger = \
             await logger.get_logger(account.contract_id)
-        domain_service.set_smaregi_api(
-            domain_service.login_account.access_token_entity,
-            domain_service.login_account.contract_id
-        )
+        # domain_service.set_smaregi_api(
+        #     domain_service.login_account.access_token_entity,
+        #     domain_service.login_account.contract_id
+        # )
         return domain_service
 
-    def with_smaregi_api(
-        self,
-        _access_token: AccessToken,
-        _contract_id
-    ):
-        if self._app_config.ENV_DIVISION in (
-            AppConfig.ENV_DIVISION_MOCK,
-            AppConfig.ENV_DIVISION_LOCAL,
-            AppConfig.ENV_DIVISION_STAGING,
-        ):
-            smaregi_env = SmaregiConfig.ENV_DIVISION_DEVELOPMENT
-        else:
-            smaregi_env = SmaregiConfig.ENV_DIVISION_PRODUCTION
+    # def with_smaregi_api(
+    #     self,
+    #     _access_token: AccessToken,
+    #     _contract_id
+    # ):
+    #     if self._app_config.ENV_DIVISION in (
+    #         AppConfig.ENV_DIVISION_MOCK,
+    #         AppConfig.ENV_DIVISION_LOCAL,
+    #         AppConfig.ENV_DIVISION_STAGING,
+    #     ):
+    #         smaregi_env = SmaregiConfig.ENV_DIVISION_DEVELOPMENT
+    #     else:
+    #         smaregi_env = SmaregiConfig.ENV_DIVISION_PRODUCTION
 
-        config = SmaregiConfig(
-            smaregi_env,
-            _contract_id,
-            self._app_config.SMAREGI_CLIENT_ID,
-            self._app_config.SMAREGI_CLIENT_SECRET,
-            _access_token,
-            self._logger
-        )
-        smaregi_config.set_by_object(config)
+    #     config = SmaregiConfig(
+    #         smaregi_env,
+    #         _contract_id,
+    #         self._app_config.SMAREGI_CLIENT_ID,
+    #         self._app_config.SMAREGI_CLIENT_SECRET,
+    #         _access_token,
+    #         self._logger
+    #     )
+    #     SmaregiPy.init_by_dict({
+    #         'env_division': smaregi_env,
+    #         'contract_id': dictionary.get('contract_id'),
+    #         'redirect_uri': dictionary.get('redirect_uri'),
+    #         'smaregi_client_id': dictionary.get('smaregi_client_id'),
+    #         'smaregi_client_secret': dictionary.get('smaregi_client_secret'),
+    #         'access_token': dictionary.get('access_token'),
+    #         'logger': dictionary.get('logger'),
+    #     })
 
-        return self
+    #     return self
 
     def set_smaregi_api(
         self,

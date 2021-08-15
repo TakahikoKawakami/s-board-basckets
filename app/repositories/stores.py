@@ -13,10 +13,10 @@ T = TypeVar('T', bound='StoresRepository')
 class StoresRepository:
     @classmethod
     async def get_all_with_smaregipy(cls: Type[T]) -> List[StoreEntity]:
-        store_collection = await StoreCollection().get_all()
+        store_collection = await StoreCollection().fetch_all()
 
         result = []
-        for store in store_collection.records.values():
+        for store in store_collection:
             result.append(StoreEntity(store.store_id, store.store_name))
         return result
 
@@ -28,3 +28,4 @@ class StoresRepository:
                 store_id=store.store_id,
                 name=store.store_name
             )
+        return True
