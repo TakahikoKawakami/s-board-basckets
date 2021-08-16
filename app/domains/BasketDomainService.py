@@ -31,12 +31,10 @@ class BasketDomainService(AbstractDomainService):
             transactionHeadId (int): [description]
         """
 
+        breakpoint()
         try:
-            transaction = await TransactionsRepository.get_by_id(
-                head_id=transaction_head_id,
-                with_=['details']
-            )
-            print(transaction)
+            transaction = \
+                await TransactionsRepository.get_by_id(transaction_head_id)
             basket = BasketsFactory.make_basket_by_transaction(transaction)
 
             daily_basket_list = \
@@ -115,7 +113,6 @@ class BasketDomainService(AbstractDomainService):
             urlList (list[str]): [description]
         """
         self._logger.info('データ取得開始---')
-        breakpoint()
         transaction_detail_list_categorized_by_transaction_head_id = \
             self._get_transaction_detail_list_from_gzip_url_list(url_list)
 
@@ -147,7 +144,6 @@ class BasketDomainService(AbstractDomainService):
             )
         )
 
-        breakpoint()
         transaction_list = [
             Transaction.parse_obj({
                 'head': transaction_head_list_categorized_by_transaction_head_id[head_id][0].dict(),

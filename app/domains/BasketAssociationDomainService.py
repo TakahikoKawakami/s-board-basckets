@@ -58,7 +58,7 @@ class BasketAssociationDomainService(AbstractDomainService):
                 Basket.PREFIXES_PRODUCT,
                 Basket.PREFIXES_PRODUCT,
             ]
-        if analyze_type == BasketAssociationDomainService.AnalyzeTypeEnum.CUSTOMERGROUP_PRODUCT:
+        elif analyze_type == BasketAssociationDomainService.AnalyzeTypeEnum.CUSTOMERGROUP_PRODUCT:
             target_field_list = [
                 Basket.PREFIXES_CUSTOMER_GROUP,
                 Basket.PREFIXES_PRODUCT,

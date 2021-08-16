@@ -2,8 +2,12 @@ from typing import TypeVar, Type, List
 
 import smaregipy
 
-from app.entities.Transactions import Transaction, TransactionHead
-from app.common.utils import EntityUtil
+from app.entities.Transactions import (
+    Transaction,
+    TransactionHead,
+    TransactionDetail
+)
+
 
 T = TypeVar('T', bound='TransactionsRepository')
 
@@ -11,21 +15,23 @@ T = TypeVar('T', bound='TransactionsRepository')
 class TransactionsRepository:
 
     @classmethod
-    async def get_by_id(
-        cls: Type[T],
-        head_id: int,
-        with_: List[str]
-    ) -> Transaction:
+    async def get_by_id(cls: Type[T], head_id: int) -> Transaction:
 
         response = await (
             smaregipy.pos.Transaction()
             .id(head_id)
             .fetch()
         )
-        return Transaction(
-            response,
-            response.details.__root__
-        )
+        head = TransactionHead(**response.dict())
+        detail_list = [
+            TransactionDetail(**detail.dict())
+            for detail in response.details
+        ]
+
+        return Transaction.parse_obj({
+            'head': head,
+            'details': detail_list
+        })
 
     @classmethod
     async def get_head_list_by_id_range(
