@@ -31,7 +31,6 @@ class BasketDomainService(AbstractDomainService):
             transactionHeadId (int): [description]
         """
 
-        breakpoint()
         try:
             transaction = \
                 await TransactionsRepository.get_by_id(transaction_head_id)
@@ -315,7 +314,7 @@ class BasketDomainService(AbstractDomainService):
             merged_basket_list += daily_basket_list_model.baskets
 
         # fpgrowthを用いて分析
-        fpgrowth = Fpgrowth.createByDataList(
+        fpgrowth = Fpgrowth.create_by_data_list(
             merged_basket_list,
             0.1,
             self._logger

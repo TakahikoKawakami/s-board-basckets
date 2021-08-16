@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, cast
 from enum import Enum, IntEnum, auto
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 
@@ -10,7 +10,10 @@ from app.entities.VisJs import VisJs
 from app.entities.Baskets import Basket
 
 
-from app.repositories import ProductsRepository
+from app.repositories import (
+    ProductsRepository,
+    CustomerGroupsRepository,
+)
 
 from app.models import Store
 
@@ -64,7 +67,7 @@ class BasketAssociationDomainService(AbstractDomainService):
                 Basket.PREFIXES_PRODUCT,
             ]
 
-        mergedPyfpgrowthEntity = Fpgrowth.createByDataList(
+        mergedPyfpgrowthEntity = Fpgrowth.create_by_data_list(
             mergedBasketList,
             target_field_list,
             0.1,
@@ -98,13 +101,13 @@ class BasketAssociationDomainService(AbstractDomainService):
                 #     product_id=node.id
                 # ).first()
                 # self._logger.debug(repr(product))
-
                 if node.type_prefix == Basket.PREFIXES_PRODUCT:
+                    id_value = node.id.split(Basket.PREFIXES_PRODUCT)[1]
                     self._logger.info(
-                        "fetching product id: {}".format(node.id)
+                        "fetching product id: {}".format(id_value)
                     )
                     # productByApi = productsApi.get_product_by_id(node.id)
-                    productByApi = await ProductsRepository.get_by_id(node.id)
+                    productByApi = await ProductsRepository.get_by_id(id_value)
                     if productByApi is None:
                         self._logger.info(
                             "productsApi.getProductById is failed."
@@ -123,27 +126,20 @@ class BasketAssociationDomainService(AbstractDomainService):
                     # )
                     node.label = productByApi.product_name
                 elif node.type_prefix == Basket.PREFIXES_CUSTOMER_GROUP:
+                    id_value = node.id.split(Basket.PREFIXES_CUSTOMER_GROUP)[1]
                     self._logger.info(
-                        "fetching customer group id: {}".format(node.id)
+                        "fetching customer group id: {}".format(id_value)
                     )
-                    productByApi = await ProductsRepository.get_by_id(node.id)
-                    if productByApi is None:
+                    customer_group = await CustomerGroupsRepository.get_by_id(cast(int, id_value))
+                    if customer_group is None:
                         self._logger.info(
                             "CustomerGroupApi.getCustomerGroupById is failed."
                         )
                         node.label = "unknown"
                         result.nodeList.append(node)
                         continue
-                    self._logger.debug(productByApi)
-                    # product = await Product.create(
-                    #     contract_id=self.login_account.contract_id,
-                    #     product_id=productByApi.product_id,
-                    #     name=productByApi.product_name
-                    #     # color = productByApi['color'],
-                    #     # size = productByApi['size'],
-                    #     # price = productByApi['price']
-                    # )
-                    node.label = productByApi.product_name
+                    self._logger.debug(customer_group)
+                    node.label = customer_group.label
                 result.nodeList.append(node)
         except Exception as e:
             self._logger.warning("!!raise exception!!")

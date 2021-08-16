@@ -23,6 +23,7 @@ class Fpgrowth():
         self._stats = []
         self._result = []
         
+        self._field_list = []
         self._logger: Logger
 
     def __str__(self):
@@ -34,8 +35,9 @@ class Fpgrowth():
         """.format(len(self._patterns), self._rules, self._stats, len(self._result))
 
     @staticmethod
-    def createByDataList(_list, _field_list, _count, _logger) -> 'Fpgrowth':
+    def create_by_data_list(_list, _field_list, _count, _logger) -> 'Fpgrowth':
         pyfpgrowth = Fpgrowth()
+        pyfpgrowth._field_list = _field_list
         if _logger is not None:
             pyfpgrowth._logger = _logger
 
@@ -79,7 +81,7 @@ class Fpgrowth():
                 confidence = s[3]
                 lift = s[6]
 
-                # print(f"lhs = {lhs}, rhs = {rhs}, support = {support}, confidence = {confidence}, lift = {lift}")
+                print(f"lhs = {lhs}, rhs = {rhs}, support = {support}, confidence = {confidence}, lift = {lift}")
 
                 if lift < 1:
                     break
@@ -254,7 +256,6 @@ class Fpgrowth():
         return self
 
     def convert_to_vis_js(self) -> VisJs:
-        # rule作成の前にあらかじめ確認しないデータを省く必要がある？
         vis = VisJs()
 
         if len(self._result) <= 0:
@@ -277,36 +278,58 @@ class Fpgrowth():
             # productId=nullの場合もある。nullは未登録商品だったりテーブルチャージなので、nodeに加えない
             for node in nodeGroup['from']:
                 nodeFrom = node
-                if (nodeFrom["id"] not in [node.id for node in vis.nodeList]):
-                    self._logger.info("find 'from' node id: {}".format(nodeFrom["id"]))
+                id_value = nodeFrom['id']
+                type_prefix = nodeFrom['type_prefix']
+                from_id = f'{type_prefix}{id_value}'
+                if (from_id not in [node.id for node in vis.nodeList]):
+                    self._logger.info("find 'from' node id: {}".format(from_id))
 
                     vis.nodeList.append(vis.Node(
-                        id=nodeFrom["id"],
+                        id=from_id,
                         type_prefix=nodeFrom["type_prefix"],
                         label=nodeFrom["label"],
                         uri="/"
                     ))
             for node in nodeGroup['to']:
                 nodeTo = node
-                if (nodeTo["id"] not in [node.id for node in vis.nodeList]):
-                    self._logger.info("find 'to' node id: {}".format(nodeTo["id"]))
+                id_value = nodeTo['id']
+                type_prefix = nodeTo['type_prefix']
+                to_id = f'{type_prefix}{id_value}'
+                if (to_id not in [node.id for node in vis.nodeList]):
+                    self._logger.info("find 'to' node id: {}".format(to_id))
                     vis.nodeList.append(vis.Node(
-                        id=nodeTo["id"],
+                        id=to_id,
                         type_prefix=nodeTo["type_prefix"],
                         label=nodeTo["label"],
                         uri="/"
                     ))
             
             if (len(nodeGroup['from']) == 1) and (len(nodeGroup['to']) == 1):
-                vis.edgeList.append(vis.Edge(
-                    fromNode=nodeGroup['from'][0]["id"],
-                    toNode=nodeGroup['to'][0]["id"],
-                    width=nodeGroup['lift'] / _maxLift * 5
-                ))
+                from_id_value = nodeGroup['from'][0]["id"]
+                from_type_prefix = nodeGroup['from'][0]["type_prefix"]
+                from_id = f'{from_type_prefix}{from_id_value}'
+                to_id_value = nodeGroup['to'][0]["id"]
+                to_type_prefix = nodeGroup['to'][0]["type_prefix"]
+                to_id = f'{to_type_prefix}{to_id_value}'
+                # 指定された分析対象の組み合わせのみvisに保存
+                if (
+                    (
+                        from_type_prefix == self._field_list[0] and
+                        to_type_prefix == self._field_list[1]
+                    ) or
+                    (
+                        from_type_prefix == self._field_list[1] and
+                        to_type_prefix == self._field_list[0]
+                    )
+                ):
+                    vis.edgeList.append(vis.Edge(
+                        fromNode=from_id,
+                        toNode=to_id,
+                        width=nodeGroup['lift'] / _maxLift * 5
+                    ))
         self._logger.info("---- convertion finished ----")
         self._logger.info(vis)
         return vis
-
 
     def _getDictForVis(self, data):
         if (data.startswith(Basket.PREFIXES_PRODUCT)):
