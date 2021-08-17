@@ -32,8 +32,8 @@ def authorize(req, resp):
 
 async def login(req, resp):
     logger.info('login!!!')
-    code = DictionaryUtil.getByKey('code', req.params)
-    state = DictionaryUtil.getByKey('state', req.params)
+    code = req.params.get('code')
+    state = req.params.get('state')
 
     logger.info('code: {code}, state: {state}')
     if (code is None or state is None):

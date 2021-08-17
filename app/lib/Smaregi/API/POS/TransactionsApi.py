@@ -1,4 +1,5 @@
 from ..BaseServiceApi import BaseServiceApi
+from .entities import TransactionHead, TransactionDetail
 
 
 class TransactionsApi(BaseServiceApi):
@@ -6,107 +7,85 @@ class TransactionsApi(BaseServiceApi):
         super().__init__(config)
 
 
-    def getTransactionHeadList(self, field=None, sort=None, whereDict=None):
+    def getTransactionHeadList(self, field=None, sort=None, whereDict=None) -> TransactionHead:
         contractId = self.config.contractId
         self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
         self.uri = self.uriPos + '/transactions'
         
         header = self._getHeader()
-        body = self._getBody(sort=sort, whereDict=whereDict)
+        body = self._getQuery(sort=sort, whereDict=whereDict)
         
-        result = self._api(self.uri, header, body)
+        response = self._apiGet(self.uri, header, body)
+        if response[0] != 200:
+            raise Exception(response[1])
+        responseData = response[1]
+        result = [TransactionHead(data) for data in responseData]
         return result
 
 
-    def getTransactionDetail(self,transactionHeadId, field=None, sort=None, whereDict=None):
+    def getTransactionDetail(self,transactionHeadId, field=None, sort=None, whereDict=None) -> list['TransactionDetail']:
         contractId = self.config.contractId
         self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
         self.uri = self.uriPos + '/transactions/' + transactionHeadId + '/details'
         
         header = self._getHeader()
-        body = self._getBody(sort=sort, whereDict=whereDict)
+        body = self._getQuery(sort=sort, whereDict=whereDict)
         
-        result = self._api(self.uri, header, body)
+        response = self._apiGet(self.uri, header, body)
+        if response[0] != 200:
+            raise Exception(response[1])
+        responseData = response[1]
+        result = [TransactionDetail(data) for data in responseData]
         return result
         
 
-    def getTransaction(self,transactionHeadId, field=None, sort=None, whereDict=None):
+    def getTransaction(self,transactionHeadId, field=None, sort=None, whereDict=None) -> dict[str, 'TransactionHead' or 'TransactionDetail']:
+        """取引取得APIを実施します
+
+        Returns:
+            dict: head, detailsをキーに持つdict型。各々の要素はTransactionHead、TransactionDetail型
+        """
         contractId = self.config.contractId
         self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
         self.uri = self.uriPos + '/transactions/' + transactionHeadId
         
         header = self._getHeader()
-        body = self._getBodyForDetail(sort=sort, whereDict=whereDict)
+        body = self._getQueryForDetail(sort=sort, whereDict=whereDict)
         
-        result = self._api(self.uri, header, body)
+        response = self._apiGet(self.uri, header, body)
+        if response[0] != 200:
+            raise Exception(response[1])
+        responseData = response[1]
+        result = {}
+        result["head"] = TransactionHead(responseData)
+        if response.get("details") is not None:
+            result["details"] = [TransactionDetail(data) for data in responseData.get("details")]
         return result
         
-        
-class TransactionDetail():
-    def __init__(self):
-        self._transactionHeadId = None 
-        self._transactionDetailId = None 
-        self._parentTransactionDetailId = None 
-        self._transactionDetailDivision = None 
-        self._productId = None 
-        self._productCode = None 
-        self._productName = None 
-        self._printReceiptProductName = None 
-        self._color = None 
-        self._size = None 
-        self._groupCode = None 
-        self._taxDivision = None 
-        self._price = None 
-        self._salesPrice = None 
-        self._unitDiscountPrice = None 
-        self._unitDiscountRate = None 
-        self._unitDiscountDivision = None 
-        self._cost = None 
-        self._quantity = None 
-        self._unitNonDiscountSum = None 
-        self._unitDiscountSum = None 
-        self._unitDiscountedSum = None 
-        self._costSum = None 
-        self._categoryId = None 
-        self._categoryName = None 
-        self._discriminationNo = None 
-        self._salesDivision = None 
-        self._productDivision = None 
-        self._inventoryReservationDivision = None 
-        self._pointNotApplicable = None 
-        self._calcDiscount = None 
-        self._taxFreeDivision = None 
-        self._taxFreeCommodityPrice = None 
-        self._taxFree = None 
-        self._productBundleGroupId = None 
-        self._discountPriceProportional = None 
-        self._discountPointProportional = None 
-        self._discountCouponProportional = None 
-        self._taxIncludeProportional = None 
-        self._taxExcludeProportional = None 
-        self._productBundleProportional = None 
-        self._staffDiscountProportional = None 
-        self._bargainDiscountProportional = None 
-        self._roundingPriceProportional = None 
-        self._productStaffDiscountRate = None 
-        self._staffRank = None 
-        self._staffRankName = None 
-        self._staffDiscountRate = None 
-        self._staffDiscountDivision = None 
-        self._applyStaffDiscountRate = None 
-        self._applyStaffDiscountPrice = None 
-        self._bargainId = None 
-        self._bargainName = None 
-        self._bargainDivision = None 
-        self._bargainValue = None 
-        self._applyBargainValue = None 
-        self._applyBargainDiscountPrice = None 
-        self._taxRate = None 
-        self._standardTaxRate = None 
-        self._modifiedTaxRate = None 
-        self._reduceTaxId = None 
-        self._reduceTaxName = None 
-        self._reduceTaxRate = None 
-        self._reduceTaxPrice = None 
-        self._reduceTaxMemberPrice = None
+    
+    def createTransactionDetailCsv(self, field=None, sort=None, whereDict=None):
+        """取引明細CSV作成APIを実施します
 
+        Args:
+            field (dict, optional): [description]. Defaults to None.
+            sort (dict, optional): [description]. Defaults to None.
+            whereDict (dict, optional): [description]. Defaults to None.
+        """
+        contractId = self.config.contractId
+        self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
+        self.uri = self.uriPos + '/transactions/details/out_file_async'
+        
+        header = self._getHeader()
+
+        body = self._getQueryForDetail(sort=sort, whereDict=whereDict, state={
+            'contractId': self.config.contractId,
+            'field': field,
+            'sort': sort,
+            'where': whereDict,
+        })
+        
+        response = self._apiPost(self.uri, header, body)
+        if response[0] != 200:
+            raise Exception(response[1])
+        responseData = response[1]
+        return responseData

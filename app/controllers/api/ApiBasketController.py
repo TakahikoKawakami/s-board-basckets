@@ -10,7 +10,7 @@ from app.domains.BasketDomainService import BasketDomainService
 from app.validators import BasketValidators
 
 
-class Basket(AbstractController):
+class ApiBasket(AbstractController):
     def __init__(self) ->None:
         super().__init__()
         self._basketDomainService = None
@@ -18,7 +18,7 @@ class Basket(AbstractController):
     async def on_get(self, req, resp):
         if self.isBookingRedirect():
             return
-        self._logger.info('access DailyBasket')
+        self._logger.info('get basket')
         self._basketDomainService = BasketDomainService(self._loginAccount)
         if req.params != {}:
             startDate = datetime.datetime.strptime(req.params['startDate'], "%Y-%m-%dT%H:%M:%S%z").date()
@@ -32,6 +32,12 @@ class Basket(AbstractController):
             await self.render('baskets/index.pug')
 
     async def on_put(self, req, resp):
+        """取引明細一覧CSV作成APIを利用して、スマレジの取引データを同期します
+
+        Args:
+            req ([type]): [description]
+            resp ([type]): [description]
+        """
         if self.isAccessDenied():
             return
         self._logger.info('sync DailyBasket')
@@ -58,7 +64,7 @@ class Basket(AbstractController):
             resp.status_code = 400
         
         
-class Associate(AbstractController):
+class ApiAssociate(AbstractController):
     def __init__(self) -> None:
         super().__init__()
         self._basketAssociationDomainService = None
@@ -75,7 +81,7 @@ class Associate(AbstractController):
             'baskets/association/index.pug'
         )
 
-class AssociateResult(AbstractController):
+class ApiAssociateResult(AbstractController):
     """分析結果コントローラ
 
     Args:

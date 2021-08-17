@@ -21,5 +21,7 @@ or if you use vs-code, you can run for debug named "Python: Responder".
 
 `cd app/static && npm install`
 
+`sudo apt install -y ruby && gem install -y ultrahook`
 
-``
+in devcontainer, to catch webhook from smaregi, exec command as following:
+`ultrahook look-into-baskets http://0.0.0.0:5500/webhook`
