@@ -7,37 +7,47 @@ link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
     h1 分析ページ
     p カレンダーをクリックして、分析する期間を指定しましょう
     p データがない日はまず同期をして下さい
-    //- .container
-    form(action="baskets/associate/result", method="get")
-        input#analyze-store-id(name="store_id", type="hidden", value="{{ displayStore.storeId }}")
-        div(style="margin: 10px;")
-            {% for error in message._schema %}
-            span(style="color: var(--color__danger);") {{error}}<br>
-            {% endfor %}
-        .date-range_group
-            input#analyze-from(name="date_from", placeholder="")
-            p ~ 
-            input#analyze-to(name="date_to", placeholder="")
-            button(type="submit") 分析開始
-        .from__group
-            div(style="margin: 10px;")
-                {% for error in message.date_to %}
-                span(style="color: var(--color__danger);") {{error}}<br>
-                {% endfor %}
-            div(style="margin: 10px;")
-                {% for error in message.date_from %}
-                span(style="color: var(--color__danger);") {{error}}<br>
-                {% endfor %}
-            div(style="margin: 10px;")
-                {% for error in message.store_id %}
-                span(style="color: var(--color__danger);") {{error}}<br>
-                {% endfor %}
-    .basket-container
+    .two-column-container
         .calendar-container
             #calendar
             .calendar-loading
                 .loader
-        //- div testtesttest
+            //- div testtesttest
+        .condition-container
+            form(action="baskets/associate/result", method="get")
+                input#analyze-store-id(name="store_id", type="hidden", value="{{ displayStore.storeId }}")
+                div(style="margin: 10px;")
+                    {% for error in message._schema %}
+                    span(style="color: var(--color__danger);") {{error}}<br>
+                    {% endfor %}
+                .condition_group
+                    p 分析対象
+                    .date-range_group
+                        .center
+                            select#select-analyze-target.form__input(name='select_analyze_target')
+                                option(value='', disabled) 分析対象
+                                option(value='0') 商品 x 商品
+                                option(value='1') 客層 x 商品
+                    p 期間
+                    .date-range_group
+                        .inline-container
+                            input#analyze-from(name="date_from", placeholder="")
+                            p ~ 
+                            input#analyze-to(name="date_to", placeholder="")
+                    button(type="submit") 分析開始
+                .from__group
+                    div(style="margin: 10px;")
+                        {% for error in message.date_to %}
+                        span(style="color: var(--color__danger);") {{error}}<br>
+                        {% endfor %}
+                    div(style="margin: 10px;")
+                        {% for error in message.date_from %}
+                        span(style="color: var(--color__danger);") {{error}}<br>
+                        {% endfor %}
+                    div(style="margin: 10px;")
+                        {% for error in message.store_id %}
+                        span(style="color: var(--color__danger);") {{error}}<br>
+                        {% endfor %}
 
 
     #date-modal.modal

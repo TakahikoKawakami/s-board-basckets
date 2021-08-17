@@ -6,6 +6,8 @@ import csv
 
 def get_gzip_data_from_url(url) -> list:
     """URLからGzip圧縮されたCSVファイルを開き、データを取得します
+        csvで送られてくるので、nullは空文字として格納されているため、
+        空文字はnullとして置き換える
 
     Args:
         url (string): URL
@@ -19,5 +21,9 @@ def get_gzip_data_from_url(url) -> list:
         with gzip.open(gzip_file, 'rt') as f:
             data = csv.DictReader(f)
             for row in data:
-                result.append(row)
+                converted_data = {
+                    k: v if v != '' else None
+                    for k, v in row.items()
+                }
+                result.append(converted_data)
     return result

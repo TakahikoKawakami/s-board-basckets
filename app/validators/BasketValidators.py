@@ -1,10 +1,15 @@
 import datetime
 from dateutil.relativedelta import relativedelta
 
-from marshmallow import Schema, fields, validates, validates_schema, ValidationError
+from marshmallow import Schema, fields, validate, validates, validates_schema, ValidationError
 
 
 class AccosiationCondition(Schema):
+    select_analyze_target = fields.Integer(
+        required=True,
+        validate=validate.OneOf([0, 1]),
+        error_messages={"required": "[分析対象] プルダウンから選択してください"}
+    )
     store_id = fields.String(
         required=True,
         error_messages={"required": "[店舗選択] 設定画面から、店舗を選択してください"}
@@ -21,21 +26,21 @@ class AccosiationCondition(Schema):
     class Meta:
         strict = True
 
-    @validates('date_from')
-    def validate_dateFrom(self, value):
-        if type(value) is datetime.datetime:
-            value = value.date()
-        _today = datetime.date.today()
-        if (value > _today):
-            raise ValidationError("[開始日] 指定できる日付は今日までです")
+    # @validates('date_from')
+    # def validate_dateFrom(self, value):
+    #     if type(value) is datetime.datetime:
+    #         value = value.date()
+    #     _today = datetime.date.today()
+    #     if (value > _today):
+    #         raise ValidationError("[開始日] 指定できる日付は今日までです")
 
-    @validates('date_to')
-    def validate_dateTo(self, value):
-        if type(value) is datetime.datetime:
-            value = value.date()
-        _today = datetime.date.today()
-        if (value > _today):
-            raise ValidationError("[終了日] 指定できる日付は今日までです")
+    # @validates('date_to')
+    # def validate_dateTo(self, value):
+    #     if type(value) is datetime.datetime:
+    #         value = value.date()
+    #     _today = datetime.date.today()
+    #     if (value > _today):
+    #         raise ValidationError("[終了日] 指定できる日付は今日までです")
 
     @validates_schema
     def validate_dateFromTo(self, data, **kwargs):

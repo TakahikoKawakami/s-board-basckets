@@ -61,39 +61,20 @@ class AssociateResult(AbstractController):
             schema = BasketValidators.AccosiationCondition()
             query = schema.load(req.params)
 
-            account_setting = await self.login_account.account_setting_model
-            target_store_id = str(account_setting.display_store_id)
-
-            # basket_domain_service = \
-            #     await BasketDomainService\
-            #     .create_instance(self.login_account)
-            # association_result = await basket_domain_service.associate(
-            #     target_store_id,
-            #     query['date_fronm'],
-            #     query['date_to']
-            # )
-
-            # vis = await association_result.vis_js()
-            # pickup_message = association_result.pickup_message()
-
-            # await self.render(
-            #     path="baskets/association/result.pug",
-            #     search_from=query['date_from'],
-            #     search_to=query['date_to'],
-            #     vis=vis.toDict(),
-            #     pickUpMessage=pickup_message
-            # )
-            # return
-
             self._basket_association_domain_service = \
                 await BasketAssociationDomainService\
                 .create_instance(self.login_account)
-            targetStore = await self\
-                ._basket_association_domain_service\
+            await self._basket_association_domain_service\
                 .target_store
 
-            fpgrowth = await self._basket_association_domain_service\
-                .associate(query['store_id'], query['date_from'], query['date_to'])
+            fpgrowth = await self.\
+                _basket_association_domain_service\
+                .associate(
+                    query['select_analyze_target'],
+                    query['store_id'],
+                    query['date_from'],
+                    query['date_to']
+                )
             self._logger.info('create fpgrowth')
 
             vis = await self\
@@ -131,6 +112,7 @@ class AssociateResult(AbstractController):
             resp.redirect('/baskets', status_code=302)
             return
         except Exception as e:
+            self._logger.error(e)
             SessionManager.set(
                 resp.session,
                 SessionManager.KEY_ERROR_MESSAGES,

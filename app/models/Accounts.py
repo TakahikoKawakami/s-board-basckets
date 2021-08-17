@@ -115,7 +115,7 @@ class Account(AbstractTortoiseModel):
 
     @access_token_entity.setter
     def access_token_entity(self, access_token: AccessToken):
-        self.access_token = access_token.access_token
+        self.access_token = access_token.token
         self.expiration_date_time = access_token.expiration_datetime
 
     @property
@@ -136,10 +136,13 @@ class Account(AbstractTortoiseModel):
 
         new_account = await super().create(
             contract_id=contract_id,
-            access_token=access_token.access_token,
+            access_token=access_token.token,
             expiration_date_time=access_token.expiration_datetime,
             user_status=cls.StatusEnum.STATUS_START,
             plan=plan,
             account_setting=new_account_setting
         )
         return new_account
+
+
+login_account = Account()

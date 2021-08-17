@@ -10,7 +10,7 @@ from app.validators import BasketValidators
 
 
 class ApiBasket(AbstractController):
-    def __init__(self) ->None:
+    def __init__(self) -> None:
         super().__init__()
         self._basket_domain_service = None
 

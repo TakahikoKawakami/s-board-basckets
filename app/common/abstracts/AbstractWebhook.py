@@ -1,6 +1,7 @@
 from typing import TypeVar, Type
 from logging import Logger
-from SmaregiPlatformApi import (
+from smaregipy import (
+    SmaregiPy,
     smaregi_config,
     Config as SmaregiConfig
 )
@@ -40,14 +41,14 @@ class AbstractWebhook():
         else:
             smaregi_env = SmaregiConfig.ENV_DIVISION_PRODUCTION
 
-        config = SmaregiConfig(
-            smaregi_env,
-            _contract_id,
-            self._app_config.SMAREGI_CLIENT_ID,
-            self._app_config.SMAREGI_CLIENT_SECRET,
-            _access_token,
-            self._logger
-        )
-        smaregi_config.set_by_object(config)
+        SmaregiPy.init_by_dict({
+            'env_division': smaregi_env,
+            'contract_id': _contract_id,
+            'smaregi_client_id': self._app_config.SMAREGI_CLIENT_ID,
+            'smaregi_client_secret': self._app_config.SMAREGI_CLIENT_SECRET,
+            'redirect_uri': self._app_config.APP_URI + '/accounts/login',
+            'access_token': _access_token,
+            'logger': self._logger
+        })
 
         return self
