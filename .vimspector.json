@@ -1,0 +1,64 @@
+{
+  "adapters": {
+    "debugpy2": {
+      "command": [
+        "python",
+        "-m",
+        "debugpy.adapter"
+      ],
+      "name": "debugpy2",
+      "configuration": {
+        "python": "python"
+      }
+    }
+  },
+  "configurations": {
+      "attach": {
+      "adapter": "debugpy",
+      "configuration": {
+        "name": "attach",
+        "type": "python",
+        "request": "attach",
+        "pid": "${pid}"
+      }
+    },
+    "run responder": {
+      "adapter": "debugpy",
+      "configuration": {
+        "name": "Python: Launch",
+        "type": "python",
+        "request": "launch",
+        "cwd": "${cwd}",
+        "stopOnEntry": true,
+        "python": "/usr/local/bin/python",
+        "debugOptions": [
+        ],
+        "program": "${cwd}/run.py"
+      }
+    },
+    "python current file": {
+      "adapter": "debugpy",
+      "configuration": {
+        "name": "Python: Current File",
+        "type": "python",
+        "request": "launch",
+        "cwd": "${cwd}",
+        "stopOnEntry": true,
+        "python": "/usr/local/bin/python",
+        "program": "${cwd}/run.py",
+        "console": "integratedTerminal"
+      }
+    },
+    "run responder2": {
+      "adapter": "debugpy",
+      "configuration": {
+        "name": "Python: アタッチ",
+        "type": "python",
+        "request": "attach",
+        "host": "localhost",
+        "stopOnEntry": true,
+        "console": "integratedTerminal"
+      }
+    }
+  }
+}

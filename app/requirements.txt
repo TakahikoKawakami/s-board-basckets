@@ -31,6 +31,7 @@ distro==1.4.0
 docopt==0.6.2
 docutils==0.16
 et-xmlfile==1.0.1
+flake8==3.9.2
 Flask==1.1.2
 Flask-Migrate==2.5.3
 Flask-Script==2.0.6
@@ -68,6 +69,7 @@ mccabe==0.6.1
 msgpack==1.0.2
 mypy==0.812
 mypy-extensions==0.4.3
+neovim==0.3.1
 networkx==2.5
 numpy==1.20.1
 openpyxl==3.0.6
@@ -84,10 +86,13 @@ pip-autoremove==0.9.1
 pipdeptree==2.0.0
 progress==1.5
 promise==2.3
+pycodestyle==2.7.0
 pycparser==2.20
 pydantic==1.7.3
+pyflakes==2.3.1
 pylint==2.6.0
 PyMySQL==0.9.3
+pynvim==0.4.3
 pyparsing==2.4.7
 PyPika==0.44.1
 pypika-tortoise==0.1.0
@@ -116,6 +121,7 @@ scipy==1.6.0
 SecretStorage==3.3.0
 serverfiles==0.3.1
 six==1.15.0
+SmaregiPlatformApi @ git+https://github.com/shabaraba/SmaregiPlatformApi@b7043f0f4f4442d92259a154e9024f96f66f9d1a
 sniffio==1.2.0
 SQLAlchemy==1.4.6
 starlette==0.13.8

@@ -1,27 +1,22 @@
-import logging
+import json
 import datetime
-import calendar
 
-from app.common.utils import CsvUtil, DictionaryUtil, EntityUtil
-import app.common.managers.SessionManager as sessionManager
+from app.common.utils import CsvUtil,  EntityUtil
 
-from app.entities.Transactions import Transaction
-from app.lib.Smaregi.API.POS.TransactionsApi import TransactionsApi
-from app.lib.Smaregi.API.POS.entities import TransactionHead, TransactionDetail
-
+from SmaregiPlatformApi.pos import TransactionsApi
+from SmaregiPlatformApi.entities import TransactionHead, TransactionDetail
 
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.entities.Baskets import Basket
 from app.entities.Transactions import Transaction
+from app.entities.AssociationResult import AssociationResult
+from app.entities.Fpgrowth import Fpgrowth
 from app.models.DailyBasketList import DailyBasketList
-from app.models.Accounts import AccountSetting
+from app.models import Store
+
 
 class BasketDomainService(AbstractDomainService):
-    def __init__(self, loginAccount):
-        super().__init__(loginAccount)
-        self.withSmaregiApi(loginAccount.accessToken.accessToken, loginAccount.contractId)
-
-    async def registerBasketByTransactionHeadId(self, transactionHeadId: int) -> None:
+    async def register_basket_by_transaction_head_id(self, transaction_head_id: int) -> None:
         """取引ヘッダIDからバスケットデータを作成し、DBに登録します
         取引が存在しない場合でも、空のバスケットをDBに登録します
 
@@ -29,55 +24,67 @@ class BasketDomainService(AbstractDomainService):
             transactionHeadId (int): [description]
         """
 
-        _transactionsApi = TransactionsApi(self._apiConfig)
-        whereDict = {
+        _transactions_api = TransactionsApi()
+        where_dict = {
             'with_details': 'all'
         }
         try:
-            _apiResponse = _transactionsApi.getTransaction(transactionHeadId, whereDict=whereDict)
-            transaction = Transaction(_apiResponse['head'], _apiResponse['details'])
+            _api_response = _transactions_api.get_transaction(
+                transaction_head_id,
+                where_dict=where_dict
+            )
+            transaction = Transaction(
+                _api_response['head'],
+                _api_response['details']
+            )
             _basket = Basket()
-            _basket.setByTransactionHead(transaction.head)
-            _basket.setByTransactionDetailList(transaction.details)
+            _basket.set_by_transaction_head(transaction.head)
+            _basket.set_by_transaction_detail_list(transaction.details)
 
-            _dailyBasketListTuple = await DailyBasketList.get_or_create(
-                contract_id = self._loginAccount.contractId,
-                store_id = _basket.storeId,
-                target_date = _basket.targetDate
+            _daily_basket_list_tuple = await DailyBasketList.get_or_create(
+                contract_id=self.login_account.contract_id,
+                store_id=_basket.store_id,
+                target_date=_basket.target_date
             )
 
-            _dailyBasketList = _dailyBasketListTuple[0] # [1]は取得したか、作成したかのboolean true: create
-            _dailyBasketList.appendBasket(_basket)
-            await _dailyBasketList.save()
+            _daily_basket_list = _daily_basket_list_tuple[0]  # [1]は取得したか、作成したかのboolean true: create
+            _daily_basket_list.append_basket(_basket)
+            await _daily_basket_list.save()
             self._logger.info('バスケットデータ登録完了')
-            self._logger.info(repr(_dailyBasketList))
+            self._logger.info(repr(_daily_basket_list))
         except Exception as e:
             self._logger.warning("!!raise exception!!")
             self._logger.warning(e)
 
-
-    async def registerBasketByTransactionList(self, transactionList: list['Transaction']) -> None:
+    async def register_basket_by_transaction_list(
+        self,
+        transaction_list: list['Transaction']
+    ) -> None:
         """取引entityリストからバスケットデータを作成し、DBに登録します
 
         Args:
             transactionList (list[Transaction]): [description]
         """
-        for transaction in transactionList:
+        self._logger.info("register basket by transaction list: start")
+        daily_basket_list = None
+        for transaction in transaction_list:
             _basket = Basket()
-            _basket.setByTransactionHead(transaction.head)
-            _basket.setByTransactionDetailList(transaction.details)
+            _basket.set_by_transaction_head(transaction.head)
+            _basket.set_by_transaction_detail_list(transaction.details)
 
-            _dailyBasketListTuple = await DailyBasketList.get_or_create(
-                contract_id = self._loginAccount.contractId,
-                store_id = _basket.storeId,
-                target_date = _basket.targetDate
+            daily_basket_list_tuple = await DailyBasketList.get_or_create(
+                contract_id=self.login_account.contract_id,
+                store_id=_basket.store_id,
+                target_date=_basket.target_date
             )
 
-            _dailyBasketList = _dailyBasketListTuple[0] # [1]は取得したか、作成したかのboolean true: create
-            _dailyBasketList.appendBasket(_basket)
-        await _dailyBasketList.save()
+            daily_basket_list = daily_basket_list_tuple[0]  # [1]は取得したかのbool
+            daily_basket_list.append_basket(_basket)
+        if isinstance(daily_basket_list, DailyBasketList):
+            await daily_basket_list.save()
         self._logger.info('バスケットデータ登録完了')
-        self._logger.info(repr(_dailyBasketList))
+        self._logger.info(repr(daily_basket_list))
+        self._logger.info("register basket by transaction list: finish")
 
 
     async def registerBasketByTransaction(self, transactionHead, transactionDetail):
@@ -97,48 +104,52 @@ class BasketDomainService(AbstractDomainService):
         self._logger.info('バスケットデータ登録完了')
         self._logger.info(repr(_dailyBasketList))
 
-
-    async def registerBasketByGzipUrlList(self, urlList: list[str]) -> None:
+    async def register_basket_by_gzip_url_list(
+        self,
+        url_list: list[str]
+    ) -> None:
         """Gzip圧縮された取引明細データがおかれているurlリストから、バスケットデータを作成し、DBに登録します
 
         Args:
             urlList (list[str]): [description]
         """
         self._logger.info('データ取得開始---')
-        transactionDetailListCategorizedByTransactionHeadId = self._getTransactionDetailListFromGzipUrlList(urlList)
+        transaction_detail_list_categorized_by_transaction_head_id = \
+            self._get_transaction_detail_list_from_gzip_url_list(url_list)
 
-        transactionHeadIdFrom = min(transactionDetailListCategorizedByTransactionHeadId.keys())
-        transactionHeadIdTo = max(transactionDetailListCategorizedByTransactionHeadId.keys())
+        transaction_head_id_from = min(transaction_detail_list_categorized_by_transaction_head_id.keys())
+        transaction_head_id_to = max(transaction_detail_list_categorized_by_transaction_head_id.keys())
         
-        transactionHeadListCategorizedByTransactionHeadId = self._getTransactionHeadListByAPI(headIdFrom = transactionHeadIdFrom, headIdTo = transactionHeadIdTo)
+        transaction_head_list_categorized_by_transaction_head_id = self._get_transaction_head_list_by_api(head_id_from=transaction_head_id_from, head_id_to=transaction_head_id_to)
 
         self._logger.info('データ取得完了---')
-        self._logger.info('取引数: ' + str(len(transactionHeadListCategorizedByTransactionHeadId)))
+        self._logger.info('取引数: ' + str(len(transaction_head_list_categorized_by_transaction_head_id)))
 
-        transactionList = [
+        transaction_list = [
             Transaction(
-                transactionHeadListCategorizedByTransactionHeadId[headId][0],
-                transactionDetailListCategorizedByTransactionHeadId[headId]
-            ) for headId in transactionHeadListCategorizedByTransactionHeadId.keys()
+                transaction_head_list_categorized_by_transaction_head_id[head_id][0],
+                transaction_detail_list_categorized_by_transaction_head_id[head_id]
+            ) for head_id in transaction_head_list_categorized_by_transaction_head_id.keys()
         ]
-        await self.registerBasketByTransactionList(transactionList)
+        await self.register_basket_by_transaction_list(transaction_list)
 
-
-    def _getTransactionDetailListFromGzipUrlList(self, urlList: list[str]) -> dict[int, list['TransactionDetail']]:
+    def _get_transaction_detail_list_from_gzip_url_list(
+        self,
+        url_list: list[str]
+    ) -> dict[int, list['TransactionDetail']]:
         """Gzip圧縮された取引明細ファイルをurlリストから順に取得し、取引ヘッダIDをキー、その明細リストを要素に持つ辞書を返します
 
         Returns:
             dict: 取引ヘッダID: [明細リスト] の辞書
         """
-        transactionDetailList = []
-        for url in urlList:
-            dataList = CsvUtil.getGzipDataFromUrl(url)
-            transactionDetailList.extend([TransactionDetail(data) for data in dataList])
-        transactionDetailListCategorizedByTransactionHeadId = EntityUtil.categorizeByKey('transactionHeadId', transactionDetailList)
-        return transactionDetailListCategorizedByTransactionHeadId
+        transaction_detail_list = []
+        for url in url_list:
+            data_list = CsvUtil.get_gzip_data_from_url(url)
+            transaction_detail_list.extend([TransactionDetail(data) for data in data_list])
+        transaction_detail_list_categorized_by_transaction_head_id = EntityUtil.categorize_by_key('transaction_head_id', transaction_detail_list)
+        return transaction_detail_list_categorized_by_transaction_head_id
 
-
-    def _getTransactionHeadListByAPI(self, headIdFrom: int, headIdTo: int) -> dict[int, list[TransactionHead]]:
+    def _get_transaction_head_list_by_api(self, head_id_from: int, head_id_to: int) -> dict[int, list[TransactionHead]]:
         """APIから取引ヘッダリストを取得します
 
         Args:
@@ -148,40 +159,41 @@ class BasketDomainService(AbstractDomainService):
         Returns:
             dict: 取引ヘッダID: [ヘッダリスト] の辞書
         """
-        transactionsApi = TransactionsApi(self._apiConfig)
-        transactionHeadList = transactionsApi.getTransactionHeadList(whereDict= {
-            'transaction_head_id-from': headIdFrom,
-            'transaction_head_id-to': headIdTo,
+        transactions_api = TransactionsApi()
+        transaction_head_list = transactions_api.get_transaction_head_list(where_dict= {
+            'transaction_head_id-from': head_id_from,
+            'transaction_head_id-to': head_id_to,
         })
-        transactionHeadListCategorizedByTransactionHeadId = EntityUtil.categorizeByKey('transactionHeadId', transactionHeadList)
-        return transactionHeadListCategorizedByTransactionHeadId
+        transaction_head_list_categorized_by_transaction_head_id = EntityUtil.categorize_by_key('transaction_head_id', transaction_head_list)
+        return transaction_head_list_categorized_by_transaction_head_id
 
+    async def get_daily_basket_list_by_date_range(
+        self,
+        start_date: datetime.date,
+        end_date: datetime.date
+    ):
+        account_setting = await self.login_account.account_setting_model
+        store_id = account_setting.display_store_id
 
-    async def getDailyBasketListByDateRange(self, startDate: datetime.date, endDate: datetime.date):
-        accountSetting = await self._loginAccount.accountSetting
-        storeId = accountSetting.displayStoreId
-
-        _dailyBasketList = await DailyBasketList.filter(
-            contract_id = self._loginAccount.contractId,
-            store_id = storeId,
-            target_date__range = (startDate, endDate)
+        _daily_basket_list = await DailyBasketList.filter(
+            contract_id=self.login_account.contract_id,
+            store_id=store_id,
+            target_date__range=(start_date, end_date)
         ).all()
-        return _dailyBasketList
-    
+        return _daily_basket_list
 
-    async def deleteDailyBasketListByDateRange(self, startDate: datetime.date, endDate: datetime.date):
-        accountSetting = await self._loginAccount.accountSetting
-        storeId = accountSetting.displayStoreId
+    async def delete_daily_basket_list_by_date_range(self, start_date: datetime.date, end_date: datetime.date):
+        account_setting = await self.login_account.account_setting_model
+        store_id = account_setting.display_store_id
 
-        _dailyBasketList = await DailyBasketList.filter(
-            contract_id = self._loginAccount.contractId,
-            store_id = storeId,
-            target_date__range = (startDate, endDate)
+        _daily_basket_list = await DailyBasketList.filter(
+            contract_id=self.login_account.contract_id,
+            store_id=store_id,
+            target_date__range=(start_date, end_date)
         ).delete()
-        return _dailyBasketList
+        return _daily_basket_list
 
-
-    async def syncDailyBasketListByDateRange(self, startDate: datetime.datetime, endDate: datetime.datetime):
+    async def sync_daily_basket_list_by_date_range(self, start_date: datetime.datetime, end_date: datetime.datetime):
         """指定された期間の日次バスケットデータを作成、同期します
 
         Args:
@@ -194,99 +206,33 @@ class BasketDomainService(AbstractDomainService):
         Returns:
             [type]: [description]
         """
-        accountSetting = await self._loginAccount.accountSetting
-        storeId = accountSetting.displayStoreId
+        account_setting = await self.login_account.account_setting_model
+        store_id = account_setting.display_store_id
+        if store_id is None:
+            self._logger.info("store_id is None")
+            raise Exception("store_id is None")
 
-        _transactionsApi = TransactionsApi(self._apiConfig)
-        _transactionsApi.createTransactionDetailCsv(
-            whereDict={
-                'storeId': storeId,
-                'transactionDateTimeFrom': startDate,
-                'transactionDateTimeTo': endDate,
-                'callbackUrl': self._appConfig.CALLBACK_URI + '/webhook'
-            }, 
+        _transactions_api = TransactionsApi()
+        self._logger.info("send create_transaction_detail_csv api")
+        where_dict = {
+            'storeId': store_id,
+            'transactionDateTimeFrom': start_date,
+            'transactionDateTimeTo': end_date,
+            'callbackUrl': self._app_config.CALLBACK_URI + '/webhook'
+        }
+        self._logger.debug("where_dict = " + json.dumps(where_dict))
+        _transactions_api.create_transaction_detail_csv(
+            where_dict=where_dict,
             sort='sumDate:asc'
         )
 
-        # _targetTransactionHeadList = _transactionsApi.getTransactionHeadList(
-        #     whereDict={
-        #         'store_id': storeId,
-        #         'sum_date-from': startDate,
-        #         'sum_date-to': endDate,
-        #     }, 
-        #     sort='sumDate:asc'
-        # )
-        # # 締日ごとに並び替え
-        # _sumDateCategorizedTransactionHeadList = DictionaryUtil.categorizeByKey('sumDate', _targetTransactionHeadList)
-        # try:
-        #     for _sumDate, _transactionHeadList in _sumDateCategorizedTransactionHeadList.items():
-        #         # 締め日データが既にあれば無視。なければレコード作成
-        #         _existedRecords = await DailyBasketList.filter(
-        #             contract_id = self._loginAccount.contractId,
-        #             store_id = storeId,
-        #             target_date = _sumDate
-        #         ).all()
-        #         if (_existedRecords == []):
-
-        #             _dailyBasketListModelList = self._getBasketListByTransactionHeadList(_transactionHeadList, _sumDate)
-        #             for _dailyBasketListModel in _dailyBasketListModelList:
-        #                 await _dailyBasketListModel.save()
-        #                 # self._logger.debug(_registered)
-        # except Exception as e:
-        #     raise e
-
-        # _result = await DailyBasketList.filter(
-        #     contract_id = self._loginAccount.contractId,
-        #     store_id = storeId,
-        #     target_date__range = (startDate, endDate)
-        # ).all()
-        # return _result 
-
-
-        # _dailyBasketList = await DailyBasketList.filter(
-        #     contract_id = self._loginAccount.contractId,
-        #     store_id = storeId,
-        #     target_date__range = (startDate, endDate)
-        # ).delete()
-        # return _dailyBasketList
         return
 
-    def _getBasketListByTransactionHeadList(self, _transactionHeadList, _sumDate):
-        """取引ヘッダリストに紐づく全取引明細を取得し、日別バスケット分析用データモデルを返却します
-
-        Arguments:
-            _transactionHeadList {TransactionHead} -- APIで取得した取引ヘッダリスト
-            _sumDate {str} -- 締め日（Y-m-d）
-
-        Returns:
-            BasketAnalysis -- バスケット分析モデル（分析済）
-        """
-        
-        _transactionsApi = TransactionsApi(self._apiConfig)
-        _dailyBasketListDict = {}
-        for _transactionHead in _transactionHeadList:
-            _transactionDetailList = _transactionsApi.getTransactionDetail(_transactionHead['transactionHeadId'])
-            _basketModel = Basket()
-            _basketModel.setByTransactionHead(_transactionHead)
-            _basketModel.setByTransactionDetailList(_transactionDetailList)
-
-            if (_basketModel.storeId not in _dailyBasketListDict.keys()):
-                _dailyBasketListDict[_basketModel.storeId] = []
-
-            _dailyBasketListDict[_basketModel.storeId].append(_basketModel)
-            
-        _resultList = []
-        for _storeId, _dailyBasketList in _dailyBasketListDict.items():
-            _dailyBasketListModel = DailyBasketList()
-            _dailyBasketListModel.contractId = self._loginAccount.contractId
-            _dailyBasketListModel.basketList = _dailyBasketList
-            _dailyBasketListModel.storeId = _storeId
-            _dailyBasketListModel.targetDate = datetime.datetime.strptime(_sumDate, "%Y-%m-%d")
-            _resultList.append(_dailyBasketListModel)
-            
-        return _resultList
-
-    async def registerEmptyBasket(self, storeId: int, targetDate: datetime) -> None:
+    async def register_empty_basket(
+        self,
+        store_id: int,
+        target_date: datetime.datetime
+    ) -> None:
         """空のバスケットデータを作成します
         もし存在していたら何もしない
 
@@ -294,12 +240,140 @@ class BasketDomainService(AbstractDomainService):
             storeId (int): [description]
             targetDate (datetime): [description]
         """
-        dailyBasketListTuple = await DailyBasketList.get_or_create(
-            contract_id = self._loginAccount.contractId,
-            store_id = storeId,
-            target_date = targetDate
+        daily_basket_list_tuple = await DailyBasketList.get_or_create(
+            contract_id=self.login_account.contract_id,
+            store_id=store_id,
+            target_date=target_date
         )
 
-        if dailyBasketListTuple[1] is True: # [1]は取得したか、作成したかのboolean true: create
-            _dailyBasketList = dailyBasketListTuple[0] 
-            await _dailyBasketList.save()
+        if daily_basket_list_tuple[1] is True:  # [1]は取得したか、作成したかのboolean
+            # true: create
+            _daily_basket_list = daily_basket_list_tuple[0]
+            await _daily_basket_list.save()
+
+    async def associate(
+        self,
+        target_store_id: str,
+        target_date_from: datetime.datetime,
+        target_date_to: datetime.datetime
+    ) -> 'AssociationResult':
+        store = await Store.filter(
+            contract_id=self.login_account.contract_id,
+            store_id=target_store_id
+        ).first()
+        if store is None:
+            raise Exception("store does not exists")
+
+        target_date_from_str = target_date_from.strftime("%Y-%m-%d")
+        target_date_to_str = target_date_to.strftime("%Y-%m-%d")
+        self._logger.info("-----search condition-----")
+        self._logger.info("storeId     : " + target_store_id)
+        self._logger.info("search_from : " + target_date_from_str)
+        self._logger.info("search_to   : " + target_date_to_str)
+
+        # 分析期間の日別バスケットリストを取得
+        daily_basket_list_model_list = await DailyBasketList.filter(
+            contract_id=self.login_account.contract_id,
+            store_id=target_store_id,
+            target_date__range=(target_date_from, target_date_to)
+        )
+
+        # 全データをマージ
+        merged_basket_list = []
+        for daily_basket_list_model in daily_basket_list_model_list:
+            merged_basket_list += daily_basket_list_model.baskets
+
+        # fpgrowthを用いて分析
+        fpgrowth = Fpgrowth.createByDataList(
+            merged_basket_list,
+            0.1,
+            self._logger
+        )
+
+        self._logger.debug("----- ----- vis.js created.")
+        return vis
+        association_result = AssociationResult(
+            store=store,
+            date_from=target_date_from,
+            date_to=target_date_to,
+            fpgrowth=fpgrowth
+        )
+
+        return association_result
+
+    async def _convert_association_result_to_vis_js(self, fpgrowth):
+        vis = None
+        self._logger.info("-----convert association result to vis.js-----")
+        self._logger.info(fpgrowth)
+        if fpgrowth is not None:
+            try:
+                self._logger.debug("debug in if content")
+                vis = fpgrowth.convertToVisJs()
+                self._logger.debug("----- ----converted fpgrowth to vis.js-----")
+                vis = await self._setVisNodeLabel(vis)
+                self._logger.debug("----- ----set label for vis.js-----")
+            except Exception as e:
+                raise e
+        
+    async def _setVisNodeLabel(self, vis):
+        productsApi = ProductsApi()
+        result = VisJs()
+        try:
+            for node in vis.nodeList:
+                product = await Product.filter(
+                    contract_id = self._loginAccount.contractId,
+                    product_id = node.id
+                ).first()
+                self._logger.debug(repr(product))
+
+                if product is None:
+                    self._logger.info("fetching product id: {}".format(node.id))
+                    productByApi = productsApi.getProductById(node.id)
+                    if productByApi is None:
+                        self._logger.info("productsApi.getProductById is failed.")
+                        node.label = "unknown"
+                        result.nodeList.append(node)
+                        continue
+                    self._logger.debug(productByApi)
+                    product = await Product.create(
+                        contract_id = self._loginAccount.contractId,
+                        product_id = productByApi['productId'],
+                        name = productByApi['productName']
+                        # color = productByApi['color'],
+                        # size = productByApi['size'],
+                        # price = productByApi['price']
+                    )
+                node.label = product.name
+                result.nodeList.append(node)
+        except Exception as e:
+            self._logger.warning("!!raise exception!!")
+            self._logger.warning(e)
+            raise e
+
+        result.edgeList = vis.edgeList
+        return result
+    
+    async def convertAssociationResultToPickUpMessage(self, fpgrowth, storeId, dateFrom, dateTo):
+        store = await self.target_store
+
+        productFrom = None
+        productTo = None
+        if len(fpgrowth.result) > 0:
+            productFromIdList = [result['id'] for result in fpgrowth.result[0]['from']]
+            productToIdList = [result['id'] for result in fpgrowth.result[0]['to']]
+            productFrom = await Product.filter(
+                contract_id = self._loginAccount.contractId,
+                product_id__in = productFromIdList
+            ).all()
+            productTo = await Product.filter(
+                contract_id = self._loginAccount.contractId,
+                product_id__in = productToIdList
+            ).all()
+        message = {
+            'store': store,
+            'from': dateFrom,
+            'to': dateTo,
+            'productFrom': productFrom,
+            'productTo': productTo,
+        }
+        return message

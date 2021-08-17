@@ -2,9 +2,8 @@ import datetime
 
 from marshmallow import ValidationError
 
-from app.common.managers import SessionManager, HttpManager
+from app.common.managers import SessionManager
 from app.common.abstracts.AbstractController import AbstractController
-from app.domains.AccountDomainService import AccountDomainService
 from app.domains.BasketAssociationDomainService import BasketAssociationDomainService
 from app.domains.BasketDomainService import BasketDomainService
 from app.validators import BasketValidators
@@ -13,23 +12,36 @@ from app.validators import BasketValidators
 class ApiBasket(AbstractController):
     def __init__(self) ->None:
         super().__init__()
-        self._basketDomainService = None
+        self._basket_domain_service = None
 
     async def on_get(self, req, resp):
-        if self.isBookingRedirect():
+        if self.is_booking_redirect():
             return
         self._logger.info('get basket')
-        self._basketDomainService = BasketDomainService(self._loginAccount)
+        self._basket_domain_service = \
+            await BasketDomainService.create_instance(self.login_account)
         if req.params != {}:
-            startDate = datetime.datetime.strptime(req.params['startDate'], "%Y-%m-%dT%H:%M:%S%z").date()
-            endDate = datetime.datetime.strptime(req.params['endDate'], "%Y-%m-%dT%H:%M:%S%z").date()
-            dailyBasketList = await self._basketDomainService.getDailyBasketListByDateRange(startDate, endDate)
+            start_date = datetime.datetime.strptime(
+                req.params['startDate'],
+                "%Y-%m-%dT%H:%M:%S%z"
+            ).date()
+            end_date = datetime.datetime.strptime(
+                req.params['endDate'],
+                "%Y-%m-%dT%H:%M:%S%z"
+            ).date()
+            daily_basket_list = await self\
+                ._basket_domain_service\
+                .get_daily_basket_list_by_date_range(start_date, end_date)
 
-            jsonDailyBasketList = [await model.serialize for model in dailyBasketList]
-            resp.media = jsonDailyBasketList
+            json_daily_basket_list = [
+                await model.serialize()
+                for model in daily_basket_list
+            ]
+            resp.media = json_daily_basket_list
             return
         else:
-            await self.render('baskets/index.pug')
+            resp.media = {}
+            return
 
     async def on_put(self, req, resp):
         """取引明細一覧CSV作成APIを利用して、スマレジの取引データを同期します
@@ -38,28 +50,26 @@ class ApiBasket(AbstractController):
             req ([type]): [description]
             resp ([type]): [description]
         """
-        if self.isAccessDenied():
+        if self.is_access_denied():
             return
         self._logger.info('sync DailyBasket')
-        self._basketDomainService = BasketDomainService(self._loginAccount)
+        self._basket_domain_service = await BasketDomainService.create_instance(self.login_account)
         request = await req.media(format='json')
-        dateFrom = request['startDate'] + 'T00:00:00+0900'
-        dateTo = request['endDate'] + 'T23:59:59+0900'
+        date_from = request['startDate'] + 'T00:00:00+0900'
+        date_to = request['endDate'] + 'T23:59:59+0900'
         try:
-            syncedDailyBasketList = await self._basketDomainService.syncDailyBasketListByDateRange(dateFrom ,dateTo)
-            # jsonDailyBasketList = [await model.serialize for model in syncedDailyBasketList]
-            # resp.media = jsonDailyBasketList
+            await self._basket_domain_service.sync_daily_basket_list_by_date_range(date_from, date_to)
         except Exception:
             resp.status_code = 400
 
     async def on_delete(self, req, resp):
         self._logger.info('delete DailyBasket')
-        self._basketDomainService = BasketDomainService(self._loginAccount)
+        self._basket_domain_service = await BasketDomainService.create_instance(self.login_account)
         request = req.params
-        dateFrom = request['startDate']
-        dateTo = request['endDate']
+        date_from = request['startDate']
+        date_to = request['endDate']
         try:
-            await self._basketDomainService.deleteDailyBasketListByDateRange(dateFrom ,dateTo)
+            await self._basket_domain_service.delete_daily_basket_list_by_date_range(date_from, date_to)
         except Exception:
             resp.status_code = 400
         

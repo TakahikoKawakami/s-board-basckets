@@ -1,6 +1,5 @@
+from typing import Optional
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
-from app.common.managers import SessionManager
-from app.common.utils import DictionaryUtil
 
 from app.models.DailyBasketList import DailyBasketList
 from app.models.Products import Product
@@ -9,60 +8,54 @@ from app.entities.Fpgrowth import Fpgrowth
 from app.entities.VisJs import VisJs
 
 
-from app.lib.Smaregi.API.POS.StoresApi import StoresApi
-from app.lib.Smaregi.API.POS.ProductsApi import ProductsApi
-from app.lib.Smaregi.API.POS.entities import Product as ProductByApi
+from SmaregiPlatformApi.pos import StoresApi, ProductsApi
 
 from app.models import Store
 
-class BasketAssociationDomainService(AbstractDomainService):
-    def __init__(self, loginAccount):
-        super().__init__(loginAccount)
-        self.withSmaregiApi(self._loginAccount.accessToken.accessToken, self._loginAccount.contractId)
 
+class BasketAssociationDomainService(AbstractDomainService):
     @property
-    async def targetStore(self) -> 'Store':
-        accountSetting = await self._loginAccount.accountSetting
+    async def target_store(self) -> Optional['Store']:
+        account_setting = await self.login_account.account_setting_model
         return await Store.filter(
-            contract_id = self._loginAccount.contractId,
-            store_id = accountSetting.displayStoreId
+            contract_id=self.login_account.contract_id,
+            store_id=account_setting.display_store_id
         ).first()
 
     def getStoreList(self):
-        _storesApi = StoresApi(self._apiConfig)
-        _apiResponse = _storesApi.getStoreList()
+        _storesApi = StoresApi()
+        _apiResponse = _storesApi.get_store_list()
         return _apiResponse
 
-    async def associate(self, targetDateFrom, targetDateTo) -> 'Fpgrowth':
-        accountSetting = await self._loginAccount.accountSetting
-        targetStoreId = str(accountSetting.displayStoreId)
+    async def associate(self, target_store_id: str, targetDateFrom, targetDateTo) -> 'Fpgrowth':
+        account_setting = await self.login_account.account_setting_model
         self._logger.info("-----search condition-----")
-        self._logger.info("storeId     : " + targetStoreId)
+        self._logger.info("storeId     : " + target_store_id)
         self._logger.info("search_from : " + targetDateFrom.strftime("%Y-%m-%d"))
         self._logger.info("search_to   : " + targetDateTo.strftime("%Y-%m-%d"))
 
         # 分析期間の日別バスケットリストを取得
         dailyBasketListModelList = await DailyBasketList.filter(
-            contract_id = self._loginAccount.contractId,
-            store_id = targetStoreId,
-            target_date__range = (targetDateFrom, targetDateTo)
+            contract_id=self.login_account.contract_id,
+            store_id=target_store_id,
+            target_date__range=(targetDateFrom, targetDateTo)
         )
 
         # 全データをマージ
         mergedBasketList = []
         for dailyBasketListModel in dailyBasketListModelList:
-            mergedBasketList += dailyBasketListModel.basketList
+            mergedBasketList += dailyBasketListModel.baskets
         mergedPyfpgrowthEntity = Fpgrowth.createByDataList(mergedBasketList, 0.1, self._logger)
         return mergedPyfpgrowthEntity
 
-    async def convertAssociationResultToVisJs(self, fpgrowth):
+    async def convert_association_result_to_vis_js(self, fpgrowth: Fpgrowth):
         vis = None
         self._logger.info("-----convert association result to vis.js-----")
         self._logger.info(fpgrowth)
         if fpgrowth is not None:
             try:
                 self._logger.debug("debug in if content")
-                vis = fpgrowth.convertToVisJs()
+                vis = fpgrowth.convert_to_vis_js()
                 self._logger.debug("----- ----converted fpgrowth to vis.js-----")
                 vis = await self._setVisNodeLabel(vis)
                 self._logger.debug("----- ----set label for vis.js-----")
@@ -73,19 +66,19 @@ class BasketAssociationDomainService(AbstractDomainService):
         return vis
 
     async def _setVisNodeLabel(self, vis):
-        productsApi = ProductsApi(self._apiConfig)
+        productsApi = ProductsApi()
         result = VisJs()
         try:
             for node in vis.nodeList:
                 product = await Product.filter(
-                    contract_id = self._loginAccount.contractId,
-                    product_id = node.id
+                    contract_id=self.login_account.contract_id,
+                    product_id=node.id
                 ).first()
                 self._logger.debug(repr(product))
 
                 if product is None:
                     self._logger.info("fetching product id: {}".format(node.id))
-                    productByApi = productsApi.getProductById(node.id)
+                    productByApi = productsApi.get_product_by_id(node.id)
                     if productByApi is None:
                         self._logger.info("productsApi.getProductById is failed.")
                         node.label = "unknown"
@@ -93,9 +86,9 @@ class BasketAssociationDomainService(AbstractDomainService):
                         continue
                     self._logger.debug(productByApi)
                     product = await Product.create(
-                        contract_id = self._loginAccount.contractId,
-                        product_id = productByApi['productId'],
-                        name = productByApi['productName']
+                        contract_id=self.login_account.contract_id,
+                        product_id=productByApi.product_id,
+                        name=productByApi.product_name
                         # color = productByApi['color'],
                         # size = productByApi['size'],
                         # price = productByApi['price']
@@ -109,28 +102,40 @@ class BasketAssociationDomainService(AbstractDomainService):
 
         result.edgeList = vis.edgeList
         return result
-    
-    async def convertAssociationResultToPickUpMessage(self, fpgrowth, storeId, dateFrom, dateTo):
-        store = await self.targetStore
 
-        productFrom = None
-        productTo = None
+    async def convert_association_result_to_pickup_message(
+        self,
+        fpgrowth,
+        storeId,
+        date_from,
+        date_to
+    ):
+        store = await self.target_store
+
+        product_from = None
+        product_to = None
         if len(fpgrowth.result) > 0:
-            productFromIdList = [result['id'] for result in fpgrowth.result[0]['from']]
-            productToIdList = [result['id'] for result in fpgrowth.result[0]['to']]
-            productFrom = await Product.filter(
-                contract_id = self._loginAccount.contractId,
-                product_id__in = productFromIdList
+            product_from_id_list = [
+                result['id']
+                for result in fpgrowth.result[0]['from']
+            ]
+            product_to_id_list = [
+                result['id']
+                for result in fpgrowth.result[0]['to']
+            ]
+            product_from = await Product.filter(
+                contract_id=self.login_account.contract_id,
+                product_id__in=product_from_id_list
             ).all()
-            productTo = await Product.filter(
-                contract_id = self._loginAccount.contractId,
-                product_id__in = productToIdList
+            product_to = await Product.filter(
+                contract_id=self.login_account.contract_id,
+                product_id__in=product_to_id_list
             ).all()
         message = {
             'store': store,
-            'from': dateFrom,
-            'to': dateTo,
-            'productFrom': productFrom,
-            'productTo': productTo,
+            'from': date_from,
+            'to': date_to,
+            'productFrom': product_from,
+            'productTo': product_to,
         }
         return message

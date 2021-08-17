@@ -1,35 +1,53 @@
-from datetime import datetime
-
-import app.database as db
-
+from typing import TypeVar, Type
+from logging import Logger
+from SmaregiPlatformApi import (
+    smaregi_config,
+    Config as SmaregiConfig
+)
 from app import logger
+from app.models import Account
 from app.config import AppConfig
-from app.lib.Smaregi.config import config as SmaregiConfig
+from app.entities.AccessToken import AccessToken
+
+
+T = TypeVar('T', bound="AbstractWebhook")
 
 
 class AbstractWebhook():
-    def __init__(self, account):
-        self._accessAccount = account
-        self._logger = None
-
+    def __init__(self, account: 'Account'):
+        self._access_account: 'Account' = account
+        self._logger: Logger
 
     @classmethod
-    async def createInstance(cls, account):
+    async def create_instance(cls: Type[T], account: 'Account') -> T:
         webhook = cls(account)
-        webhook._logger = await logger.getLogger(account)
+        if account is not None:
+            webhook._logger = await logger.get_logger(account.contract_id)
         return webhook
 
+    def with_smaregi_api(
+        self,
+        _access_token: AccessToken,
+        _contract_id
+    ):
+        self._app_config = AppConfig()
+        if self._app_config.ENV_DIVISION in (
+            AppConfig.ENV_DIVISION_MOCK,
+            AppConfig.ENV_DIVISION_LOCAL,
+            AppConfig.ENV_DIVISION_STAGING,
+        ):
+            smaregi_env = SmaregiConfig.ENV_DIVISION_DEVELOPMENT
+        else:
+            smaregi_env = SmaregiConfig.ENV_DIVISION_PRODUCTION
 
-    def withSmaregiApi(self, _accessToken, _contractId):
-        self._appConfig = AppConfig()
-        self._apiConfig = SmaregiConfig(
-            self._appConfig.ENV_DIVISION,
-            self._appConfig.SMAREGI_CLIENT_ID,
-            self._appConfig.SMAREGI_CLIENT_SECRET,
+        config = SmaregiConfig(
+            smaregi_env,
+            _contract_id,
+            self._app_config.SMAREGI_CLIENT_ID,
+            self._app_config.SMAREGI_CLIENT_SECRET,
+            _access_token,
             self._logger
         )
-        self._apiConfig.accessToken = _accessToken
-        self._apiConfig.contractId = _contractId
+        smaregi_config.set_by_object(config)
 
         return self
-

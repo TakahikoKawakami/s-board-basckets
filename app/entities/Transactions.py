@@ -1,4 +1,4 @@
-from app.lib.Smaregi.API.POS.entities import TransactionHead, TransactionDetail
+from SmaregiPlatformApi.entities import TransactionHead, TransactionDetail
 
 class Transaction():
     """取引entity

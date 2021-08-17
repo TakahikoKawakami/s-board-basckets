@@ -29,6 +29,7 @@ def get(reqSession, _key):
     except Exception:
         return None
 
+
 def set(respSession, _key, value):
     respSession[_key] = value
 

@@ -3,10 +3,20 @@ from dateutil.relativedelta import relativedelta
 
 from marshmallow import Schema, fields, validates, validates_schema, ValidationError
 
+
 class AccosiationCondition(Schema):
-    # store_id = fields.String(required=True)
-    date_from = fields.Date(required=True)
-    date_to = fields.Date(required=True)
+    store_id = fields.String(
+        required=True,
+        error_messages={"required": "[店舗選択] 設定画面から、店舗を選択してください"}
+    )
+    date_from = fields.Date(
+        required=True,
+        error_messages={"required": "[開始日] 開始日を選択してください"}
+    )
+    date_to = fields.Date(
+        required=True,
+        error_messages={"required": "[終了日] 終了日を選択してください"}
+    )
 
     class Meta:
         strict = True

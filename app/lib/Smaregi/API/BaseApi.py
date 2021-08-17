@@ -7,7 +7,7 @@ class BaseApi():
         # self.logger = self.config.logger
 
 
-    def _getBase64Encode(self, string):
+    def _get_base64_encode(self, string):
         return base64.b64encode(string)
 
     

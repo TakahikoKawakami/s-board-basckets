@@ -1,14 +1,11 @@
 import numpy as np
 import itertools
-from scipy.sparse import lil_matrix  # other types would convert to LIL anyway
 import ast
 import ujson
 from orangecontrib.associate import fpgrowth as fp
-import logging
 
 from app import logger
 from app.entities.Baskets import Basket
-from app.domains.ProductsRepository import ProductsRepository
 from app.entities.VisJs import VisJs
 
 
@@ -36,7 +33,7 @@ class Fpgrowth():
         """.format(len(self._patterns), self._rules, self._stats, len(self._result))
 
     @staticmethod
-    def createByDataList(_list, _count, _logger):
+    def createByDataList(_list, _count, _logger) -> 'Fpgrowth':
         pyfpgrowth = Fpgrowth()
         if _logger is not None:
             pyfpgrowth._logger = _logger
@@ -242,8 +239,7 @@ class Fpgrowth():
 
         return self
 
-
-    def convertToVisJs(self):
+    def convert_to_vis_js(self) -> VisJs:
         # rule作成の前にあらかじめ確認しないデータを省く必要がある？
         vis = VisJs()
 
@@ -259,7 +255,8 @@ class Fpgrowth():
         self._logger.info("nodeGroup: {}件".format(len(self._result)))
         for nodeGroup in self._result:
             # edgesがlimitを超えたら了
-            if (len(vis.edgeList) > self.MAX_EDGE_COUNT): break
+            if (len(vis.edgeList) > self.MAX_EDGE_COUNT):
+                break
 
             # edgeから見ていく（キーの要素数が1、要素の要素数が1の場合）
             # edgeのfrom, toで、まだnodeにない場合はnodeに格納
@@ -270,25 +267,25 @@ class Fpgrowth():
                     self._logger.info("find 'from' node id: {}".format(nodeFrom["id"]))
 
                     vis.nodeList.append(vis.Node(
-                        id = nodeFrom["id"],
-                        label = nodeFrom["label"],
-                        uri = "/"
+                        id=nodeFrom["id"],
+                        label=nodeFrom["label"],
+                        uri="/"
                     ))
             for node in nodeGroup['to']:
                 nodeTo = node
                 if (nodeTo["id"] not in [node.id for node in vis.nodeList]):
                     self._logger.info("find 'to' node id: {}".format(nodeTo["id"]))
                     vis.nodeList.append(vis.Node(
-                        id = nodeTo["id"],
-                        label = nodeTo["label"],
-                        uri = "/"
+                        id=nodeTo["id"],
+                        label=nodeTo["label"],
+                        uri="/"
                     ))
             
             if (len(nodeGroup['from']) == 1) and (len(nodeGroup['to']) == 1):
                 vis.edgeList.append(vis.Edge(
-                    fromNode = nodeGroup['from'][0]["id"],
-                    toNode = nodeGroup['to'][0]["id"],
-                    width = nodeGroup['lift'] / _maxLift * 5
+                    fromNode=nodeGroup['from'][0]["id"],
+                    toNode=nodeGroup['to'][0]["id"],
+                    width=nodeGroup['lift'] / _maxLift * 5
                 ))
         self._logger.info("---- convertion finished ----")
         self._logger.info(vis)

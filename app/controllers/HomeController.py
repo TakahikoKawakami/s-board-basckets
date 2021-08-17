@@ -1,8 +1,5 @@
 from app.config import templates
-from app.common.managers import SessionManager
 from logging import getLogger
-import json
-
 
 logger = getLogger(__name__)
 
@@ -19,5 +16,5 @@ def index(req, resp):
         resp.html = templates.render("home/welcome.pug")
 
 
-def favicon():
-    return app.send_static_file("favicon.ico")
+# def favicon():
+#     return app.send_static_file("favicon.ico")

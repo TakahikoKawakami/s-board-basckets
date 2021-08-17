@@ -9,6 +9,7 @@ link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
     p データがない日はまず同期をして下さい
     //- .container
     form(action="baskets/associate/result", method="get")
+        input#analyze-store-id(name="store_id", type="hidden", value="{{ displayStore.storeId }}")
         div(style="margin: 10px;")
             {% for error in message._schema %}
             span(style="color: var(--color__danger);") {{error}}<br>
@@ -25,6 +26,10 @@ link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
                 {% endfor %}
             div(style="margin: 10px;")
                 {% for error in message.date_from %}
+                span(style="color: var(--color__danger);") {{error}}<br>
+                {% endfor %}
+            div(style="margin: 10px;")
+                {% for error in message.store_id %}
                 span(style="color: var(--color__danger);") {{error}}<br>
                 {% endfor %}
     .basket-container
