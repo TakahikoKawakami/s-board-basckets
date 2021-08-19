@@ -123,7 +123,7 @@ tortoise-orm==0.17.1
 typesystem==0.2.4
 typing-extensions==3.7.4.3
 ujson==4.0.2
-urllib3==1.26.3
+urllib3==1.26.5
 uvicorn==0.13.2
 uvloop==0.14.0
 watchgod==0.6
