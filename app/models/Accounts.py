@@ -45,7 +45,7 @@ class Account(AbstractTortoiseModel):
 
     access_token = fields.CharField(max_length=1024)
     expiration_date_time = fields.DatetimeField()
-    status = fields.CharField(max_length=16)
+    status = fields.CharField(max_length=16, null=True)
     
     account_setting: fields.OneToOneRelation[AccountSetting] = fields.OneToOneField(
         "models.AccountSetting",

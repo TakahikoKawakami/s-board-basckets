@@ -95,6 +95,7 @@ class AccountDomainService(AbstractDomainService):
             if not _accountModel.accessToken.isAccessTokenAvailable():
                 _accessTokenForUpdate = self.getAccessTokenByContractId(_contractId)
                 _accountModel.accessToken = _accessTokenForUpdate
+                breakpoint()
                 await _accountModel.save()
             else:
                 _accessTokenForUpdate = _accountModel.accessToken
