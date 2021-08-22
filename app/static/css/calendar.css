@@ -9,7 +9,9 @@
 }
 
 .calendar-container {
-  width: 100%;
+  margin-left: 10px;
+  margin-right: 10px;
+  width: 95%;
   height: 100%;
   position: relative;
 }

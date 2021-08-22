@@ -122,7 +122,7 @@ scipy==1.6.0
 SecretStorage==3.3.0
 serverfiles==0.3.1
 six==1.15.0
-smaregipy @ git+https://github.com/shabaraba/SmaregiPy@f2d1695e05b83e7cdba2f0c8551fc6f4f1f0ff1b
+smaregipy @ git+https://github.com/shabaraba/SmaregiPy@f2d1695e05b83e7cdba2f0c8551fc6f4f1f0ff1b#egg=smaregipy
 sniffio==1.2.0
 SQLAlchemy==1.4.6
 starlette==0.13.8

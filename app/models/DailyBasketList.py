@@ -1,3 +1,4 @@
+from typing import List
 from tortoise import fields
 from app.common.abstracts.AbstractTortoiseModel import AbstractTortoiseModel
 from app.entities.Baskets import Basket
@@ -32,7 +33,7 @@ class DailyBasketList(AbstractTortoiseModel):
         return _result
 
     @baskets.setter
-    def baskets(self, basket_list: list['Basket']):
+    def baskets(self, basket_list: List['Basket']):
         string_list = \
             DailyBasketList._convert_basket_list_to_string(basket_list)
         self.basket_list = ujson.dumps(string_list)  # type: ignore
