@@ -1,6 +1,7 @@
 import datetime
 import pytz
 import json
+from typing import List
 
 from smaregipy.entities.transaction import HeadEntity, DetailEntity
 
@@ -50,7 +51,7 @@ class Basket():
 
     def set_by_transaction_detail_list(
         self,
-        _transaction_detail_list: list['DetailEntity']
+        _transaction_detail_list: List['DetailEntity']
     ) -> None:
         """取引明細からバスケットentityに必要なデータを抽出、セットします
 

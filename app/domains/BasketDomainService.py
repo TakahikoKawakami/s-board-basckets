@@ -1,3 +1,4 @@
+from typing import List, Dict
 import json
 import datetime
 
@@ -56,7 +57,7 @@ class BasketDomainService(AbstractDomainService):
 
     async def register_basket_by_transaction_list(
         self,
-        transaction_list: list['Transaction']
+        transaction_list: List['Transaction']
     ) -> None:
         """取引entityリストからバスケットデータを作成し、DBに登録します
 
@@ -104,7 +105,7 @@ class BasketDomainService(AbstractDomainService):
 
     async def register_basket_by_gzip_url_list(
         self,
-        url_list: list[str]
+        url_list: List[str]
     ) -> None:
         """Gzip圧縮された取引明細データがおかれているurlリストから、バスケットデータを作成し、DBに登録します
 
@@ -154,8 +155,8 @@ class BasketDomainService(AbstractDomainService):
 
     def _get_transaction_detail_list_from_gzip_url_list(
         self,
-        url_list: list[str]
-    ) -> dict[int, list['TransactionDetail']]:
+        url_list: List[str]
+    ) -> Dict[int, List['TransactionDetail']]:
         """Gzip圧縮された取引明細ファイルをurlリストから順に取得し、取引ヘッダIDをキー、その明細リストを要素に持つ辞書を返します
 
         Returns:
