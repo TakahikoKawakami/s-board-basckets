@@ -27,7 +27,7 @@ route = Blueprint('accounts', __name__, url_prefix='/accounts')
 
 
 class ProductController():
-    __init__(self, api):
+    def __init__(self, api):
         self.smaregiApi = api
     
     def network(request):

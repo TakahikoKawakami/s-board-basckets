@@ -15,10 +15,12 @@ class Product(AbstractTortoiseModel):
     category_id = fields.IntField(null=True)
     group_code_id = fields.CharField(max_length=255, null=True)
 
-
     class Meta:
         abstract=False
         table="products"
+    
+    def __repr__(self) -> str:
+        return f'Products(product_id: "{self.product_id}", name: "{self.name}", category_id: "{self.category_id}"'
 
     @property
     def productId(self) ->int:

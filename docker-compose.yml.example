@@ -1,26 +1,27 @@
 version: '3.7'
 
 services:
-    nginx-proxy:
-        hostname: nginx-proxy
-        container_name: nginx-proxy
-        image: nginx:latest
-        ports:
-            - 80:80
-        volumes:
-            - ./nginx/default.conf:/etc/nginx/default.conf
-            - ./nginx/conf.d:/etc/nginx/conf.d
     responder:
         hostname: responder
         container_name: responder
-        build: "./app"
+        build: 
+          context: "./app"
+          args:
+            - GIT_USER_NAME: ""
+            - GIT_USER_EMAIL: ""
+            - USE_ULTRAHOOK: false
+            - ULTRAHOOK_KEY: ""
+            - ULTRAHOOK_URL: ""
+            - ULTRAHOOK_PORT: 5500
         restart: always
         tty: true # コンテナを起動し続ける
-        expose:
-            - "80"
+        ports:
+            - 5500:5500
         # command: /bin/sh -c "python /root/run.py"
         volumes:
-            - ".:/root"
+            - ".:/var/www/html"
+            - ".volumes/python_packages:/home/vscode/.local/lib/python3.9/site-packages/"
+            - ".volumes/zplug:/home/vscode/.zplug/"
     database:
         image: mysql:5.7
         hostname: mysql
@@ -36,5 +37,3 @@ services:
             - ./database/data:/var/lib/mysql
             - ./database/my.cnf:/etc/mysql/conf.d/my.cnf
             - ./database/sql:/docker-entrypoint-initdb.d
-        ports:
-            - 3306:3306

@@ -1,5 +1,6 @@
-from app.lib.Smaregi.entities import Authorize
+from smaregipy.entities.account import Account
 
-class AccessToken(Authorize.AccessToken):
-    def __init__(self, _accessToken, _expirationDatetime):
-        super().__init__(_accessToken, _expirationDatetime)
+
+class AccessToken(Account.AccessToken):
+    def __init__(self, _access_token, _expiration_datetime):
+        super().__init__(_access_token, _expiration_datetime)

@@ -1,7 +1,8 @@
-import responder
+import responder.templates
+import responder.background
 import os
 import datetime
-from os.path import join, dirname
+from os.path import join
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -12,12 +13,20 @@ backgroundQueue = responder.background.BackgroundQueue()
 templates = responder.templates.Templates(
     directory="app/templates"
 )
+
+
 # staticをjinja2で解決するためにstaticフィルタを定義
 def static_filter(path):
+
     # directoryで指定したtemplatesと同階層ががroot扱い？
-    return '/static/' + path + '?v=' + datetime.datetime.today().strftime('%y%m%d%H%M%S%F')
+    return '/static/' + path + \
+        '?v=' + datetime.datetime.today().strftime('%y%m%d%H%M%S%F')
+
+
 def node_modules_filter(path):
     return '/static/node_modules/' + path
+
+
 # staticをフィルタに追加
 # v1系ではjinja_envだったが、v2からからtemplates._envに変更された
 templates._env.filters['css'] = static_filter
@@ -36,12 +45,13 @@ load_dotenv(dotenv_path)
 
 class AppConfig(object):
     """base config"""
+    APP_VERSION = str('1.0.3')
 
     ENV_DIVISION = os.environ.get("ENV_DIVISION")
-    
-    SMAREGI_CLIENT_ID = os.environ.get('SMAREGI_CLIENT_ID')
-    SMAREGI_CLIENT_SECRET = os.environ.get('SMAREGI_CLIENT_SECRET')
-    
+
+    SMAREGI_CLIENT_ID = os.environ.get('SMAREGI_CLIENT_ID', '')
+    SMAREGI_CLIENT_SECRET = os.environ.get('SMAREGI_CLIENT_SECRET', '')
+
     SECRET_KEY = os.environ.get('SECRET_KEY')
 
     """for flask"""
@@ -50,24 +60,21 @@ class AppConfig(object):
     JSON_AS_ASCII = False
     JSON_SORT_KEYS = False
 
-    APP_URI = os.environ.get('APP_URI')
+    APP_URI = os.environ.get('APP_URI', '')
+    CALLBACK_URI = os.environ.get('CALLBACK_URI')
+    if CALLBACK_URI is None:
+        CALLBACK_URI = APP_URI
 
     SQLALCHEMY_DATABASE_URI = ''
     SQLALCHEMY_NATIVE_UNICODE = 'utf-8'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    DATABASE_NAME = os.environ.get('DB_NAME')
-    DATABASE_FILE = BASE_DIR / DATABASE_NAME
-    DATABASE_ENGINE = None
-    DATABASE_URI = None
-    SQLALCHEMY_DATABASE_URI = None
-
     ENV_DIVISION_MOCK = 'MOCK'
     ENV_DIVISION_LOCAL = 'LOCAL'
     ENV_DIVISION_STAGING = 'STAGING'
     ENV_DIVISION_PRODUCTION = 'PROD'
-    
-    DATABASE_CONNECTION = os.environ.get('DB_CONNECTION') # mysql, sqlite3, etc.
+
+    DATABASE_CONNECTION = os.environ.get('DB_CONNECTION')  # mysql,sqlite3,etc.
     DATABASE_USERNAME = os.environ.get('DB_USERNAME')
     DATABASE_PASSWORD = os.environ.get('DB_PASSWORD')
     DATABASE_HOST = os.environ.get('DB_HOST')
@@ -80,8 +87,9 @@ class AppConfig(object):
     elif (ENV_DIVISION == ENV_DIVISION_STAGING):
         DEBUG = False
         TESTING = True
-    elif (ENV_DIVISION == ENV_DIVISION_LOCAL or ENV_DIVISION == ENV_DIVISION_MOCK):
+    elif (
+        ENV_DIVISION == ENV_DIVISION_LOCAL or
+        ENV_DIVISION == ENV_DIVISION_MOCK
+    ):
         DEBUG = True
         TESTING = True
-    
-

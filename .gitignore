@@ -1,4 +1,14 @@
+# pipenv and pyenv
+3.8
+install
+versions
+
+.volumes
 .vscode
+.ssh
+.vim
+.zcompdump
+.zplug
 .npm
 .config
 .local

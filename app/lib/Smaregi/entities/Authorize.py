@@ -1,13 +1,13 @@
 import datetime
 import pytz
 
+
 class UserInfo():
     def __init__(self, json):
         self._sub = json['sub']
         self._contractId = json['contract']['id']
         self._isOwner = json['contract']['is_owner']
 
-    
     @property
     def contractId(self):
         return self._contractId
@@ -16,7 +16,6 @@ class UserInfo():
 class UserAccessToken():
     def __init__(self, _accessToken):
         self._accessToken = _accessToken
-    
 
     @property
     def accessToken(self):
@@ -45,12 +44,12 @@ class AccessToken():
         if type(value) == str:
             value = datetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S %z')
         self._expirationDatetime = value
-        
-    def isAccessTokenAvailable(self):
+
+    def isAccess_token_available(self):
         if self.accessToken is None:
             return False
-        if self.expirationDatetime is not None:
+        if self.expiration_datetime is not None:
             now = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
-            if (self.expirationDatetime < now):
+            if (self.expiration_datetime < now):
                 return False
         return True

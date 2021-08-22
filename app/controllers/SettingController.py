@@ -1,61 +1,56 @@
-import datetime
-
-from app.config import templates
-from app.common.managers import SessionManager, HttpManager
 from app.common.abstracts.AbstractController import AbstractController
-from app.domains.AccountDomainService import AccountDomainService
-from app.domains.BasketDomainService import BasketDomainService
 from app.domains.StoreDomainService import StoreDomainService
 
 
 class AccountStore(AbstractController):
-    def __init__(self) ->None:
+    def __init__(self) -> None:
         super().__init__()
 
     async def on_get(self, req, resp):
         self._logger.info('get AccountStore')
-        storeDomainService = StoreDomainService(self._loginAccount)
-        storeList = await storeDomainService.getStoreList()
+        store_domain_service = StoreDomainService(self.login_account)
+        store_list = await store_domain_service.get_store_list()
 
-        jsonEncoded = []
-        for store in storeList:
-            jsonEncoded.append(await store.serialize)
+        json_encoded = []
+        for store in store_list:
+            json_encoded.append(await store.serialize())
 
-        resp.media = jsonEncoded
+        resp.media = json_encoded
         return
-        
+
     async def on_put(self, req, resp):
         self._logger.info('put AccountStore')
         try:
-            storeDomainService = StoreDomainService(self._loginAccount)
-            await storeDomainService.deleteAllStores()
-            await storeDomainService.syncAllStores()
+            store_domain_service = StoreDomainService(self.login_account)
+            await store_domain_service.delete_all_stores()
+            await store_domain_service.sync_all_stores()
 
             resp.media = {
                 "status": 200
-   	        }
+            }
         except Exception as e:
             self._logger.exception('raise error: %s', e)
             resp.media = {
                 "status": 500
-   	        }
+            }
         return
 
+
 class AccountSetting(AbstractController):
-    def __init__(self) ->None:
+    def __init__(self) -> None:
         super().__init__()
 
     async def on_get(self, req, resp):
         self._logger.info('get AccountSetting')
-        accountSetting = await self._loginAccount.accountSetting
-        jsonEncoded = await accountSetting.serialize
-        resp.media = jsonEncoded
+        account_setting = await self.login_account.account_setting_model
+        json_encoded = await account_setting.serialize()
+        resp.media = json_encoded
         return
         
     async def on_post(self, req, resp):
         self._logger.info('post AccountSetting')
         request = await req.media()
-        await self._accountDomainService.saveAccountSetting(request)
+        await self._account_domain_service.save_account_setting(request)
         resp.media = {
             "status": 200
         }
