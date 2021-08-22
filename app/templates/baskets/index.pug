@@ -160,7 +160,7 @@ script.
                     if (hasBasketInApiResponseData(element)){
                         $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
                     } else {
-                        $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasEmptyBasket');
+                        /* $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasEmptyBasket'); */
                     }
                 });
                 checkSyncBasketsAreFinished();
@@ -255,7 +255,7 @@ script.
                     if (hasBasketInApiResponseData(response.data[0])> 0){
                         $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
                     } else {
-                        $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-number").addClass('hasEmptyBasket');
+                        /* $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-number").addClass('hasEmptyBasket'); */
                     }
                     removeLoadingDateFromCookie(dateStr);
                 } else {
