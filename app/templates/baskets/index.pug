@@ -3,7 +3,25 @@
 link(rel="stylesheet", href="{{ 'fullcalendar/main.css' | node_modules }}")
 link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
 
+
 #basket-main
+    h1 お知らせ
+    #notification(style="background-color:white; height: 75px; width: 85%; overflow-y: scroll; margin-bottom: 15px;")
+    #notification-modal.modal
+        .modal__background.notification_modal__close
+            .modal__content
+                .modal__content__inner
+                    .date
+                    .message
+                    input(type="hidden", name="target_date")
+                    #button__for__data.button__group
+                        button.sync(stile="display:none;") 同期する
+                        button.resync(stile="display:none;") 再同期する
+                        button.delete(stile="display:none;") 削除する
+                    #button__for__analyze.button__group
+                        button#select_start_date 開始日に指定する
+                        button#select_end_date 終了日に指定する
+
     h1 分析ページ
     p カレンダーをクリックして、分析する期間を指定しましょう
     p データがない日はまず同期をして下さい
@@ -67,7 +85,58 @@ link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
 
 script(src="{{ 'fullcalendar/main.js' | node_modules }}")
 script.
+    function showNotificationModal(id) {
+        getNotification(id)
+            .then(function (response) {
+                notification = JSON.parse(response)
+                $('#notification-modal .message').html(notification.detail);
+                $('#notification-modal').fadeIn(200);
+            })
+    }
+
+    async function getAllNotifications() {
+        const resp = await axios.get('/api/notifications', {})
+        return resp.data
+    };
+
+    async function getNotification(id) {
+        const uri = '/api/notifications/' + id;
+        const resp = await axios.get(uri, {})
+        return resp.data
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
+        showNotification()
+
+        function showNotification() {
+            getAllNotifications()
+                .then(function (response) {
+                    console.log(response);
+                    const notification = JSON.parse(response[0]);
+                    console.log(notification.summary);
+
+                    summaryLiHtmlList = response.map(function(notification){
+                        var each = JSON.parse(notification);
+                        console.log(each.timestamp)
+                        return (
+                            "<li>" + 
+                                each.timestamp + 
+                                "<a class='notification_modal__open' onclick='showNotificationModal(" + each.notification_id + ")'>" + each.summary + "</a>" +
+                            "</li>"
+                        )
+                    });
+
+                    liHtml = summaryLiHtmlList.join("\n");
+
+                    $('#notification').html( "<ul>" + liHtml + "</ul>");
+                    // $('#notification').html(notification.detail);
+                });
+        }
+
+        $(document).on('click', '.notification_modal__close', function(event) {
+            $('#notification-modal').fadeOut(200);
+        });
+
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
