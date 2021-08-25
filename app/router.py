@@ -40,6 +40,14 @@ def add_routers(api: responder.API):
         '/api/baskets',
         ApiControllers.ApiBasketController.ApiBasket
     )
+    api.add_route(
+        "/api/notifications/{notification_id}",
+        ApiControllers.notification.NotificationController
+    )
+    api.add_route(
+        '/api/notifications',
+        ApiControllers.notification.NotificationCollectionController
+    )
 
     api.add_route(
         '/webhook',
