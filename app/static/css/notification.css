@@ -1,0 +1,10 @@
+.notification__list {
+    display: flex;
+    justify-content: center;
+    margin: 10px 50px;
+}
+
+.notification__list > * {
+    margin: auto 50px;
+}
+

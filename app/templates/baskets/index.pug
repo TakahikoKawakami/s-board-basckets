@@ -2,25 +2,24 @@
 {% block body %}
 link(rel="stylesheet", href="{{ 'fullcalendar/main.css' | node_modules }}")
 link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
+link(rel="stylesheet", href="{{ 'css/notification.css' | css }}")
 
 
 #basket-main
     h1 お知らせ
-    #notification(style="background-color:white; height: 75px; width: 85%; overflow-y: scroll; margin-bottom: 15px;")
+    #notification(
+        style="background-color:white; height: 75px; width: 45%;margin-bottom: 15px; font-size:18px; "
+    )
     #notification-modal.modal
         .modal__background.notification_modal__close
             .modal__content
                 .modal__content__inner
-                    .date
-                    .message
-                    input(type="hidden", name="target_date")
-                    #button__for__data.button__group
-                        button.sync(stile="display:none;") 同期する
-                        button.resync(stile="display:none;") 再同期する
-                        button.delete(stile="display:none;") 削除する
-                    #button__for__analyze.button__group
-                        button#select_start_date 開始日に指定する
-                        button#select_end_date 終了日に指定する
+                    .modal__content__inner__header
+                        .date
+                        h2.title
+                    .modal__content__inner__body
+                        .message
+                    .modal__content__inner__footer
 
     h1 分析ページ
     p カレンダーをクリックして、分析する期間を指定しましょう
@@ -30,7 +29,6 @@ link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
             #calendar
             .calendar-loading
                 .loader
-            //- div testtesttest
         .condition-container
             form(action="baskets/associate/result", method="get")
                 input#analyze-store-id(name="store_id", type="hidden", value="{{ displayStore.storeId }}")
@@ -89,6 +87,8 @@ script.
         getNotification(id)
             .then(function (response) {
                 notification = JSON.parse(response)
+                $('#notification-modal .date').html(notification.timestamp);
+                $('#notification-modal .title').html(notification.summary);
                 $('#notification-modal .message').html(notification.detail);
                 $('#notification-modal').fadeIn(200);
             })
@@ -119,8 +119,8 @@ script.
                         var each = JSON.parse(notification);
                         console.log(each.timestamp)
                         return (
-                            "<li>" + 
-                                each.timestamp + 
+                            "<li class='notification__list'>" + 
+                                "<div>" + each.timestamp + "</div>" + 
                                 "<a class='notification_modal__open' onclick='showNotificationModal(" + each.notification_id + ")'>" + each.summary + "</a>" +
                             "</li>"
                         )
