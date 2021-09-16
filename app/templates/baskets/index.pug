@@ -7,9 +7,7 @@ link(rel="stylesheet", href="{{ 'css/notification.css' | css }}")
 
 #basket-main
     h1 お知らせ
-    #notification(
-        style="background-color:white; height: 75px; width: 45%;margin-bottom: 15px; font-size:18px; "
-    )
+    #notification.notification__list__box
     #notification-modal.modal
         .modal__background.notification_modal__close
             .modal__content
@@ -121,7 +119,7 @@ script.
                         return (
                             "<li class='notification__list'>" + 
                                 "<div>" + each.timestamp + "</div>" + 
-                                "<a class='notification_modal__open' onclick='showNotificationModal(" + each.notification_id + ")'>" + each.summary + "</a>" +
+                                "<a class='cursor__link notification_modal__open' onclick='showNotificationModal(" + each.notification_id + ")'>" + each.summary + "</a>" +
                             "</li>"
                         )
                     });

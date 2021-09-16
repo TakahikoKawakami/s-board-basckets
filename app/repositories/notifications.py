@@ -25,39 +25,14 @@ all_notifications = [
                     <h3>客層-商品分析機能</h3>
                     <p>
                         【客層-商品】間の関連性を分析できる機能を追加しました。<br>
-                        【分析対象】のプルダウンメニューからお選びいただき、分析開始ボタンを押下いただくことで利用できます。
+                        【分析対象】のプルダウンメニューからお選びいただき、分析開始ボタンを押下いただくことで利用できます。<br>
+                        ※9月20日以前に同期した取引は利用できません。再同期をお願いいたします。
                     </p>
-                </li>
-                <li>
-                    <h3>お知らせ機能</h3>
-                    <p>現在ご覧いただいているような、バージョンアップや不具合修正のお知らせを<br>
-                    表示する機能を実装しました。</p>
-                </li>
-                <li>
-                    <h3>お知らせ機能</h3>
-                    <p>現在ご覧いただいているような、バージョンアップや不具合修正のお知らせを<br>
-                    表示する機能を実装しました。</p>
                 </li>
             </ol>
         """,
-        timestamp=date(2021, 8, 25)
+        timestamp=date(2021, 9, 13)
     ),
-    Notification(
-        notification_id=NotificationId.parse_obj(1),
-        summary='test2',
-        detail="""
-            <p>paragraph</p>
-        """,
-        timestamp=date(2021, 8, 25)
-    ),
-    Notification(
-        notification_id=NotificationId.parse_obj(2),
-        summary='test3',
-        detail="""
-            <a href="https://google.com">google</a>
-        """,
-        timestamp=date(2021, 8, 25)
-    )
 ]
 
 
