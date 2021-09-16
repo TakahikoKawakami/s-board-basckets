@@ -1,4 +1,4 @@
-from app.config import AppConfig
+    from app.config import AppConfig
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.common.globals import globals
 from app.common.managers import SessionManager
@@ -132,7 +132,6 @@ class AccountDomainService(AbstractDomainService):
             smaregipy.config.update_access_token(
                 globals.logged_in_account.access_token_entity
             )
-
             return
 
         # それでもなければ取得、dbとセッションに保存
@@ -259,5 +258,4 @@ class AccountDomainService(AbstractDomainService):
         await account_setting.save()
         SessionManager.set(self._session, SessionManager.KEY_TARGET_STORE, account_setting.display_store_id)
         # json = await accountSetting.serialize
-
         return

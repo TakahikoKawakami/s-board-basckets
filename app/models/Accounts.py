@@ -23,6 +23,17 @@ class Account(AbstractTortoiseModel):
     """
     アカウントモデル
     """
+    STATUS_START = 'start'
+    STATUS_STOP = 'stop'
+
+    access_token = fields.CharField(max_length=1024)
+    expiration_date_time = fields.DatetimeField()
+    status = fields.CharField(max_length=16, null=True)
+    
+    account_setting: fields.OneToOneRelation[AccountSetting] = fields.OneToOneField(
+        "models.AccountSetting",
+        related_name="account"
+    )
 
     class Meta:
         abstract = False
