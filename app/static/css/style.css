@@ -306,3 +306,7 @@ nav {
 
   /* place-items: center; */
 }
+
+.cursor__link {
+    cursor: pointer;
+}
