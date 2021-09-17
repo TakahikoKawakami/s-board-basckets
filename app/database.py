@@ -14,12 +14,12 @@ db_url = "{}://{}:{}@{}:{}/{}".format(
 )
 
 TORTOISE_ORM = {
-    "connections": {"default":db_url},
+    "connections": {"default": db_url},
     "apps": {
-        "models": { # app名. relationのrelated_nameでは、{この名称}.{modelクラス名}
+        "models": {  # app名. relationのrelated_nameでは、{この名称}.{modelクラス名}
             "models": [
                 "app.models",
-                "aerich.models" # 最後に必要
+                "aerich.models"  # 最後に必要
             ],
             "default_connection": "default",
         },
@@ -28,9 +28,11 @@ TORTOISE_ORM = {
     'timezone': 'Asia/Tokyo',
 }
 
+
 async def init():
     await Tortoise.init(TORTOISE_ORM)
-    Tortoise.init_models(['app.models'], 'models') # necessary for relations
+    Tortoise.init_models(['app.models'], 'models')  # necessary for relations
+
 
 async def close():
     await Tortoise.close_connections()

@@ -3,12 +3,10 @@ import datetime
 import pytz
 
 import requests
-import json
-import time
-import logging
 
 from .BaseIdentificationApi import BaseIdentificationApi
-from ..entities.Authorize import *
+from ..entities.Authorize import UserInfo
+from Smareigi.entities.Authorize import UserInfo
 
 class AuthorizeApi(BaseIdentificationApi):
     def __init__(self, config, redirectUri):
@@ -69,4 +67,3 @@ class AuthorizeApi(BaseIdentificationApi):
         result = result.json()
         
         return UserAccessToken(result['access_token'])
-

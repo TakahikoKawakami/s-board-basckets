@@ -1,0 +1,40 @@
+.notification__list__box {
+    background-color: white;
+    height: 75px;
+    width: 45%;
+    margin-bottom: 15px;
+    font-size:18px; 
+    overflow-y: scroll;
+}
+
+@media screen and (max-width: 800px) {
+    .notification__list__box {
+        background-color: white;
+        height: 75px;
+        width: 90%;
+        margin-bottom: 15px;
+        font-size:18px; 
+        overflow-y: scroll;
+    }
+}
+
+.notification__list {
+    display: flex;
+    justify-content: center;
+    margin: 10px 50px;
+}
+
+.notification__list:not(:last-child) {
+    border-bottom: 1px solid;
+}
+
+.notification__list > * {
+    margin: auto 50px;
+}
+
+@media screen and (max-width: 1024px) {
+    .notification__list > * {
+        margin: auto 10px;
+    }
+}
+

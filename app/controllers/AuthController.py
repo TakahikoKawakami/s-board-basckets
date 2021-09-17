@@ -1,60 +1,55 @@
-import datetime
-from logging import getLogger
-
-from app.models import Accounts as models
-
-"""TODO: lib.Smaregiをpip installでimportできるようにする"""
-from app.lib.Smaregi.config import config as SmaregiConfig
-from app.lib.Smaregi.API.Authorize import AuthorizeApi
-
+from smaregipy import SmaregiPy
+from smaregipy.account import Account
 
 from app.common.managers import SessionManager
-from app.common.utils import DictionaryUtil
 from app.domains.AccountDomainService import AccountDomainService
 
 from app.config import AppConfig
 
-appConfig = AppConfig()
 
-apiConfig = SmaregiConfig(
-    appConfig.ENV_DIVISION,
-    appConfig.SMAREGI_CLIENT_ID,
-    appConfig.SMAREGI_CLIENT_SECRET
-)
-authorizeApi = AuthorizeApi(apiConfig, appConfig.APP_URI + '/accounts/login')
-
-logger = getLogger('flask.app')
+app_config = AppConfig()
+SmaregiPy.init_by_dict({
+    'env_division': AppConfig.ENV_DIVISION,
+    'smaregi_client_id': AppConfig.SMAREGI_CLIENT_ID,
+    'smaregi_client_secret': AppConfig.SMAREGI_CLIENT_SECRET,
+    'redirect_uri': AppConfig.APP_URI + '/accounts/login'
+})
 
 
 def authorize(req, resp):
-    logger.debug('authorize')
-    resp.redirect(authorizeApi.authorize())
+    resp.redirect(Account.authentication_uri())
+
 
 async def login(req, resp):
-    logger.info('login!!!')
-    code = DictionaryUtil.getByKey('code', req.params)
-    state = DictionaryUtil.getByKey('state', req.params)
+    code = req.params.get('code')
+    state = req.params.get('state')
 
-    logger.info('code: {code}, state: {state}')
     if (code is None or state is None):
         resp.redirect('/accounts/authorize', status_code=303)
         return
 
-    accountDomainService = AccountDomainService(req.session).withSmaregiApi(None, None)
+    account_domain_service = AccountDomainService(req.session)
     try:
-        account = await accountDomainService.loginByCodeAndState(code, state)
-    except Exception as e:
+        account = await account_domain_service.login_by_code_and_state(
+            code,
+            state
+        )
+    except Exception:
         resp.redirect('/', status_code=302)
         return
-    
-    SessionManager.set(resp.session, SessionManager.KEY_CONTRACT_ID, account.contractId)
-    if account.loginStatus == account.LoginStatusEnum.SIGN_UP:
+
+    SessionManager.set(
+        resp.session,
+        SessionManager.KEY_CONTRACT_ID,
+        account.contract_id
+    )
+    if account.login_status == account.LoginStatusEnum.SIGN_UP:
         SessionManager.set(resp.session, SessionManager.KEY_SIGN_UP, True)
     resp.redirect('/baskets', status_code=303)
     return
+
 
 async def logout(req, resp):
     resp.session.clear()
     resp.redirect('/', status_code=303)
     return
-

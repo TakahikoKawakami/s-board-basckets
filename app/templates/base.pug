@@ -39,7 +39,7 @@ html(lang="ja")
             main
                 {% block body %}
                 {% endblock %}
-            footer ver 1.0.2
+            footer ver {{ app_version }}
 
             #setting-modal.modal
                 .modal__background.setting_modal__close
@@ -87,6 +87,9 @@ html(lang="ja")
         //- select option
         script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js")
         script(src="{{ 'js/components/buttons/select.js' | static }}")
+
+        //- cookie
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
         //- vis.js	
         script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js")

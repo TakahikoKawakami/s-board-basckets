@@ -1,42 +1,29 @@
 import logging
 
-import app.common.managers.SessionManager as sessionManager
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
-from app.lib.Smaregi.API.POS.StoresApi import StoresApi
+
+from app.repositories import StoresRepository
 from app.models import Store
 
 
 class StoreDomainService(AbstractDomainService):
-    def __init__(self, loginAccount):
-        super().__init__(loginAccount)
-        self.withSmaregiApi(loginAccount.accessToken.accessToken, loginAccount.contractId)
-
-
-    async def getStoreList(self):
+    async def get_store_list(self):
         return await Store.filter(
-            contract_id = self._loginAccount.contractId
+            contract_id=self.login_account.contract_id
         ).all()
 
-    async def getDisplayStore(self):
-        accountSetting = await self._loginAccount.accountSetting
+    async def get_display_store(self):
+        account_setting = await self.login_account.account_setting_model
         return await Store.filter(
-            contract_id = self._loginAccount.contractId,
-            store_id = accountSetting.displayStoreId
+            contract_id=self.login_account.contract_id,
+            store_id=account_setting.display_store_id
         ).first()
 
-    async def deleteAllStores(self):
+    async def delete_all_stores(self):
         await Store.filter(
-            contract_id = self._loginAccount.contractId
+            contract_id=self.login_account.contract_id
         ).delete()
 
-    async def syncAllStores(self):
-        storesApi = StoresApi(self._apiConfig)
-        allStoreList = storesApi.getStoreList()
-        print(allStoreList)
-        for store in allStoreList:
-            print(store['storeId'])
-            await Store.create(
-                contract_id = self._loginAccount.contractId,
-                store_id = store["storeId"],
-                name = store["storeName"]
-            )
+    async def sync_all_stores(self):
+        all_store_list = await StoresRepository.get_all_with_smaregipy()
+        await StoresRepository.save_all(all_store_list)

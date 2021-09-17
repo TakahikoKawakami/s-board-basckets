@@ -264,14 +264,49 @@ nav {
 
 .date-range_group {
   display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: minmax(100px, 300px) auto minmax(100px, 300px) auto;
+  grid-template-rows: 1fr 1fr;
   width: 100%;
   align-items: center;
 
   /* place-items: center; */
 }
 
+.center {
+  width: 100%;
+  align-items: center;
+}
+
 .section__group {
   display: inline-block;
+}
+
+.two-column-container {
+    display: block;
+}
+@media screen and (min-width: 800px) {
+    .two-column-container {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+.condition-container > form{
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: auto;
+    padding-right: auto;
+}
+
+.inline-container {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: minmax(100px, 300px) auto minmax(100px, 300px);
+  width: 100%;
+  align-items: center;
+
+  /* place-items: center; */
+}
+
+.cursor__link {
+    cursor: pointer;
 }

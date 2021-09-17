@@ -2,35 +2,66 @@
 {% block body %}
 link(rel="stylesheet", href="{{ 'fullcalendar/main.css' | node_modules }}")
 link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
+link(rel="stylesheet", href="{{ 'css/notification.css' | css }}")
+
 
 #basket-main
+    h1 お知らせ
+    #notification.notification__list__box
+    #notification-modal.modal
+        .modal__background.notification_modal__close
+            .modal__content
+                .modal__content__inner
+                    .modal__content__inner__header
+                        .date
+                        h2.title
+                    .modal__content__inner__body
+                        .message
+                    .modal__content__inner__footer
+
     h1 分析ページ
     p カレンダーをクリックして、分析する期間を指定しましょう
     p データがない日はまず同期をして下さい
-    //- .container
-    form(action="baskets/associate/result", method="get")
-        div(style="margin: 10px;")
-            {% for error in message._schema %}
-            span(style="color: var(--color__danger);") {{error}}<br>
-            {% endfor %}
-        .date-range_group
-            input#analyze-from(name="date_from", placeholder="")
-            p ~ 
-            input#analyze-to(name="date_to", placeholder="")
-            button(type="submit") 分析開始
-        .from__group
-            div(style="margin: 10px;")
-                {% for error in message.date_to %}
-                span(style="color: var(--color__danger);") {{error}}<br>
-                {% endfor %}
-            div(style="margin: 10px;")
-                {% for error in message.date_from %}
-                span(style="color: var(--color__danger);") {{error}}<br>
-                {% endfor %}
-    div.basket-container
-        div.calendar-container
-            div#calendar
-        //- div testtesttest
+    .two-column-container
+        .calendar-container
+            #calendar
+            .calendar-loading
+                .loader
+        .condition-container
+            form(action="baskets/associate/result", method="get")
+                input#analyze-store-id(name="store_id", type="hidden", value="{{ displayStore.storeId }}")
+                div(style="margin: 10px;")
+                    {% for error in message._schema %}
+                    span(style="color: var(--color__danger);") {{error}}<br>
+                    {% endfor %}
+                .condition_group
+                    p 分析対象
+                    .date-range_group
+                        .center
+                            select#select-analyze-target.form__input(name='select_analyze_target')
+                                option(value='', disabled) 分析対象
+                                option(value='0') 商品 x 商品
+                                option(value='1') 客層 x 商品
+                    p 期間
+                    .date-range_group
+                        .inline-container
+                            input#analyze-from(name="date_from", placeholder="")
+                            p ~ 
+                            input#analyze-to(name="date_to", placeholder="")
+                    button(type="submit") 分析開始
+                .from__group
+                    div(style="margin: 10px;")
+                        {% for error in message.date_to %}
+                        span(style="color: var(--color__danger);") {{error}}<br>
+                        {% endfor %}
+                    div(style="margin: 10px;")
+                        {% for error in message.date_from %}
+                        span(style="color: var(--color__danger);") {{error}}<br>
+                        {% endfor %}
+                    div(style="margin: 10px;")
+                        {% for error in message.store_id %}
+                        span(style="color: var(--color__danger);") {{error}}<br>
+                        {% endfor %}
 
 
     #date-modal.modal
@@ -50,7 +81,60 @@ link(rel="stylesheet", href="{{ 'css/calendar.css' | css }}")
 
 script(src="{{ 'fullcalendar/main.js' | node_modules }}")
 script.
+    function showNotificationModal(id) {
+        getNotification(id)
+            .then(function (response) {
+                notification = JSON.parse(response)
+                $('#notification-modal .date').html(notification.timestamp);
+                $('#notification-modal .title').html(notification.summary);
+                $('#notification-modal .message').html(notification.detail);
+                $('#notification-modal').fadeIn(200);
+            })
+    }
+
+    async function getAllNotifications() {
+        const resp = await axios.get('/api/notifications', {})
+        return resp.data
+    };
+
+    async function getNotification(id) {
+        const uri = '/api/notifications/' + id;
+        const resp = await axios.get(uri, {})
+        return resp.data
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
+        showNotification()
+
+        function showNotification() {
+            getAllNotifications()
+                .then(function (response) {
+                    console.log(response);
+                    const notification = JSON.parse(response[0]);
+                    console.log(notification.summary);
+
+                    summaryLiHtmlList = response.map(function(notification){
+                        var each = JSON.parse(notification);
+                        console.log(each.timestamp)
+                        return (
+                            "<li class='notification__list'>" + 
+                                "<div>" + each.timestamp + "</div>" + 
+                                "<a class='cursor__link notification_modal__open' onclick='showNotificationModal(" + each.notification_id + ")'>" + each.summary + "</a>" +
+                            "</li>"
+                        )
+                    });
+
+                    liHtml = summaryLiHtmlList.join("\n");
+
+                    $('#notification').html( "<ul>" + liHtml + "</ul>");
+                    // $('#notification').html(notification.detail);
+                });
+        }
+
+        $(document).on('click', '.notification_modal__close', function(event) {
+            $('#notification-modal').fadeOut(200);
+        });
+
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -128,34 +212,36 @@ script.
         })
         
         function getDateListHavingBaskets(startStr, endStr) {
-            axios.get('/baskets', {
+            axios.get('/api/baskets', {
                 params: {
                     startDate: startStr,
                     endDate: endStr,
                 },
             })
             .then(function (response) {
+                $(".calendar-loading").hide();
                 resp = response.data
                 resp.forEach(function(element, index) {
                     var el = JSON.parse(element);
-                    $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                    $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-events").removeClass('loader');
+                    if (hasBasketInApiResponseData(element)){
+                        $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                    } else {
+                        /* $("td[data-date = " + el.target_date + " ]").find(".fc-daygrid-day-number").addClass('hasEmptyBasket'); */
+                    }
                 });
+                checkSyncBasketsAreFinished();
             })
             .catch(function (error) {
                 console.log(error);
             });
+            $(".calendar-loading").show();
         };
 
         $('#date-modal').find('.sync').click(function() {
             let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
-            syncBaskets(targetDate)
+            resyncBaskets(targetDate)
                 .then(function (response) {
-                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").removeClass('loader');
-                    if (response.data.length > 0) {
-                        $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
-                    } else {
-                        alert('同期できる取引データがありませんでした。')
-                    }
                     closeDateModal();
                 })
                 .catch(function (error) {
@@ -164,6 +250,8 @@ script.
             
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").addClass('loader');
+
+            addLoadingDateToCookie(targetDate);
             closeDateModal();
         });
         
@@ -171,12 +259,6 @@ script.
             let targetDate = $('#date-modal').find('input:hidden[name="target_date"]').val();
             resyncBaskets(targetDate)
                 .then(function (response) {
-                    $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").removeClass('loader');
-                    if (response.data.length > 0) {
-                        $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
-                    } else {
-                        alert('同期できる取引データがありませんでした。')
-                    }
                     closeDateModal();
                 })
                 .catch(function (error) {
@@ -185,6 +267,8 @@ script.
             
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-number").removeClass('hasBaskets');
             $("td[data-date = " + targetDate + " ]").find(".fc-daygrid-day-events").addClass('loader');
+
+            addLoadingDateToCookie(targetDate);
             closeDateModal();
         });
 
@@ -201,7 +285,7 @@ script.
         });
 
         async function deleteBaskets(dateStr) {
-            return axios.delete('/baskets', {
+            return axios.delete('/api/baskets', {
                 params: {
                     startDate: dateStr,
                     endDate: dateStr,
@@ -211,7 +295,7 @@ script.
 
         async function syncBaskets(dateStr) {
             let csrf = "{{ csrf_token }}"
-            return axios.put('/baskets', {
+            return axios.put('/api/baskets', {
                 csrf_token: csrf,
                 startDate: dateStr,
                 endDate: dateStr,
@@ -224,9 +308,94 @@ script.
             return result;
         }
 
+        async function getBasket(dateStr) {
+            const targetDateTimeStr = dateStr + "T00:00:00+09:00";
+            axios.get('/api/baskets', {
+                params: {
+                    startDate: targetDateTimeStr,
+                    endDate: targetDateTimeStr,
+                },
+            })
+            .then(function (response) {
+                if (response.data.length > 0) {
+                    $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-events").removeClass('loader');
+                    if (hasBasketInApiResponseData(response.data[0])> 0){
+                        $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-number").addClass('hasBaskets');
+                    } else {
+                        /* $("td[data-date = " + dateStr + " ]").find(".fc-daygrid-day-number").addClass('hasEmptyBasket'); */
+                    }
+                    removeLoadingDateFromCookie(dateStr);
+                } else {
+                    //- alert('同期できる取引データがありませんでした。')
+                }
+                return;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+
+        function hasBasketInApiResponseData(responseData) {
+            const data = JSON.parse(responseData);
+            const basketList = JSON.parse(data.basket_list);
+            return basketList.length > 0;
+        }
+
         function closeDateModal() {
             $('#date-modal').fadeOut(200);
         }
+
+        async function checkSyncBasketsAreFinished() {
+            let loadingDateStr = $.cookie("loading-date");
+            if (loadingDateStr === undefined) return;
+            let loadingDate = loadingDateStr.split(",");
+            if (loadingDate.length == 0) return;
+
+            try {
+                loadingDate.forEach((value, index) => {
+                    $("td[data-date = " + value + " ]").find(".fc-daygrid-day-events").addClass('loader');
+                    getBasket(value, value);
+                });
+            } catch (e) {
+                console.log(e);
+                $.removeCookie("loading-date");
+            }
+        }
+
+        function addLoadingDateToCookie(targetDate) {
+            let loadingDateStr = $.cookie("loading-date");
+            if (loadingDateStr !== undefined && loadingDateStr.split(",").length !== 0) {
+                let loadingDate = $.cookie("loading-date").split(",");
+                if (!loadingDate.includes(targetDate)) {
+                    loadingDate.push(targetDate);
+                }
+                $.cookie("loading-date", loadingDate.join(","));
+            } else {
+                $.cookie("loading-date", targetDate);
+            }
+        }
+
+        function removeLoadingDateFromCookie(targetDate) {
+            let loadingDateStr = $.cookie("loading-date");
+            if (loadingDateStr === undefined) return;
+            let loadingDate = loadingDateStr.split(",");
+            if (loadingDate.length == 0) return;
+
+            let removedLoadingDateArray = loadingDate.filter(x =>{
+                return x !== targetDate;
+            });
+            const removedLoadingDateStr = removedLoadingDateArray.join(",");
+            if (removedLoadingDateStr === "") {
+                $.removeCookie("loading-date");
+                return;
+            }
+
+            $.cookie("loading-date", removedLoadingDateStr);
+            return;
+        }
+
+        checkSyncBasketsAreFinished();
+        setInterval(checkSyncBasketsAreFinished, 10000);
     });
 
 {% endblock %}

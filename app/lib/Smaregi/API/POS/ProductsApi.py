@@ -1,6 +1,6 @@
 from urllib.parse import urlencode
 
-
+from .entities import Product
 from ..BaseServiceApi import BaseServiceApi
 
 
@@ -14,27 +14,23 @@ class ProductsApi(BaseServiceApi):
         pass
 
 
-    def getProductList(self, field=None, sort=None, whereDict=None):
-        contractId = self.config.contractId
-        self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
-        self.uri = self.uriPos + '/products'
-        
-        header = self._getHeader()
-        body = self._getBody('productId,productName', sort, whereDict)
-        
-        result = self._api(self.uri, header, body)
+    def getProductById(self, id: int, field = None, sort = None, whereDict:dict = None) -> 'Product':
+        """商品取得APIを実施します
 
-        self.logger.info(result)
-        return result
+        Raises:
+            Exception: 取得できなかった場合
 
-
-    def getProductById(self, id, field=None, sort=None, whereDict=None):
+        Returns:
+            Product: [description]
+        """
         contractId = self.config.contractId
         self.uriPos = self.config.uriApi + '/' + contractId + '/pos'
         self.uri = self.uriPos + '/products/' + id
         
         header = self._getHeader()
-        body = self._getBodyForDetail('productId,productName', sort, whereDict)
+        body = self._getQueryForDetail('productId,productName', sort, whereDict)
         
-        result = self._api(self.uri, header, body)
-        return result
+        response = self._apiGet(self.uri, header, body)
+        if response[0] != 200:
+            raise Exception(response[1])
+        return Product(response[1])
