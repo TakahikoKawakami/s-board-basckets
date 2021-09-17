@@ -1,4 +1,4 @@
-    from app.config import AppConfig
+from app.config import AppConfig
 from app.common.abstracts.AbstractDomainService import AbstractDomainService
 from app.common.globals import globals
 from app.common.managers import SessionManager
