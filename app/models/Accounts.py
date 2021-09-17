@@ -97,7 +97,7 @@ class Account(AbstractTortoiseModel):
     access_token = fields.CharField(max_length=1024)
     expiration_date_time = fields.DatetimeField()
     status = fields.CharField(max_length=16, null=True)
-    user_status = fields.IntEnumField(enum_type=StatusEnum)
+    user_status = fields.IntEnumField(enum_type=StatusEnum, null=True)
     plan = fields.IntEnumField(enum_type=PlanEnum, null=True)
     last_login_version = fields.CharField(max_length=32, null=True)
 

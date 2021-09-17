@@ -4,7 +4,7 @@
   width: 100%;
   top: 0px;
   left: 0px;
-  z-index: 1;
+  z-index: 10;
 }
 
 .modal__background {
@@ -39,11 +39,36 @@
 .modal__content__inner {
   position: relative;
   padding: 24px;
-  width: 100%;
-  height: 100%;
+  width: 90%;
+  height: 90%;
 
   display:grid;
   grid-template-columns: 1fr;
   place-items: center;
 }
 
+.modal__content__inner__header {
+  display:grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+
+}
+
+.modal__content__inner__body {
+    width: 90%;
+    height: 90%;
+    text-align: left;
+    overflow-y: scroll;
+}
+
+.modal__content__inner__body li{
+    margin-bottom: 20px;
+}
+
+.modal__content__inner__body *{
+    margin-bottom: 20px;
+}
+
+
+.modal__content__inner__footer {
+}

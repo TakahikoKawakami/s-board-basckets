@@ -18,7 +18,7 @@ class AbstractController():
         self._req = None
         self._resp = None
 
-    async def on_request(self, req, resp):
+    async def on_request(self, req, resp, *args, **kwargs):
         print('on_request')
         self._req = req
         self._resp = resp
