@@ -69,16 +69,21 @@ class BasketDomainService(AbstractDomainService):
         for transaction in transaction_list:
             self._logger.info(transaction.head.sum_date)
             _basket = Basket()
+            self._logger.info("set head")
             _basket.set_by_transaction_head(transaction.head)
+            self._logger.info("set details")
             _basket.set_by_transaction_detail_list(transaction.details)
 
-            daily_basket_list_tuple = await DailyBasketList.get_or_create(
-                contract_id=self.login_account.contract_id,
-                store_id=_basket.store_id,
-                target_date=_basket.target_date
-            )
+            self._logger.info("save to db start")
+            if daily_basket_list is None:
+                daily_basket_list_tuple = await DailyBasketList.get_or_create(
+                    contract_id=self.login_account.contract_id,
+                    store_id=_basket.store_id,
+                    target_date=_basket.target_date
+                )
 
-            daily_basket_list = daily_basket_list_tuple[0]  # [1]は取得したかのbool
+                self._logger.info(daily_basket_list_tuple)
+                daily_basket_list = daily_basket_list_tuple[0]  # [1]は取得したかのbool
             daily_basket_list.append_basket(_basket)
         if isinstance(daily_basket_list, DailyBasketList):
             await daily_basket_list.save()
