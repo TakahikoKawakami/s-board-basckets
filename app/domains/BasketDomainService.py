@@ -67,6 +67,7 @@ class BasketDomainService(AbstractDomainService):
         self._logger.info("register basket by transaction list: start")
         daily_basket_list = None
         for transaction in transaction_list:
+            self._logger.info(transaction.head.sum_date)
             _basket = Basket()
             _basket.set_by_transaction_head(transaction.head)
             _basket.set_by_transaction_detail_list(transaction.details)
@@ -130,6 +131,7 @@ class BasketDomainService(AbstractDomainService):
                 head_id_from=transaction_head_id_from,
                 head_id_to=transaction_head_id_to
             )
+        self._logger.info(transaction_head_list)
         transaction_head_list_categorized_by_transaction_head_id = \
             EntityUtil.categorize_by_key(
                 'transaction_head_id',

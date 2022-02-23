@@ -33,7 +33,7 @@ class Webhook(AbstractController):
         else:
             _contract_id = header['smaregi-contract-id']
             _event = header['smaregi-event']
-        
+
         _account_domain_service = AccountDomainService(None)
         await _account_domain_service.login_by_contract_id(_contract_id)
         _access_account = _account_domain_service.login_account

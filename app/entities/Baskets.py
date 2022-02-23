@@ -77,6 +77,7 @@ class Basket():
             _transactionHead {[type]} -- [description]
         """
         self._transaction_head_id = _transaction_head.transaction_head_id
+        self._logger.info(_transaction_head.sum_date)
 
         if _transaction_head.sum_date is None:
             now = datetime.datetime.\

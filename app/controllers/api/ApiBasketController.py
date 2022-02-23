@@ -18,6 +18,7 @@ class ApiBasket(AbstractController):
         if self.is_booking_redirect():
             return
         self._logger.info('get basket')
+        self._logger.info(req.params)
         self._basket_domain_service = \
             await BasketDomainService.create_instance(self.login_account)
         if req.params != {}:
@@ -29,9 +30,12 @@ class ApiBasket(AbstractController):
                 req.params['endDate'],
                 "%Y-%m-%dT%H:%M:%S%z"
             ).date()
+            self._logger.info(start_date)
+            self._logger.info(end_date)
             daily_basket_list = await self\
                 ._basket_domain_service\
                 .get_daily_basket_list_by_date_range(start_date, end_date)
+            self._logger.info(daily_basket_list)  
 
             json_daily_basket_list = [
                 await model.serialize()
