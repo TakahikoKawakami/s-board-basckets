@@ -27,7 +27,7 @@ cycler==0.10.0
 ddlparse==1.9.0
 decorator==4.4.2
 dictdiffer==0.8.1
-distlib==0.3.0
+distlib==0.3.1
 distro==1.4.0
 docopt==0.6.2
 docutils==0.16
@@ -116,7 +116,7 @@ scipy==1.6.0
 SecretStorage==3.3.0
 serverfiles==0.3.1
 six==1.15.0
-smaregipy @ git+https://github.com/shabaraba/SmaregiPy.git@5447e5da1f21b38c0da1a759ee50b982de1522f7
+smaregipy @ git+https://github.com/shabaraba/SmaregiPy.git#egg=smaregipy
 sniffio==1.2.0
 SQLAlchemy==1.4.6
 starlette==0.13.8

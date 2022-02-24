@@ -1,4 +1,5 @@
 from typing import TypeVar, Type, List
+from pydantic import ValidationError
 
 import smaregipy
 
@@ -59,7 +60,10 @@ class TransactionsRepository:
             .TransactionCollection()
             .fetch_all(**where_dict)
         )
-        print(head_list)
-        return [
-            TransactionHead(**transaction.dict()) for transaction in head_list
-        ]
+        try:
+            return [
+                TransactionHead(**transaction.dict()) for transaction in head_list
+            ]
+        except ValidationError as e:
+            print(e.json())
+            return []

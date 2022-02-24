@@ -93,7 +93,7 @@ class TransactionHead(BaseModel):
     subtotal_discount_rate: Optional[float]
     subtotal_discount_division: Optional[int]
     point_discount: Optional[int]
-    coupon_discount: Optional[int]
+    # coupon_discount: Optional[int]
     total: Optional[int]
     tax_include: Optional[int]
     tax_exclude: Optional[int]

@@ -130,7 +130,7 @@ class BasketDomainService(AbstractDomainService):
             transaction_detail_list_categorized_by_transaction_head_id
             .keys()
         )
-        
+
         transaction_head_list = \
             await TransactionsRepository.get_head_list_by_id_range(
                 head_id_from=transaction_head_id_from,
