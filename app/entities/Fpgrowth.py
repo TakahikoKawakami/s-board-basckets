@@ -281,6 +281,10 @@ class Fpgrowth():
                 id_value = nodeFrom['id']
                 type_prefix = nodeFrom['type_prefix']
                 from_id = f'{type_prefix}{id_value}'
+                if type_prefix == Basket.PREFIXES_PRODUCT:
+                    uri_query = 'productId'
+                if type_prefix == Basket.PREFIXES_CUSTOMER_GROUP:
+                    uri_query = 'customerGroupId'
                 if (from_id not in [node.id for node in vis.nodeList]):
                     self._logger.info("find 'from' node id: {}".format(from_id))
 
@@ -288,7 +292,7 @@ class Fpgrowth():
                         id=from_id,
                         type_prefix=nodeFrom["type_prefix"],
                         label=nodeFrom["label"],
-                        uri="/"
+                        uri="https://www1.smaregi.jp/control/master/product/detail.html?productId={}".format(id_value)
                     ))
             for node in nodeGroup['to']:
                 nodeTo = node
@@ -301,7 +305,7 @@ class Fpgrowth():
                         id=to_id,
                         type_prefix=nodeTo["type_prefix"],
                         label=nodeTo["label"],
-                        uri="/"
+                        uri="https://www1.smaregi.jp/control/master/product/detail.html?productId={}".format(id_value)
                     ))
             
             if (len(nodeGroup['from']) == 1) and (len(nodeGroup['to']) == 1):
