@@ -1,5 +1,6 @@
 # LOOK INTO BASKETS
-this app is to analyze transactions in your store with SMAREGI services.
+this app is to analyze transactions in your store with SMAREGI services.   
+[how to use the app](https://from-garage.work/how_to_use/look_into_baskets.html)
 
 # use languages
 - python 3.8.0
