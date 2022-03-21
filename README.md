@@ -11,6 +11,7 @@ this app is to analyze transactions in your store with SMAREGI services.
 - responder v1.3.0
 - tortoise-orm v0.20.0
 - jinja2 (pug extensions)
+- [SmaregiPy](https://github.com/shabaraba/SmaregiPy)
 
 # usage
 `git clone`  
